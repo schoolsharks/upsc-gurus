@@ -50,7 +50,6 @@ const userSchema = new Schema<UserType>({
         type: Number,
         default: 0
     },
-
     refreshToken: {
         type: String,
         default: null
