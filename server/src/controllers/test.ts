@@ -1,9 +1,9 @@
 import AppError from "../utils/appError";
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, response } from "express";
 import mongoose, { Schema } from "mongoose";
 import User from "../models/user.model";
 import Test from "../models/test.model";
-import { QuestionStatusEnum, SetStatusEnum } from "../types/enum";
+import { QuestionStatusEnum, SetStatusEnum, TestStatusEnum } from "../types/enum";
 import Question from "../models/questions.model";
 
 export function calulateAccuracyOfUserAnswer(
@@ -472,7 +472,7 @@ const handleGetTestQuestions = async (
       {
         $match: {
           _id: new mongoose.Types.ObjectId(String(testId)),
-          // testStatus: { $ne: "LOCKED" }
+          testStatus: { $ne: "LOCKED" }
         }
       },
       {
@@ -532,7 +532,7 @@ const handleGetTestQuestions = async (
       {
         $match: {
           _id: new mongoose.Types.ObjectId(String(testId)),
-          // testStatus: { $ne: "LOCKED" }
+          testStatus: { $ne: "LOCKED" }
         }
       },
       {
@@ -684,5 +684,34 @@ const updateQuestionResponse = async (
   }
 };
 
+const lockTest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { testId } = req.query;
+  if (!testId)
+    throw new AppError("TestId not found", 400);
 
-export { userTestInfo, handleCreateTest, handleGetTestQuestions, updateQuestionResponse }
+  const lockedTest = await Test.findByIdAndUpdate(
+    new mongoose.Types.ObjectId(String(testId)),
+    {
+      $set: {
+        testStatus: TestStatusEnum.LOCKED,
+        new: true
+      }
+    },
+    { new: true }
+  );
+
+  if(!lockedTest)
+    throw new AppError("testId not found/ faile to lock test", 404);
+
+  return res.status(200).json({
+    success:true,
+    message: "Test locked successfully"
+  })
+}
+
+
+export { userTestInfo, handleCreateTest, handleGetTestQuestions, updateQuestionResponse, lockTest }
