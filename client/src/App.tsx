@@ -43,9 +43,18 @@ function App() {
 
       {/* Protected Routes */}
       <Route path="/" element={<ProtectedRoute element={<Home />} />} />
-      <Route path="/launch-test/:testTemplateId" element={<ProtectedRoute element={<TestForm />} />} />
-      <Route path="/confirmation" element={<ProtectedRoute element={<TestTakerInfo />} />} />
-      <Route path="/test/question/:testId" element={<ProtectedRoute element={<QuestionComponent />} />}/>
+      <Route
+        path="/launch-test/:testTemplateId"
+        element={<ProtectedRoute element={<TestForm />} />}
+      />
+      <Route
+        path="/confirmation/:testTemplateId"
+        element={<ProtectedRoute element={<TestTakerInfo />} />}
+      />
+      <Route
+        path="/test/question/:testId"
+        element={<ProtectedRoute element={<QuestionComponent />} />}
+      />
     </Routes>
   );
 }

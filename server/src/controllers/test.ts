@@ -3,7 +3,11 @@ import { Request, Response, NextFunction, response } from "express";
 import mongoose, { Schema } from "mongoose";
 import User from "../models/user.model";
 import Test from "../models/test.model";
-import { QuestionStatusEnum, SetStatusEnum, TestStatusEnum } from "../types/enum";
+import {
+  QuestionStatusEnum,
+  SetStatusEnum,
+  TestStatusEnum,
+} from "../types/enum";
 import Question from "../models/questions.model";
 
 export function calulateAccuracyOfUserAnswer(
@@ -20,10 +24,10 @@ export function calulateAccuracyOfUserAnswer(
     const userSet = new Set(user);
 
     //  handling multiSelect case specialy
-    const extraElements = [...userSet].filter(item => !correctSet.has(item));
+    const extraElements = [...userSet].filter((item) => !correctSet.has(item));
 
     // intersection
-    const commonElements = [...correctSet].filter(item => userSet.has(item));
+    const commonElements = [...correctSet].filter((item) => userSet.has(item));
 
     // Calculate accuracy
     const accuracy =
@@ -132,8 +136,8 @@ const userTestInfo = async (
             },
           },
           {
-            $match: { active: true, isDeleted: false }
-          }
+            $match: { active: true, isDeleted: false },
+          },
         ],
         as: "allTestTemplates",
       },
@@ -163,7 +167,9 @@ const userTestInfo = async (
         inProgressTest: {
           $push: {
             $cond: {
-              if: { $in: ["$tests.testStatus", ["IN_PROGRESS", "NOT_STARTED"]] },
+              if: {
+                $in: ["$tests.testStatus", ["IN_PROGRESS", "NOT_STARTED"]],
+              },
               then: {
                 testId: "$tests._id",
                 testTemplateId: "$testIds.testTemplateId",
@@ -224,22 +230,24 @@ const userTestInfo = async (
                         $map: {
                           input: "$$allTestTemplateIdsFlattened",
                           as: "testTemplate",
-                          in: "$$testTemplate._id"
-                        }
+                          in: "$$testTemplate._id",
+                        },
                       },
                       "$$completedAndInProgressTestIds",
-                    ]
-                  }
+                    ],
+                  },
                 },
                 in: {
                   $filter: {
                     input: "$$allTestTemplateIdsFlattened",
                     as: "testTemplate",
-                    cond: { $in: ["$$testTemplate._id", "$$remainingTestTemplateIds"] }
-                  }
-                }
-              }
-            }
+                    cond: {
+                      $in: ["$$testTemplate._id", "$$remainingTestTemplateIds"],
+                    },
+                  },
+                },
+              },
+            },
           },
         },
         completedAndInProgressTestIds: {
@@ -306,7 +314,7 @@ const handleCreateTest = async (
   if (usertestStatus.length === 0) throw new AppError("DB error", 500);
 
   if (usertestStatus[0].testIds) {
-    const isTestTemplateIdExist = usertestStatus.some(doc =>
+    const isTestTemplateIdExist = usertestStatus.some((doc) =>
       doc.testTemplateId.equals(testTemplateId)
     );
     if (isTestTemplateIdExist)
@@ -361,99 +369,99 @@ const handleCreateTest = async (
   return res.status(200).json({
     success: true,
     message: "Test created successfully with answers pre-filled",
-    testID: updatedUser.activeTest,
+    testId: newTest._id,
   });
 };
 
-async function checkSetTimeLimit(
-  userId: string,
-  activeTestId: Schema.Types.ObjectId,
-  setName: string,
-) {
-  const test = await Test.findById(activeTestId).select("sets testStatus");
-  if (test) {
-    const setInfo = test.sets.find((set) => set.setName === setName);
-    if (setInfo) {
-      if (setInfo.timeSpent > setInfo.timeLimit) {
-        // locking the set
-        setInfo.setStatus = SetStatusEnum.LOCKED;
-        await test.save();
+// async function checkSetTimeLimit(
+//   userId: string,
+//   activeTestId: Schema.Types.ObjectId,
+//   setName: string,
+// ) {
+//   const test = await Test.findById(activeTestId).select("sets testStatus");
+//   if (test) {
+//     const setInfo = test.sets.find((set) => set.setName === setName);
+//     if (setInfo) {
+//       if (setInfo.timeSpent > setInfo.timeLimit) {
+//         // locking the set
+//         setInfo.setStatus = SetStatusEnum.LOCKED;
+//         await test.save();
 
-        // on locking creating nextSet
-        let nextSetName: string = "";
-        let nextSetCreated;
+//         // on locking creating nextSet
+//         let nextSetName: string = "";
+//         let nextSetCreated;
 
-        if (setName === "VERBAL") {
-          nextSetName = "QUANTITATIVE";
-          nextSetCreated = await createSetForTest(userId, nextSetName);
-        } else if (setName === "QUANTITATIVE") {
-          nextSetName = "VERBAL_2";
-          nextSetCreated = await createSetBasedOnPreviousSet(
-            userId,
-            nextSetName
-          );
-        } else if (setName === "VERBAL_2") {
-          nextSetName = "QUANTITATIVE_2";
-          nextSetCreated = await createSetBasedOnPreviousSet(
-            userId,
-            nextSetName
-          );
-        } else if (setName === "QUANTITATIVE_2") {
+//         if (setName === "VERBAL") {
+//           nextSetName = "QUANTITATIVE";
+//           nextSetCreated = await createSetForTest(userId, nextSetName);
+//         } else if (setName === "QUANTITATIVE") {
+//           nextSetName = "VERBAL_2";
+//           nextSetCreated = await createSetBasedOnPreviousSet(
+//             userId,
+//             nextSetName
+//           );
+//         } else if (setName === "VERBAL_2") {
+//           nextSetName = "QUANTITATIVE_2";
+//           nextSetCreated = await createSetBasedOnPreviousSet(
+//             userId,
+//             nextSetName
+//           );
+//         } else if (setName === "QUANTITATIVE_2") {
 
-          const lockAndUpdateTestScoreStatus = await lockAndUpdateTestScore(
-            userId,
-            activeTestId.toString()
-          );
-          nextSetCreated = 1;
+//           const lockAndUpdateTestScoreStatus = await lockAndUpdateTestScore(
+//             userId,
+//             activeTestId.toString()
+//           );
+//           nextSetCreated = 1;
 
-          // test.testStatus = TestStatusEnum.LOCKED;
-          // await test.save();
+//           // test.testStatus = TestStatusEnum.LOCKED;
+//           // await test.save();
 
-          // const user = await User.findById(userId).select("activeTest");
-          // if (user) {
-          //   user.activeTest = null;
-          //   await user.save();
-          // }
+//           // const user = await User.findById(userId).select("activeTest");
+//           // if (user) {
+//           //   user.activeTest = null;
+//           //   await user.save();
+//           // }
 
-          // nextSetName = "ANALYTICS";
-          // nextSetCreated = await createSetForTest(userId, nextSetName);
-        }
-        if (!nextSetCreated) {
-          throw new AppError("set Not created", 404);
-        }
-        return true;
-      }
-    }
-  }
-  return false;
-}
-async function checkTestTimeLimit(
-  userId: string,
-  activeTestId: Schema.Types.ObjectId
-) {
-  const test = await Test.findById(activeTestId).select(
-    "testTimeLimit testTimeSpent testStatus"
-  );
-  if (test) {
-    if (test.testTimeSpent > test.testTimeLimit) {
-      // test.testStatus = TestStatusEnum.LOCKED;
-      // const lockedTest = await test.save();
-      // if (lockedTest || test.testStatus == TestStatusEnum.LOCKED) {
-      //   const user = await User.findById(userId).select("activeTest");
-      //   if (user) {
-      //     user.activeTest = null;
-      //     await user.save();
-      //   }
-      // }
-      const lockAndUpdateTestScoreStatus = await lockAndUpdateTestScore(
-        userId,
-        activeTestId.toString()
-      );
-      return true;
-    }
-  }
-  return false;
-}
+//           // nextSetName = "ANALYTICS";
+//           // nextSetCreated = await createSetForTest(userId, nextSetName);
+//         }
+//         if (!nextSetCreated) {
+//           throw new AppError("set Not created", 404);
+//         }
+//         return true;
+//       }
+//     }
+//   }
+//   return false;
+// }
+// async function checkTestTimeLimit(
+//   userId: string,
+//   activeTestId: Schema.Types.ObjectId
+// ) {
+//   const test = await Test.findById(activeTestId).select(
+//     "testTimeLimit testTimeSpent testStatus"
+//   );
+//   if (test) {
+//     if (test.testTimeSpent > test.testTimeLimit) {
+//       // test.testStatus = TestStatusEnum.LOCKED;
+//       // const lockedTest = await test.save();
+//       // if (lockedTest || test.testStatus == TestStatusEnum.LOCKED) {
+//       //   const user = await User.findById(userId).select("activeTest");
+//       //   if (user) {
+//       //     user.activeTest = null;
+//       //     await user.save();
+//       //   }
+//       // }
+//       const lockAndUpdateTestScoreStatus = await lockAndUpdateTestScore(
+//         userId,
+//         activeTestId.toString()
+//       );
+//       return true;
+//     }
+//   }
+//   return false;
+// }
 
 const handleGetTestQuestions = async (
   req: Request,
@@ -472,11 +480,11 @@ const handleGetTestQuestions = async (
       {
         $match: {
           _id: new mongoose.Types.ObjectId(String(testId)),
-          testStatus: { $ne: "LOCKED" }
-        }
+          testStatus: { $ne: "LOCKED" },
+        },
       },
       {
-        $unwind: "$answers"
+        $unwind: "$answers",
       },
       {
         $lookup: {
@@ -532,11 +540,11 @@ const handleGetTestQuestions = async (
       {
         $match: {
           _id: new mongoose.Types.ObjectId(String(testId)),
-          testStatus: { $ne: "LOCKED" }
-        }
+          testStatus: { $ne: "LOCKED" },
+        },
       },
       {
-        $unwind: "$answers"
+        $unwind: "$answers",
       },
       {
         $lookup: {
@@ -556,7 +564,7 @@ const handleGetTestQuestions = async (
           timeSpent: { $first: "$testTimeSpent" },
           questionDetails: {
             $push: {
-              _id: "$questionDetails._id",
+              questionId: "$questionDetails._id",
               question: "$questionDetails.question",
               positioning: "$questionDetails.positioning",
               options: "$questionDetails.options",
@@ -605,7 +613,6 @@ const updateQuestionResponse = async (
   res: Response,
   next: NextFunction
 ) => {
-
   try {
     console.log("updateQuestionResponse");
     const { questionId, userAnswer, testId } = req.body;
@@ -624,35 +631,47 @@ const updateQuestionResponse = async (
     }
 
     // Get the question details
-    const question = await Question.findById(questionId).select("correctAnswer optionType");
+    const question = await Question.findById(questionId).select(
+      "correctAnswer optionType"
+    );
     if (!question) {
       return next(new AppError("Question not found", 404));
     }
 
     const correctAnswer = question.correctAnswer;
-    const isCorrect = JSON.stringify(userAnswer) === JSON.stringify(correctAnswer);
+    const isCorrect =
+      JSON.stringify(userAnswer) === JSON.stringify(correctAnswer);
 
     // Calculate accuracy based on question type
     let userAnswerAccuracy: Number | null = null;
-    if (question.optionType === "numerical" || question.optionType === "fractional") {
-      userAnswerAccuracy = calculateNumericalAccuracy(userAnswer, correctAnswer);
+    if (
+      question.optionType === "numerical" ||
+      question.optionType === "fractional"
+    ) {
+      userAnswerAccuracy = calculateNumericalAccuracy(
+        userAnswer,
+        correctAnswer
+      );
     } else {
-      userAnswerAccuracy = calulateAccuracyOfUserAnswer(userAnswer, correctAnswer);
+      userAnswerAccuracy = calulateAccuracyOfUserAnswer(
+        userAnswer,
+        correctAnswer
+      );
     }
 
     // Update existing answer or push a new one if not found
     const updatedTest = await Test.findOneAndUpdate(
       {
         _id: testId,
-        "answers.questionId": questionId
+        "answers.questionId": questionId,
       },
       {
         $set: {
           "answers.$.userAnswer": userAnswer,
           "answers.$.userAnswerAccuracy": userAnswerAccuracy,
           "answers.$.isCorrect": checkIfAllEmpty(userAnswer) ? null : isCorrect,
-          "answers.$.questionStatus": QuestionStatusEnum.ATTEMPTED
-        }
+          "answers.$.questionStatus": QuestionStatusEnum.ATTEMPTED,
+        },
       },
       { new: true }
     );
@@ -667,9 +686,9 @@ const updateQuestionResponse = async (
               questionId,
               userAnswer,
               userAnswerAccuracy,
-              isCorrect: checkIfAllEmpty(userAnswer) ? null : isCorrect
-            }
-          }
+              isCorrect: checkIfAllEmpty(userAnswer) ? null : isCorrect,
+            },
+          },
         },
         { new: true }
       );
@@ -684,34 +703,74 @@ const updateQuestionResponse = async (
   }
 };
 
-const lockTest = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const { testId } = req.query;
-  if (!testId)
-    throw new AppError("TestId not found", 400);
+const handleMark = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    console.log("Marking Question");
+    const { questionId, testId } = req.body;
+    const userId: string = req.user?.id;
+
+    if (!userId) return next(new AppError("User not authenticated", 400));
+    if (!testId) return next(new AppError("Test ID is required", 400));
+    if (!questionId) return next(new AppError("Question ID is required", 400));
+
+    // Check if the test exists
+    const test = await Test.findById(testId);
+    if (!test) return next(new AppError("Test not found", 404));
+
+    // Update the question status to "MARKED"
+    const updatedTest = await Test.findOneAndUpdate(
+      {
+        _id: testId,
+        "answers.questionId": questionId,
+      },
+      {
+        $set: { "answers.$.questionStatus": QuestionStatusEnum.MARKED },
+      },
+      { new: true }
+    );
+
+    if (!updatedTest) {
+      return next(new AppError("Question answer entry not found", 404));
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Question marked successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const lockTest = async (req: Request, res: Response, next: NextFunction) => {
+  const { testId } = req.body;
+  if (!testId) throw new AppError("TestId not found", 400);
 
   const lockedTest = await Test.findByIdAndUpdate(
     new mongoose.Types.ObjectId(String(testId)),
     {
       $set: {
         testStatus: TestStatusEnum.LOCKED,
-        new: true
-      }
+        new: true,
+      },
     },
     { new: true }
   );
 
-  if(!lockedTest)
+  if (!lockedTest)
     throw new AppError("testId not found/ faile to lock test", 404);
 
   return res.status(200).json({
-    success:true,
-    message: "Test locked successfully"
-  })
-}
+    success: true,
+    message: "Test locked successfully",
+  });
+};
 
-
-export { userTestInfo, handleCreateTest, handleGetTestQuestions, updateQuestionResponse, lockTest }
+export {
+  userTestInfo,
+  handleCreateTest,
+  handleGetTestQuestions,
+  updateQuestionResponse,
+  lockTest,
+  handleMark,
+};

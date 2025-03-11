@@ -17,10 +17,10 @@ import { TestType } from "../../types/enum";
 function handleUrlPath() {
   const urlPath = window.location.pathname;
 
-  if (urlPath.includes('sectional/launch-test')) {
-    return TestType.SECTIONAL_TEST
+  if (urlPath.includes("sectional/launch-test")) {
+    return TestType.SECTIONAL_TEST;
   } else {
-    return TestType.FULL_LENGTH_TEST
+    return TestType.FULL_LENGTH_TEST;
   }
 }
 
@@ -30,7 +30,6 @@ const TestForm: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
   const [testType, setTestType] = useState<TestType>(TestType.NULL);
-
 
   const { testTemplateId } = useParams();
 
@@ -52,45 +51,27 @@ const TestForm: React.FC = () => {
       lastName: lastName,
     };
 
-    sessionStorage.setItem("test-taker-fn", data.firstName)
-    sessionStorage.setItem("test-taker-ln", data.lastName)
+    sessionStorage.setItem("test-taker-fn", data.firstName);
+    sessionStorage.setItem("test-taker-ln", data.lastName);
 
-    setLoading(true)
+    setLoading(true);
     try {
-      let response;
-      if (testType === TestType.FULL_LENGTH_TEST) {
-        response = await userApi.post("/test/launchTest", {testTemplateId});
-      }
-      else {
-        response = await userApi.post("/sectional/launchSectionalTest", null, {
-          params: {sectionalTestTemplateId: testTemplateId }
-        });
-      }
+      const response = await userApi.post("/test/launchTest", {
+        testTemplateId,
+      });
 
-      // const response = await userApi.post("/test/launchTest", null, {
-      //   params: { testTemplateId }
-      // });
-      // console.log(response, "launch test response");
       if (
         response.status === 201 ||
         response.status === 200 ||
         response.status === 204 ||
         response.status === 202
       ) {
-
-        if(testType === TestType.FULL_LENGTH_TEST){
-          navigate("/confirmation");
-        }
-        else{
-          navigate("/sectional/confirmation")
-        }
-
+        navigate(`/test/question/${response.data.testId}?question=0`);
       }
     } catch (error) {
       console.error("Error sending data:", error);
-    }
-    finally {
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,7 +81,6 @@ const TestForm: React.FC = () => {
       setTestType(TestType.FULL_LENGTH_TEST);
     else if (testType === TestType.SECTIONAL_TEST)
       setTestType(TestType.SECTIONAL_TEST);
-
   }, [testType]);
 
   console.log("testType", testType);
@@ -269,7 +249,11 @@ const TestForm: React.FC = () => {
 
         {/* Submit Button */}
         <Button type="submit" variant="contained">
-          {loading ? <CircularProgress size={24} sx={{ color: "#fff" }} /> : "Launch Test"}
+          {loading ? (
+            <CircularProgress size={24} sx={{ color: "#fff" }} />
+          ) : (
+            "Launch Test"
+          )}
         </Button>
 
         <hr />

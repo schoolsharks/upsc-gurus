@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import "../styles/QuestionStyles.css";
 import {
   setQuestions,
@@ -15,14 +15,10 @@ import userApi from "../api/userApi";
 import ExactlyMCQTwo from "../response/ExactlyMCQTwo";
 import MCQSingleAnswer from "../response/MCQSingleAnswer";
 import MCQMultipleAnswer from "../response/MCQMultipleAnswer";
-import {
-  selectQuestions,
-  selectQuestionSets,
-} from "../redux/reducers/questionReducer";
+import { selectQuestions } from "../redux/reducers/questionReducer";
 import DOMPurify from "dompurify";
 // import useCheatProtection from "../hooks/useCheatProtection";
 import SelectSentence from "../response/SelectSentence";
-import { TestType } from "../types/enum";
 import TestHeader from "./TestHeader";
 
 interface HeaderProps {
@@ -31,6 +27,7 @@ interface HeaderProps {
 }
 
 interface Question {
+  _id: string;
   questionId: string;
   question: string;
   positioning: "left" | "center" | "split";
@@ -74,13 +71,14 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
       }));
     console.log(selectUserResponses);
   }, []);
+  
   // Function to send user responses to the API
   const sendUserResponse = async (newSelectedAnswers: string[][]) => {
-    if (!currentQuestion?._id || !testId) return;
+    if (!currentQuestion?.questionId || !testId) return;
 
     try {
       const userResponse = {
-        questionId: currentQuestion._id,
+        questionId: currentQuestion.questionId,
         userAnswer: newSelectedAnswers,
         testId,
       };
@@ -100,7 +98,7 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
       // Dispatch updated user response
       dispatch(
         updateUserResponse({
-          questionId: currentQuestion._id,
+          questionId: currentQuestion.questionId,
           userResponse: updatedResponse,
         })
       );
@@ -136,7 +134,11 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
 
   return (
     <>
-      <TestHeader currentIndex={index} totalQuestions={questions.length} />
+      <TestHeader
+        currentIndex={index}
+        totalQuestions={questions.length}
+        questionId = {currentQuestion?.questionId}
+      />
       <div className="test-copy-disable" style={{ height: "100vh" }}>
         <div
           className={`question-container ${
@@ -197,13 +199,16 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
                       // Screenposition={currentQuestion.positioning}
                     />
                   ) : (
-                    <div
-                    className="question-html text-[1.25rem]"
-                    
-                  ><span className='mr-3 position:absolute;left:${
+                    <div className="question-html text-[1.25rem]">
+                      <span
+                        className='mr-3 position:absolute;left:${
                     index + 1 > 9 ? "-42" : "-32"
-                  }px;top:0'>Q-{index + 1}:</span>{currentQuestion.question}</div>
-                  
+                  }px;top:0'
+                      >
+                        Q-{index + 1}:
+                      </span>
+                      {currentQuestion.question}
+                    </div>
                   )}
                 </Stack>
               </div>
