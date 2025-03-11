@@ -1,6 +1,6 @@
 import AppError from "../utils/appError";
 import { Request, Response, NextFunction } from "express";
-import mongoose, { Schema } from "mongoose";
+import mongoose, { mongo, Schema } from "mongoose";
 import User from "../models/user.model";
 import Test from "../models/test.model";
 import { QuestionStatusEnum, SetStatusEnum, TestStatusEnum } from "../types/enum";
@@ -468,27 +468,133 @@ const userTestInfo = async (
       }
   
       console.log("Received testId:", testId);
+
+      const test = await Test.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(String(testId)),
+                // testStatus: { $ne: "LOCKED" }
+            }
+        },
+        {
+            $unwind: "$answers"
+        },
+        {
+            $lookup: {
+                from: "questions",
+                let: { questionId: "$answers.questionId" },
+                pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$questionId"] } } }],
+                as: "questionDetails",
+            },
+        },
+        {
+            $unwind: { path: "$questionDetails", preserveNullAndEmptyArrays: true },
+        },
+        {
+            $group: {
+                _id: "$_id",
+                timeLimit: { $first: "$testTimeLimit" },
+                timeSpent: { $first: "$testTimeSpent" },
+                questionDetails: {
+                    $push: {
+                        _id: "$questionDetails._id",
+                        question: "$questionDetails.question",
+                        positioning: "$questionDetails.positioning",
+                        options: "$questionDetails.options",
+                        optionType: "$questionDetails.optionType",
+                        difficulty: "$questionDetails.difficulty",
+                        // questionStatus: "$answers.questionStatus",
+                        userAnswer: "$answers.userAnswer",
+                    },
+                },
+            },
+        },
+        {
+            $project: {
+                _id: 0,
+                timeLimit: 1,
+                timeSpent: 1,
+                timeRemaining: { $subtract: ["$timeLimit", "$timeSpent"] },
+                questionDetails: { $ifNull: ["$questionDetails", []] },
+            },
+        },
+    ]);
   
-      // Find the test by ID and populate only the questions, excluding answers
-      const test = await Test.findById(testId)
-        .populate({
-          path: "answers.questionId",
-          select: "question positioning options optionType difficulty userAnswer",
-        })
-        .select("answers");
-        // console.log(test);
+      // // Find the test by ID and populate only the questions, excluding answers
+      // const test = await Test.findById(testId)
+      //   .populate({
+      //     path: "answers.questionId",
+      //     select: "question positioning options optionType difficulty userAnswer",
+      //   })
+      //   .select("answers");
+      //   // console.log(test);
+      
+      const testA = await Test.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(String(testId)),
+                // testStatus: { $ne: "LOCKED" }
+            }
+        },
+        {
+            $unwind: "$answers"
+        },
+        {
+            $lookup: {
+                from: "questions",
+                let: { questionId: "$answers.questionId" },
+                pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$questionId"] } } }],
+                as: "questionDetails",
+            },
+        },
+        {
+            $unwind: { path: "$questionDetails", preserveNullAndEmptyArrays: true },
+        },
+        {
+            $group: {
+                _id: "$_id",
+                timeLimit: { $first: "$testTimeLimit" },
+                timeSpent: { $first: "$testTimeSpent" },
+                questionDetails: {
+                    $push: {
+                        _id: "$questionDetails._id",
+                        question: "$questionDetails.question",
+                        positioning: "$questionDetails.positioning",
+                        options: "$questionDetails.options",
+                        optionType: "$questionDetails.optionType",
+                        difficulty: "$questionDetails.difficulty",
+                        // questionStatus: "$answers.questionStatus",
+                        userAnswer: "$answers.userAnswer",
+                    },
+                },
+            },
+        },
+        {
+            $project: {
+                _id: 0,
+                timeLimit: 1,
+                timeSpent: 1,
+                timeRemaining: { $subtract: ["$timeLimit", "$timeSpent"] },
+                questionDetails: { $ifNull: ["$questionDetails", []] },
+            },
+        },
+    ]);
+
+    // console.log("test", testA)
   
-      if (!test) {
+      if (!test.length) {
         return next(new AppError("Test not found", 404));
       }
+
+      // console.log("tes", test)
   
-      // Extract only the populated questions from the answers array
-      const questions = test.answers.map((answer) => answer.questionId);
-      console.log(questions)
+      // // Extract only the populated questions from the answers array
+      // const questions = test.answers.map((answer) => answer.questionId);
+      // console.log(questions)
   
       res.status(200).json({
         success: true,
-        questionsList: questions,
+        questionsList: testA[0].questionDetails,
       });
     } catch (error) {
       next(error);

@@ -1,15 +1,19 @@
 import mongoose from "mongoose";
 
-const dbConnect = async (): Promise<void> => {
-    try {
-        await mongoose.connect("mongodb://127.0.0.1:27017/", {
-            dbName: "upscgurus",
-        });
-        console.log("Database connected successfully");
-    } catch (error) {
-        console.error("Database connection failed:", error);
-        process.exit(1); // Exit process with failure
+const dbConnect = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URI as string);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(`Error: ${error.message}`);
+    } else {
+      console.error(`Unexpected error: ${error}`);
     }
+
+    process.exit(1);
+  }
 };
 
 export default dbConnect;
+
