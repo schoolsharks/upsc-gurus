@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { login } from "../actions/userActions";
+import { fetchUserInfo, login } from "../actions/userActions";
 
 export enum AuthStates {
   AUTHENTICATED = "AUTHENTICATED",
@@ -51,49 +51,72 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     logout(state) {
-      state.userId = null;
       state.name = "";
       state.email = "";
-      state.authState = AuthStates.IDLE;
-      state.error = null;
       state.completedTests = [];
       state.inProgressTests = [];
       state.unAttemptedTests = [];
+      state.authState = AuthStates.IDLE;
+      state.error = null;
     },
-    setUser(state, action: PayloadAction<Partial<UserState>>) {
+    setUser(state, action) {
       state.authState = action.payload.authState ?? state.authState;
       state.inProgressTests =
-        action.payload.inProgressTests ?? state.inProgressTests;
+        action.payload.inProgressTest ?? state.inProgressTests;
       state.error = action.payload.error ?? state.error;
     },
+    setUserInfo(state, action) {
+      // console.log("action.payload", action.payload);
+      state.inProgressTests =
+        action.payload.inProgressTest ?? state.inProgressTests;
+      state.unAttemptedTests =
+        action.payload.unAttemptedTest ?? state.unAttemptedTests;
+      state.completedTests =
+        action.payload.completedTest ?? state.completedTests;
+        state.email = action.payload.email;
+      state.error = action.payload.error ?? state.error;
+    }
   },
   extraReducers: (builder) => {
     builder
+      .addCase(fetchUserInfo.pending, (state) => {
+        state.authState = AuthStates.INITIALIZING;
+        state.error = null;
+        state.loading = true;
+      })
+      .addCase(fetchUserInfo.fulfilled, (state, action: PayloadAction<any>) => {
+        state.userId = action.payload._id;
+        state.name = action.payload.userName;
+        state.email = action.payload.email;
+        state.completedTests = action.payload.completedTest;
+        state.inProgressTests = action.payload.inProgressTest;
+        state.unAttemptedTests = action.payload.unAttemptedTest;
+        state.authState = AuthStates.AUTHENTICATED;
+        state.loading = false;
+      })
+      .addCase(fetchUserInfo.rejected, (state, action) => {
+        state.error = action.payload as string;
+        state.loading = false;
+        state.authState = AuthStates.IDLE;
+      })
       .addCase(login.pending, (state) => {
         state.authState = AuthStates.INITIALIZING;
         state.error = null;
         state.loading = true;
       })
-      .addCase(
-        login.fulfilled,
-        (state, action: PayloadAction<{ user: Omit<UserState, "loading" | "error"> }>) => {
-          state.authState = AuthStates.AUTHENTICATED;
-          state.userId = action.payload.user.userId;
-          state.name = action.payload.user.name;
-          state.email = action.payload.user.email;
-          state.completedTests = action.payload.user.completedTests;
-          state.inProgressTests = action.payload.user.inProgressTests;
-          state.unAttemptedTests = action.payload.user.unAttemptedTests;
-          state.loading = false;
-        }
-      )
+      .addCase(login.fulfilled, (state, action: PayloadAction<any>) => {
+        state.authState = AuthStates.AUTHENTICATED;
+        state.name = action.payload.user.name;
+        state.email = action.payload.user.email;
+        state.loading = false;
+      })
       .addCase(login.rejected, (state, action) => {
         state.authState = AuthStates.ERROR;
-        state.error = typeof action.payload === "string" ? action.payload : "Login failed";
+        state.error = action.payload as string;
         state.loading = false;
       });
   },
 });
 
-export const { logout, setUser } = userSlice.actions;
+export const { logout, setUser, setUserInfo } = userSlice.actions;
 export default userSlice.reducer;

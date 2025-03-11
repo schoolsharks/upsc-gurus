@@ -1,6 +1,20 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import userApi from "../../api/userApi";
 
+export const fetchUserInfo = createAsyncThunk(
+  "user/fetchUserTestInfo",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await userApi.get("/test/userTestInfo");
+      return response.data.user;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch user data"
+      );
+    }
+  }
+);
+
 export const login = createAsyncThunk(
   "user/login",
   async ({ email, password }: { email: string; password: string }, { rejectWithValue }) => {
@@ -10,6 +24,7 @@ export const login = createAsyncThunk(
 
       if (accessToken && user.id) {
         localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("userId", user.id);
         return { user, accessToken };
       } else {
         return rejectWithValue("Login failed: No access token received.");
@@ -19,3 +34,5 @@ export const login = createAsyncThunk(
     }
   }
 );
+
+

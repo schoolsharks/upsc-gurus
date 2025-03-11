@@ -16,7 +16,7 @@ import "./home.css";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
-import { logout } from "../../redux/reducers/userReducer";
+import { logout, setUserInfo } from "../../redux/reducers/userReducer";
 import { MdLogout } from "react-icons/md";
 import { convertSecondsToTime } from '../../utils/formatTime'
 import userApi from "../../api/userApi";
@@ -35,11 +35,9 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     const fetchUserInfo = async () => {
-      console.log("function invoked");
       try {
         const response = await userApi.get(`/test/userTestInfo`);
         dispatch(setUserInfo(response.data.user));
-        // console.log(response.data.user);
       } catch (err: any) {
         dispatch(setUserInfo(err));
         console.log(
@@ -48,15 +46,14 @@ const Home: React.FC = () => {
       }
     };
 
-    fetchUserInfo();
-  }, [dispatch]);
+   fetchUserInfo()
+  }, []);
 
   const testData = {
     testName: "GRE Practice Test 1",
     totalTime: "1 hour and 28 minutes",
     subjects: ["Verbal Reasoning", "Quantitative Reasoning"],
   };
-
 
   const handleLogout = () => {
     dispatch(logout());
@@ -115,7 +112,7 @@ const Home: React.FC = () => {
           >
             In Progress
           </Typography>
-          <Stack direction={"row"} flexWrap={"wrap"} marginTop={"14px"}>
+          <Stack direction={"row"} gap={2} flexWrap={"wrap"} marginTop={"14px"}>
             {inProgressTests?.length ? (
               inProgressTests?.map((test: any) => (
                 <Card
@@ -161,7 +158,7 @@ const Home: React.FC = () => {
                     </Stack>
                     <Box textAlign="center">
                       <Button
-                        onClick={() => navigate(`/test/question`)}
+                        onClick={() => navigate(`/test/question/${test.testId}`)}
                         variant="contained"
                         style={{
                           marginTop: "16px",
@@ -232,8 +229,7 @@ const Home: React.FC = () => {
                     </Typography>
                     <Box textAlign="center">
                       <Button
-                        onClick={() => inProgressTests?.length ?
-                          setInProgressDialogOpen(true) : navigate(`/launch-test/${test?.testTemplateId}`)
+                        onClick={() => navigate(`/launch-test/${test?.testTemplateId}`)
                         }
                         variant="contained"
                         style={{

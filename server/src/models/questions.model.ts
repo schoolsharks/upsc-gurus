@@ -63,7 +63,6 @@ const questionSchema = new Schema<QuestionType>(
     explanation: {
       type: String,
     },
-
     videoLink: {
       type: String,
     },

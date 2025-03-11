@@ -8,6 +8,9 @@ import { useEffect, useState } from "react";
 import Loader from "./components/Loader";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import Home from "./pages/home/Home";
+import TestForm from "./pages/test/TestForm";
+import TestTakerInfo from "./pages/test/TestTakerInfo";
+import QuestionComponent from "./components/Question";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -40,6 +43,9 @@ function App() {
 
       {/* Protected Routes */}
       <Route path="/" element={<ProtectedRoute element={<Home />} />} />
+      <Route path="/launch-test/:testTemplateId" element={<ProtectedRoute element={<TestForm />} />} />
+      <Route path="/confirmation" element={<ProtectedRoute element={<TestTakerInfo />} />} />
+      <Route path="/test/question/:testId" element={<ProtectedRoute element={<QuestionComponent />} />}/>
     </Routes>
   );
 }

@@ -1,4 +1,5 @@
-import { Schema, model, Document } from 'mongoose';
+import mongoose, { Schema, model, Document } from 'mongoose';
+import TestTemplate from './testTemplate.model';
 
 interface UserType extends Document {
     email: string;
@@ -41,11 +42,6 @@ const userSchema = new Schema<UserType>({
             }
         }
     ],
-    activeTest: {
-        type: Schema.Types.ObjectId,
-        ref: 'Test',
-        default: null
-    },
     testAttempts: {
         type: Number,
         default: 0

@@ -1,0 +1,5 @@
+export enum TestType {
+    FULL_LENGTH_TEST = "FULL_LENGTH_TEST",
+    SECTIONAL_TEST = "SECTIONAL_TEST",
+    NULL = "NULL"
+  }

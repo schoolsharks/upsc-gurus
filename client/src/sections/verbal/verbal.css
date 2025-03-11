@@ -1,0 +1,209 @@
+.verbal-quest-container {
+  display: flex;
+  flex-direction: column;
+
+  margin: 20px;
+}
+
+.question-header {
+  background-color: #bfbfbf;
+  padding: 10px;
+  font-size: 14px;
+  text-align: left;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.question-text {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+.options-column {
+  display: flex;
+  flex-direction: column;
+  margin-right: 20px;
+  justify-content: space-between; /* Align items from the top */
+}
+
+.checkbox-label {
+  /* display: flex;
+    align-items: center; */
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  text-align: left;
+  width: 100%;
+  padding-left: 10px; /* Add consistent left padding */
+  position: relative;
+  margin-bottom: 10px; /* Optional: space between checkbox options */
+}
+
+.checkbox-label input {
+  appearance: none; /* Remove default checkbox styling */
+  width: 24px; /* Increase size */
+  height: 24px; /* Increase size */
+  border: 2px solid #000; /* Add border */
+  border-radius: 4px; /* Optional: rounded corners */
+  margin-right: 15px; /* Space between checkbox and label text */
+  cursor: pointer;
+  position: relative;
+  background-color: #fff; /* Default background color */
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.checkbox-label input:checked {
+  background-color: #000;
+  border-color: #000;
+}
+
+.checkbox-label input:checked::after {
+  content: "X";
+  font-size: 20px;
+  color: #fff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: bold;
+}
+
+.instruction-text {
+  margin-top: 95px;
+  font-size: 14px;
+  padding: 10px;
+  color: black;
+  background-color: #bfbfbf;
+}
+
+/* fifthpage css */
+
+.fifth-verbal-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* height: 100vh; */
+  width: 100%;
+  padding: 20px;
+}
+
+.instruction-bar {
+  background-color: #d3d3d3;
+  padding: 10px;
+  width: 60%;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* .question-container {
+    width: 60%;
+    text-align: center;
+  } */
+
+.options-list {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.option-label {
+  display: block;
+  width: 300px;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #d3d3d3;
+  text-align: center;
+  cursor: pointer;
+  background-color: #fff;
+  transition: background-color 0.3s ease;
+}
+
+.option-label input {
+  display: none;
+}
+
+.option-label.selected {
+  background-color: #000;
+  color: #fff;
+}
+
+.select-instruction {
+  margin-top: 20px;
+  color: #333;
+}
+
+.blanks-container {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.blank-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.option-label {
+  display: block;
+  width: 150px;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #d3d3d3;
+  text-align: center;
+  cursor: pointer;
+  background-color: #fff;
+  transition: background-color 0.3s ease;
+}
+
+.option-label input {
+  display: none;
+}
+
+.option-label.selected {
+  background-color: #000;
+  color: #fff;
+}
+
+.select-instruction {
+  margin-top: 20px;
+  color: #333;
+}
+
+/* seventh page  */
+
+.verbal-question-container {
+  display: flex;
+  flex-direction: column;
+  margin: 20px;
+  /* justify-content: center; */
+  width: 100%;
+}
+
+.options-columns {
+  display: flex;
+  flex-direction: row;
+  gap: 3rem;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.options-column {
+  flex: 1;
+  margin: 0 10px;
+  /* max-width: 320px; */
+}
+
+.option-label {
+  display: block;
+  /* min-width: 260px; */
+  width: 100%;
+  margin-bottom: 10px;
+  text-transform: capitalize;
+
+}
+
+.option-label input {
+  margin-right: 10px;
+}
