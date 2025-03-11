@@ -81,7 +81,7 @@ const Header: React.FC<HeaderProps> = ({
         {/* Logo */}
         <div className="logo-container">
           <img
-            src="/public/images/logo.jpeg"
+            src="/public/images/logo.png"
             alt="UPSC Gurus Logo"
             className="logo mr-3"
           />

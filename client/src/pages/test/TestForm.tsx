@@ -114,7 +114,7 @@ const TestForm: React.FC = () => {
         padding={"12px 44px"}
       >
         <img
-          src="/public/images/logo.jpeg"
+          src="/public/images/logo.png"
           alt="Career Geek Logo"
           style={{ width: "170px" }}
         />

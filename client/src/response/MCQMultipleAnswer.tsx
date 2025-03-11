@@ -94,7 +94,7 @@ const MCQMultipleAnswer: React.FC<MCQMultipleAnswerProps> = ({
           )}
 
           <div className="options-column">
-            <div style={{ width: "100%" }}>
+            <div style={{ width: "100%" }} className="flex flex-col justify-center items-center w-full">
               {options.map((group, groupIndex) => (
                 <div key={groupIndex} className="option-group">
                   {group.map((option, optionIndex) => (

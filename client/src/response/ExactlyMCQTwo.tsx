@@ -58,7 +58,7 @@ const ExactlyMCQTwo: React.FC<ExactlyMCQTwoProps> = ({
         </Typography> */}
 
 
-        <div className="options-column">
+        <div className="w-full flex justify-center items-center">
           {options.map((optionGroup, groupIndex) => (
             <div key={groupIndex}>
 

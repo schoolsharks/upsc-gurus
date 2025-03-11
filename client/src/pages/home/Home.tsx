@@ -68,7 +68,7 @@ const Home: React.FC = () => {
         padding={"16px 44px"}
       >
         <img
-          src="/images/logo.jpeg"
+          src="/images/logo.png"
           alt="Career Geek Logo"
           style={{ width: "170px" }}
         />

@@ -66,14 +66,14 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
 
   const currentQuestion = questions[index];
 
- useEffect(()=>{
-  const selectUserResponses = (state: RootState) =>
-    state.question.questions.map((q) => ({
-      questionId: q.questionId,
-      userResponse: q.userAnswer || [],
-    }));
-  console.log(selectUserResponses);
- },[])
+  useEffect(() => {
+    const selectUserResponses = (state: RootState) =>
+      state.question.questions.map((q) => ({
+        questionId: q.questionId,
+        userResponse: q.userAnswer || [],
+      }));
+    console.log(selectUserResponses);
+  }, []);
   // Function to send user responses to the API
   const sendUserResponse = async (newSelectedAnswers: string[][]) => {
     if (!currentQuestion?._id || !testId) return;
@@ -104,7 +104,7 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
           userResponse: updatedResponse,
         })
       );
-    } catch (error:any) {
+    } catch (error: any) {
       console.error(
         "Error sending response:",
         error?.response?.data || error.message
@@ -185,7 +185,7 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
                       that apply.
                     </Typography>
                   )}
-                <Stack direction="row" padding={"12px 16px 0 42px"}>
+                <Stack direction="column" padding={"20px 0"}>
                   {currentQuestion.optionType === "selectSentence" ? (
                     <SelectSentence
                       questionId={currentQuestion.questionId}
@@ -198,16 +198,12 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
                     />
                   ) : (
                     <div
-                      className="question-html"
-                      dangerouslySetInnerHTML={{
-                        __html: DOMPurify.sanitize(
-                          `<span style='position:absolute;left:${
-                            index + 1 > 9 ? "-42" : "-32"
-                          }px;top:0'>Q-${index + 1}</span>` +
-                            currentQuestion.question
-                        ),
-                      }}
-                    />
+                    className="question-html text-[1.25rem]"
+                    
+                  ><span className='mr-3 position:absolute;left:${
+                    index + 1 > 9 ? "-42" : "-32"
+                  }px;top:0'>Q-{index + 1}:</span>{currentQuestion.question}</div>
+                  
                   )}
                 </Stack>
               </div>
