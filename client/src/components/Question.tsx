@@ -20,24 +20,12 @@ import DOMPurify from "dompurify";
 // import useCheatProtection from "../hooks/useCheatProtection";
 import SelectSentence from "../response/SelectSentence";
 import TestHeader from "./TestHeader";
+import TestSidebar from "./TestSidebar";
+import { Question } from "../types/QuestionType";
 
 interface HeaderProps {
   showHeader?: boolean;
   questionIndex?: number;
-}
-
-interface Question {
-  _id: string;
-  questionId: string;
-  question: string;
-  positioning: "left" | "center" | "split";
-  options: string[][];
-  optionType: string;
-  difficulty: string;
-  questionStatus: string;
-  userResponse: string[][];
-  section: string;
-  userAnswer?: string[][];
 }
 
 const QuestionComponent: React.FC<HeaderProps> = () => {
@@ -58,6 +46,8 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
 
   // const queryParams = new URLSearchParams(location.search);
   const index = parseInt(queryParams.get("question") || "0", 10);
+  
+
   // let setName: string | null = questions[0]?.section ?? "0";
   // console.log(setName);
 
@@ -71,7 +61,7 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
       }));
     console.log(selectUserResponses);
   }, []);
-  
+
   // Function to send user responses to the API
   const sendUserResponse = async (newSelectedAnswers: string[][]) => {
     if (!currentQuestion?.questionId || !testId) return;
@@ -134,88 +124,90 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
 
   return (
     <>
-      <TestHeader
-        currentIndex={index}
-        totalQuestions={questions.length}
-        questionId = {currentQuestion?.questionId}
-      />
-      <div className="test-copy-disable" style={{ height: "100vh" }}>
-        <div
-          className={`question-container ${
-            currentQuestion?.positioning === "left" ||
-            currentQuestion?.positioning === "split"
-              ? "left-positioning"
-              : "center"
-          }`}
-        >
-          {/* <div>
+      <div className="flex min-w-screen">
+        <div className="w-[80%]">
+          <TestHeader
+            currentIndex={index}
+            totalQuestions={questions.length}
+            questionId={currentQuestion?.questionId}
+          />
+          <div className="test-copy-disable">
+            <div
+              className={`question-container ${
+                currentQuestion?.positioning === "left" ||
+                currentQuestion?.positioning === "split"
+                  ? "left-positioning"
+                  : "center"
+              }`}
+            >
+              {/* <div>
        <p>Test Started At: {testStartTime?.toLocaleTimeString() || "Not started"}</p>
       <p>Elapsed Time: {calculateTimeElapsed()}</p>
      </div> */}
 
-          {currentQuestion ? (
-            <>
-              <div className="question-section">
-                {/* {currentQuestion?.positioning === "split" && (
+              {currentQuestion ? (
+                <>
+                  <div className="question-section">
+                    {/* {currentQuestion?.positioning === "split" && (
                   <Typography className="header-question-split">
                     Questions 1 to 3 are based on this passage.
                   </Typography>
                 )} */}
 
-                {currentQuestion?.positioning === "center" &&
-                  (currentQuestion.optionType === "multiCorrectMCQ" ||
-                    currentQuestion.optionType === "blank") && (
-                    <Typography
-                      variant="h6"
-                      gutterBottom
-                      sx={{
-                        height: "auto",
-                        backgroundColor: "#CFCFCF",
-                        width: "100%",
-                        textAlign: "center",
-                        padding: "5px",
-                        fontSize: "1rem",
-                        // fontSize: { xs: "17px", sm: "20px" },
-                        wordWrap: "break-word",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "normal",
-                        marginBottom: "20px",
-                      }}
-                    >
-                      Consider each of the choices separately and select all
-                      that apply.
-                    </Typography>
-                  )}
-                <Stack direction="column" padding={"20px 0"}>
-                  {currentQuestion.optionType === "selectSentence" ? (
-                    <SelectSentence
-                      questionId={currentQuestion.questionId}
-                      options={currentQuestion.options}
-                      sendUserResponse={(newSelectedAnswers: string[][]) =>
-                        sendUserResponse(newSelectedAnswers)
-                      }
-                      userAnswer={currentQuestion.userAnswer || [[]]}
-                      // Screenposition={currentQuestion.positioning}
-                    />
-                  ) : (
-                    <div className="question-html text-[1.25rem]">
-                      <span
-                        className='mr-3 position:absolute;left:${
+                    {currentQuestion?.positioning === "center" &&
+                      (currentQuestion.optionType === "multiCorrectMCQ" ||
+                        currentQuestion.optionType === "blank") && (
+                        <Typography
+                          variant="h6"
+                          gutterBottom
+                          sx={{
+                            height: "auto",
+                            backgroundColor: "#CFCFCF",
+                            width: "100%",
+                            textAlign: "center",
+                            padding: "5px",
+                            fontSize: "1rem",
+                            // fontSize: { xs: "17px", sm: "20px" },
+                            wordWrap: "break-word",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "normal",
+                            marginBottom: "20px",
+                          }}
+                        >
+                          Consider each of the choices separately and select all
+                          that apply.
+                        </Typography>
+                      )}
+                    <Stack direction="column" padding={"20px 0"}>
+                      {currentQuestion.optionType === "selectSentence" ? (
+                        <SelectSentence
+                          questionId={currentQuestion.questionId}
+                          options={currentQuestion.options}
+                          sendUserResponse={(newSelectedAnswers: string[][]) =>
+                            sendUserResponse(newSelectedAnswers)
+                          }
+                          userAnswer={currentQuestion.userAnswer || [[]]}
+                          // Screenposition={currentQuestion.positioning}
+                        />
+                      ) : (
+                        <div className="question-html text-[1.25rem]">
+                          <span
+                            className='mr-3 position:absolute;left:${
                     index + 1 > 9 ? "-42" : "-32"
                   }px;top:0'
-                      >
-                        Q-{index + 1}:
-                      </span>
-                      {currentQuestion.question}
-                    </div>
-                  )}
-                </Stack>
-              </div>
+                          >
+                            Q-{index + 1}:
+                          </span>
+                          {currentQuestion.question}
+                        </div>
+                      )}
+                    </Stack>
+                  </div>
 
-              <div className="options-section">
-                {/* Render appropriate question type */}
-                {/* {currentQuestion.optionType === "blank" && (
+                  <div className="options-section">
+                    {/* Render appropriate question type */}
+                    {/* {currentQuestion.optionType === "blank" && (
                   <VerbalQuestion
                     key={`${currentQuestion?.questionId}-${index}`}
                     questionId={currentQuestion.questionId}
@@ -227,74 +219,79 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
                   />
                 )} */}
 
-                {currentQuestion.optionType === "twoCorrectMCQ" && (
-                  <ExactlyMCQTwo
-                    questionId={currentQuestion.questionId}
-                    options={currentQuestion.options}
-                    sendUserResponse={(newSelectedAnswers: string[][]) =>
-                      sendUserResponse(newSelectedAnswers)
-                    }
-                    userAnswere={currentQuestion.userAnswer}
-                  />
-                )}
+                    {currentQuestion.optionType === "twoCorrectMCQ" && (
+                      <ExactlyMCQTwo
+                        questionId={currentQuestion.questionId}
+                        options={currentQuestion.options}
+                        sendUserResponse={(newSelectedAnswers: string[][]) =>
+                          sendUserResponse(newSelectedAnswers)
+                        }
+                        userAnswere={currentQuestion.userAnswer}
+                      />
+                    )}
 
-                {currentQuestion.optionType === "singleCorrectMCQ" && (
-                  <MCQSingleAnswer
-                    questionId={currentQuestion.questionId}
-                    options={currentQuestion.options}
-                    sendUserResponse={(newSelectedAnswers: string[][]) =>
-                      sendUserResponse(newSelectedAnswers)
-                    }
-                    userAnswer={currentQuestion.userAnswer}
-                  />
-                )}
+                    {currentQuestion.optionType === "singleCorrectMCQ" && (
+                      <MCQSingleAnswer
+                        questionId={currentQuestion.questionId}
+                        options={currentQuestion.options}
+                        sendUserResponse={(newSelectedAnswers: string[][]) =>
+                          sendUserResponse(newSelectedAnswers)
+                        }
+                        userAnswer={currentQuestion.userAnswer}
+                      />
+                    )}
 
-                {currentQuestion.optionType === "multiCorrectMCQ" && (
-                  <MCQMultipleAnswer
-                    questionId={currentQuestion.questionId}
-                    options={currentQuestion.options}
-                    sendUserResponse={(newSelectedAnswers: string[][]) =>
-                      sendUserResponse(newSelectedAnswers)
-                    }
-                    userResponse={currentQuestion.userAnswer || [[]]}
-                    Screenposition={currentQuestion.positioning}
-                  />
-                )}
+                    {currentQuestion.optionType === "multiCorrectMCQ" && (
+                      <MCQMultipleAnswer
+                        questionId={currentQuestion.questionId}
+                        options={currentQuestion.options}
+                        sendUserResponse={(newSelectedAnswers: string[][]) =>
+                          sendUserResponse(newSelectedAnswers)
+                        }
+                        userResponse={currentQuestion.userAnswer || [[]]}
+                        Screenposition={currentQuestion.positioning}
+                      />
+                    )}
 
-                {currentQuestion.optionType === "selectSentence" && (
-                  <div
-                    className="question-html"
-                    style={{ margin: "12px 0 0 48px" }}
-                    dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(
-                        `<span style='position:absolute;left:${
-                          index + 1 > 9 ? "-42" : "-32"
-                        }px;top:0'>Q-${index + 1}</span>` +
-                          currentQuestion.question
-                      ),
-                    }}
-                  />
-                )}
+                    {currentQuestion.optionType === "selectSentence" && (
+                      <div
+                        className="question-html"
+                        style={{ margin: "12px 0 0 48px" }}
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(
+                            `<span style='position:absolute;left:${
+                              index + 1 > 9 ? "-42" : "-32"
+                            }px;top:0'>Q-${index + 1}</span>` +
+                              currentQuestion.question
+                          ),
+                        }}
+                      />
+                    )}
 
-                {currentQuestion.optionType === "numerical" && (
-                  <input
-                    type="text"
-                    className="numerical-input"
-                    value={selectedAnswers[0]?.[0] || ""}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      const updatedAnswer = [[inputValue]];
-                      setSelectedAnswers(updatedAnswer);
-                    }}
-                    onBlur={() => {
-                      sendUserResponse(selectedAnswers);
-                    }}
-                    placeholder="Enter your answer here"
-                  />
-                )}
-              </div>
-            </>
-          ) : null}
+                    {currentQuestion.optionType === "numerical" && (
+                      <input
+                        type="text"
+                        className="numerical-input"
+                        value={selectedAnswers[0]?.[0] || ""}
+                        onChange={(e) => {
+                          const inputValue = e.target.value;
+                          const updatedAnswer = [[inputValue]];
+                          setSelectedAnswers(updatedAnswer);
+                        }}
+                        onBlur={() => {
+                          sendUserResponse(selectedAnswers);
+                        }}
+                        placeholder="Enter your answer here"
+                      />
+                    )}
+                  </div>
+                </>
+              ) : null}
+            </div>
+          </div>
+        </div>
+        <div className="w-[20%]">
+          <TestSidebar questions={questions}/>
         </div>
       </div>
     </>

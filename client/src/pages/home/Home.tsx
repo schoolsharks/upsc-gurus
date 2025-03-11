@@ -112,7 +112,7 @@ const Home: React.FC = () => {
           >
             In Progress
           </Typography>
-          <Stack direction={"row"} gap={2} flexWrap={"wrap"} marginTop={"14px"}>
+          <Stack direction={"row"} gap={"1rem"} flexWrap={"wrap"} marginTop={"14px"}>
             {inProgressTests?.length ? (
               inProgressTests?.map((test: any) => (
                 <Card
@@ -192,7 +192,7 @@ const Home: React.FC = () => {
           >
             Unattempted Tests
           </Typography>
-          <Stack direction={"row"} flexWrap={"wrap"} gap={"2rem"} marginTop={"14px"}>
+          <Stack direction={"row"} flexWrap={"wrap"} gap={"1rem"} marginTop={"14px"}>
             {unAttemptedTests?.length ? (
               unAttemptedTests?.map((test: any) => (
                 <Card
@@ -264,7 +264,7 @@ const Home: React.FC = () => {
             Completed Tests
           </Typography>
           {completedTests.length ? (
-            <Stack direction={"row"} gap={"20px"} flexWrap={"wrap"}>
+            <Stack direction={"row"} gap={"1rem"} flexWrap={"wrap"}>
               {completedTests.map((test) => (
                 <Card
                   key={test.testId}

@@ -570,7 +570,7 @@ const handleGetTestQuestions = async (
               options: "$questionDetails.options",
               optionType: "$questionDetails.optionType",
               difficulty: "$questionDetails.difficulty",
-              // questionStatus: "$answers.questionStatus",
+              questionStatus: "$answers.questionStatus",
               userAnswer: "$answers.userAnswer",
             },
           },

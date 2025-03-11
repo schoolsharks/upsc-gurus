@@ -1,0 +1,84 @@
+import { Box, Stack, Chip } from "@mui/material";
+import React from "react";
+import { Question } from "../types/QuestionType";
+import { useNavigate } from "react-router-dom";
+
+interface TestSidebarProps {
+  questions: Question[];
+}
+
+const TestSidebar: React.FC<TestSidebarProps> = ({
+  questions,
+}) => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="flex flex-col bg-[#F8F8F8] border border-[#ccc] min-h-screen items-center pt-4">
+        <div className="flex flex-col gap-2 font-semibold mb-8">
+            <div className="tracking-wider">TIME LEFT</div>
+        </div>
+        <div className="flex gap-2 text-[1.25rem]">
+            <span>Questions: {questions.length}</span>|
+            <span>Answered: {questions.filter((q) => q.questionStatus === "ATTEMPTED").length}</span>
+        </div>
+        <Stack>
+      <Box
+        sx={{
+          borderRadius: 2,
+          p: 2,
+          overflowY: "auto",
+          backgroundColor: "#F8F8F8",
+        }}
+      >
+        {questions.map((question, index) => {
+          let chipStyles = {};
+          let textColor = "#000";
+          let bgColor = "transparent";
+          let borderColor = "transparent";
+
+          switch (question.questionStatus) {
+            case "ATTEMPTED":
+              textColor = "#fff";
+              bgColor = "#111111";
+              break;
+            case "MARKED":
+              textColor = "#FFBD00";
+              borderColor = "#FFBD00";
+              break;
+            case "UNSEEN":
+              textColor = "#AFAFAF";
+              borderColor = "#AFAFAF";
+              break;
+            default:
+              textColor = "#000";
+              bgColor = "#D6D6D9"; // Default styling
+          }
+
+          chipStyles = {
+            color: textColor,
+            backgroundColor: bgColor,
+            border: borderColor !== "transparent" ? `1px solid ${borderColor}` : "none",
+            width: "40px",
+            height: "32px",
+            fontSize: "1rem",
+            margin: "4px",
+          };
+
+          return (
+            <Chip
+              key={question.questionId}
+              label={index + 1}
+              size="small"
+              onClick={() => navigate(`${location.pathname}?question=${index}`)}
+              sx={chipStyles}
+            />
+          );
+        })}
+      </Box>
+    </Stack>
+    </div>
+    
+  );
+};
+
+export default TestSidebar;
