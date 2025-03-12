@@ -12,6 +12,7 @@ import TestSidebar from "./TestSidebar";
 import { selectQuestions } from "../redux/reducers/questionReducer";
 import { Question } from "../types/QuestionType";
 import "../styles/QuestionStyles.css";
+import DOMPurify from "dompurify";
 
 const QuestionComponent: React.FC = () => {
   const [selectedAnswers, setSelectedAnswers] = useState<string[][]>([]);
@@ -127,7 +128,7 @@ const QuestionComponent: React.FC = () => {
           totalQuestions={questions.length}
           questionId={currentQuestion?.questionId}
         />
-        <div className="test-copy-disable">
+        <div className="test-copy-disable mt-5">
           <div
             className={`question-container ${
               currentQuestion?.positioning === "left" ||
@@ -139,26 +140,40 @@ const QuestionComponent: React.FC = () => {
             {currentQuestion ? (
               <>
                 <div className="question-section">
-                  <h2 className="text-xl font-semibold mb-4">
-                    Q-{index + 1}: {currentQuestion.question}
-                  </h2>
+                  <div className="text-[#707070] text-[1.2rem] mb-2">
+                    Question: {index + 1}
+                  </div>
+                  <div
+                    className="question-html text-[1.25rem] px-8"
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(currentQuestion.question),
+                    }}
+                  />
                 </div>
-                <div className="options-section flex flex-col gap-2 min-w-[400px] px-10 justify-center">
-                  {currentQuestion.optionType === "singleCorrectMCQ" &&
-                    currentQuestion.options.map((option, idx) => (
-                      <button
-                        key={idx}
-                        className={`p-2 border rounded-md ${
-                          selectedAnswers.length > 0 &&
-                          selectedAnswers[0] === option
-                            ? "bg-blue-500 text-white"
-                            : "bg-white border-gray-300"
-                        }`}
-                        onClick={() => handleSelectAnswer(option)}
-                      >
-                        {option}
-                      </button>
-                    ))}
+                <div className="options-container w-fit mx-auto">
+                  <div className="options-section flex flex-col gap-2 justify-center">
+                    {currentQuestion.optionType === "singleCorrectMCQ" &&
+                      currentQuestion.options.map((option, idx) => {
+                        const optionLetter = String.fromCharCode(65 + idx); // A, B, C, D
+                        return (
+                          <button
+                            key={idx}
+                            className={`inline-flex items-center gap-4 py-2 px-3 border rounded-md min-w-max whitespace-nowrap ${
+                              selectedAnswers.length > 0 &&
+                              selectedAnswers[0] === option
+                                ? "bg-black text-white"
+                                : "bg-white border-gray-300"
+                            }`}
+                            onClick={() => handleSelectAnswer(option)}
+                          >
+                            <span className="w-8 h-8 flex items-center justify-center rounded-full border">
+                              {optionLetter}
+                            </span>
+                            {option}
+                          </button>
+                        );
+                      })}
+                  </div>
                 </div>
               </>
             ) : null}

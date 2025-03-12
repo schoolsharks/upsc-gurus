@@ -5,6 +5,7 @@ import User from "../models/user.model";
 import Test from "../models/test.model";
 import { QuestionStatusEnum, TestStatusEnum } from "../types/enum";
 import Question from "../models/questions.model";
+import TestTemplate from "../models/testTemplate.model";
 
 export function calulateAccuracyOfUserAnswer(
   userAnswer: string[][],
@@ -317,8 +318,17 @@ const handleCreateTest = async (
       throw new AppError("Test has already been attempted", 410);
   }
 
+  const testTemplate = await TestTemplate.findById(testTemplateId);
+
+  if(!testTemplate){
+    throw new AppError("Invalid testTemplateId",404);
+  }
+  const questions = testTemplate?.questionIds
+
   // Fetch all questions related to the test template
-  const questions = await Question.find().lean(); // Modify this if you filter by template ID
+  // const questions = await Question.find().lean(); // Modify this if you filter by template ID
+
+
 
   if (!questions.length) {
     throw new AppError("No questions found for this test", 404);
@@ -610,6 +620,7 @@ const updateQuestionResponse = async (
   next: NextFunction
 ) => {
   try {
+    console.log("updatequestion")
     const { questionId, userAnswer, testId } = req.body;
     const userId: string = req.user?.id;
 
