@@ -310,7 +310,7 @@ const Home: React.FC = () => {
                       </Typography>
                     </Stack>
                   </Stack>
-                  <Typography
+                  {/* <Typography
                     sx={{
                       textDecoration: "underline",
                       color: "#142E79",
@@ -320,7 +320,7 @@ const Home: React.FC = () => {
                     onClick={() => navigate(`/analysis/${test.testId}`)}
                   >
                     View Report Card
-                  </Typography>
+                  </Typography> */}
                 </Card>
               ))}
             </Stack>

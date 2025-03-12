@@ -5,7 +5,6 @@ import User from "../models/user.model";
 import Test from "../models/test.model";
 import {
   QuestionStatusEnum,
-  SetStatusEnum,
   TestStatusEnum,
 } from "../types/enum";
 import Question from "../models/questions.model";
@@ -617,6 +616,7 @@ const updateQuestionResponse = async (
     console.log("updateQuestionResponse");
     const { questionId, userAnswer, testId } = req.body;
     const userId: string = req.user?.id;
+    console.log(userAnswer);
 
     if (!userId) return next(new AppError("User not authenticated", 401));
 
@@ -670,15 +670,15 @@ const updateQuestionResponse = async (
           "answers.$.userAnswer": userAnswer,
           "answers.$.userAnswerAccuracy": userAnswerAccuracy,
           "answers.$.isCorrect": checkIfAllEmpty(userAnswer) ? null : isCorrect,
-          "answers.$.questionStatus": QuestionStatusEnum.ATTEMPTED,
+          "answers.$.questionStatus": checkIfAllEmpty(userAnswer)? QuestionStatusEnum.SEEN : QuestionStatusEnum.ATTEMPTED,
         },
       },
       { new: true }
     );
-
+    let updatedAnswer = updatedTest?.answers[0];
     // If answer not found, push a new entry
-    if (!updatedTest) {
-      await Test.findByIdAndUpdate(
+    if (!updatedAnswer) {
+   const newTest = await Test.findByIdAndUpdate(
         testId,
         {
           $push: {
@@ -692,11 +692,15 @@ const updateQuestionResponse = async (
         },
         { new: true }
       );
+      updatedAnswer = newTest?.answers.find(
+        (ans) => ans.questionId.toString() === questionId
+      );
     }
 
     return res.status(200).json({
       success: true,
       message: "User answer updated successfully",
+      updatedAnswer
     });
   } catch (error) {
     next(error);
@@ -705,7 +709,6 @@ const updateQuestionResponse = async (
 
 const handleMark = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    console.log("Marking Question");
     const { questionId, testId } = req.body;
     const userId: string = req.user?.id;
 
@@ -766,6 +769,61 @@ const lockTest = async (req: Request, res: Response, next: NextFunction) => {
   });
 };
 
+const startQuestionTime = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { testId, questionId } = req.body;
+    const userId: string = req.user?.id;
+
+    if (!testId) {
+      throw new AppError("Test not Found", 400);
+    }
+    if (!questionId) {
+      throw new AppError("Question not Found", 400);
+    }
+    if (!userId) {
+      throw new AppError("User not Authenticated", 400);
+    }
+
+    // Find the test and check if the question exists
+    const test = await Test.findOne(
+      { _id: testId, "answers.questionId": questionId },
+      { "answers.$": 1 } // Fetch only the specific question entry
+    );
+
+    if (!test || !test.answers.length) {
+      return next(new AppError("Question answer entry not found", 404));
+    }
+
+    const questionAnswer = test.answers[0];
+
+    // Only update the status if it's currently "UNSEEN"
+    if (questionAnswer.questionStatus === QuestionStatusEnum.UNSEEN) {
+      await Test.findOneAndUpdate(
+        {
+          _id: testId,
+          "answers.questionId": questionId,
+        },
+        {
+          $set: { "answers.$.questionStatus": QuestionStatusEnum.SEEN },
+        }
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Question status changed: SEEN",
+      });
+    }
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 export {
   userTestInfo,
   handleCreateTest,
@@ -773,4 +831,5 @@ export {
   updateQuestionResponse,
   lockTest,
   handleMark,
+  startQuestionTime,
 };

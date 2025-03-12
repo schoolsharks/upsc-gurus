@@ -8,6 +8,7 @@ import {
   updateQuestionResponse,
   lockTest,
   handleMark,
+  startQuestionTime,
 } from "../../controllers/test";
 import { RouterTwoTone } from "@mui/icons-material";
 import { testScore } from "../../controllers/analysis";
@@ -24,6 +25,7 @@ router
   .put(authHandler, asyncHandler(updateQuestionResponse));
 router.route("/lockTest").put(authHandler, asyncHandler(lockTest));
 router.route("/markForReview").put(authHandler, asyncHandler(handleMark));
+router.route("/startQuestionTime").put(authHandler, asyncHandler(startQuestionTime));
 router.route("/getTestScore").get(authHandler, asyncHandler(testScore));
 
 export default router;

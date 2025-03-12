@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useParams } from "react-router-dom";
 import "../styles/QuestionStyles.css";
 import {
+  markQuestion,
   setQuestions,
   // fetchQuestions,
   updateUserResponse,
@@ -46,7 +47,6 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
 
   // const queryParams = new URLSearchParams(location.search);
   const index = parseInt(queryParams.get("question") || "0", 10);
-  
 
   // let setName: string | null = questions[0]?.section ?? "0";
   // console.log(setName);
@@ -73,8 +73,6 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
         testId,
       };
 
-      console.log("userResponse", userResponse);
-
       // Make API call
       const response = await userApi.put(
         "/test/updateQuestionResponse",
@@ -85,11 +83,14 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
       const updatedResponse =
         response?.data?.updatedAnswer ?? structuredClone(newSelectedAnswers);
 
+      const status = response.data.updatedAnswer.questionStatus;
+
       // Dispatch updated user response
       dispatch(
         updateUserResponse({
           questionId: currentQuestion.questionId,
           userResponse: updatedResponse,
+          questionStatus: status,
         })
       );
     } catch (error: any) {
@@ -99,6 +100,32 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
       );
     }
   };
+
+  useEffect(() => {
+    if (!currentQuestion || !questions || !questions[index]) return;
+
+    const startQuestionTimer = async () => {
+      try {
+        await userApi.put("/test/startQuestionTime", {
+          testId,
+          questionId: currentQuestion.questionId,
+        });
+        dispatch(
+          markQuestion({
+            questionId: currentQuestion.questionId,
+            questionStatus: "SEEN",
+          })
+        );
+      } catch (error: any) {
+        console.error(
+          "Error starting question timer:",
+          error?.response?.data || error.message
+        );
+      }
+    };
+
+    startQuestionTimer();
+  }, [index, currentQuestion?.questionId, testId, questions]);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -291,7 +318,7 @@ const QuestionComponent: React.FC<HeaderProps> = () => {
           </div>
         </div>
         <div className="w-[20%]">
-          <TestSidebar questions={questions}/>
+          <TestSidebar questions={questions} />
         </div>
       </div>
     </>

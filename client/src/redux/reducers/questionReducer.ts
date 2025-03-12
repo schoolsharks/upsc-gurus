@@ -71,13 +71,14 @@ const questionSlice = createSlice({
     },
     updateUserResponse: (
       state,
-      action: PayloadAction<{questionId:string,userResponse:string[][]}>
+      action: PayloadAction<{questionId:string,userResponse:string[][],questionStatus:string}>
     ) => {
       const question = state.questions.find(
         (item) => item.questionId === action.payload.questionId
       );
       if (question) {
         question.userAnswer = action.payload.userResponse;
+        question.questionStatus = action.payload.questionStatus;
       }
     },
   },

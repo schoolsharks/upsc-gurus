@@ -19,7 +19,6 @@ const TestHeader: React.FC<TestHeaderProps> = ({
   const dispatch = useDispatch();
 
   const handleNavigation = (direction: "next" | "prev") => {
-    console.log(direction);
     const newIndex = direction === "next" ? currentIndex + 1 : currentIndex - 1;
 
     if (newIndex >= 0 && newIndex < totalQuestions) {
