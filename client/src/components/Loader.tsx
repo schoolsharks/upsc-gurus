@@ -9,3 +9,4 @@ const Loader = ({minHeight}:{minHeight? :string}) => {
 }
 
 export default Loader
+

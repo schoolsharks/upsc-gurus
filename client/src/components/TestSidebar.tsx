@@ -18,7 +18,7 @@ const TestSidebar: React.FC<TestSidebarProps> = ({ questions }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col bg-[#F8F8F8] border border-[#ccc] min-h-screen items-center pt-4 overflow-auto">
+    <div className="flex flex-col bg-[#F8F8F8] border border-[#ccc] h-screen items-center pt-4 overflow-y-scroll">
       <div className="flex flex-col gap-2 font-semibold mb-8">
         <div className="tracking-wider">TIME LEFT</div>
       </div>
@@ -36,6 +36,10 @@ const TestSidebar: React.FC<TestSidebarProps> = ({ questions }) => {
             p: 2,
             overflowY: "auto",
             backgroundColor: "#F8F8F8",
+            display: "flex",
+            flexWrap: "wrap", // Ensures multiple Chips wrap properly
+            justifyContent: "center", // Centers Chips inside the Box
+            alignItems: "center",
           }}
         >
           {questions.map((question, index) => {
@@ -69,7 +73,7 @@ const TestSidebar: React.FC<TestSidebarProps> = ({ questions }) => {
                 borderColor !== "transparent"
                   ? `1px solid ${borderColor}`
                   : "none",
-              width: "40px",
+              width: "45px",
               height: "32px",
               fontSize: "1rem",
               margin: "4px",
@@ -90,7 +94,7 @@ const TestSidebar: React.FC<TestSidebarProps> = ({ questions }) => {
         </Box>
       </Stack>
 
-      <div className="absolute bottom-5">
+      <div className="my-5">
         <div className="flex flex-col gap-2">
           {sidebarBottom.map((item, index) => (
             <div key={index} className="flex gap-2 items-center">

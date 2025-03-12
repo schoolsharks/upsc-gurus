@@ -3,10 +3,7 @@ import { Request, Response, NextFunction, response } from "express";
 import mongoose, { Schema } from "mongoose";
 import User from "../models/user.model";
 import Test from "../models/test.model";
-import {
-  QuestionStatusEnum,
-  TestStatusEnum,
-} from "../types/enum";
+import { QuestionStatusEnum, TestStatusEnum } from "../types/enum";
 import Question from "../models/questions.model";
 
 export function calulateAccuracyOfUserAnswer(
@@ -613,10 +610,8 @@ const updateQuestionResponse = async (
   next: NextFunction
 ) => {
   try {
-    console.log("updateQuestionResponse");
     const { questionId, userAnswer, testId } = req.body;
     const userId: string = req.user?.id;
-    console.log(userAnswer);
 
     if (!userId) return next(new AppError("User not authenticated", 401));
 
@@ -637,7 +632,6 @@ const updateQuestionResponse = async (
     if (!question) {
       return next(new AppError("Question not found", 404));
     }
-
     const correctAnswer = question.correctAnswer;
     const isCorrect =
       JSON.stringify(userAnswer) === JSON.stringify(correctAnswer);
@@ -670,37 +664,22 @@ const updateQuestionResponse = async (
           "answers.$.userAnswer": userAnswer,
           "answers.$.userAnswerAccuracy": userAnswerAccuracy,
           "answers.$.isCorrect": checkIfAllEmpty(userAnswer) ? null : isCorrect,
-          "answers.$.questionStatus": checkIfAllEmpty(userAnswer)? QuestionStatusEnum.SEEN : QuestionStatusEnum.ATTEMPTED,
+          "answers.$.questionStatus": checkIfAllEmpty(userAnswer)
+            ? QuestionStatusEnum.SEEN
+            : QuestionStatusEnum.ATTEMPTED,
         },
       },
       { new: true }
     );
-    let updatedAnswer = updatedTest?.answers[0];
-    // If answer not found, push a new entry
-    if (!updatedAnswer) {
-   const newTest = await Test.findByIdAndUpdate(
-        testId,
-        {
-          $push: {
-            answers: {
-              questionId,
-              userAnswer,
-              userAnswerAccuracy,
-              isCorrect: checkIfAllEmpty(userAnswer) ? null : isCorrect,
-            },
-          },
-        },
-        { new: true }
-      );
-      updatedAnswer = newTest?.answers.find(
-        (ans) => ans.questionId.toString() === questionId
-      );
-    }
+    const updatedAnswer = updatedTest?.answers.find(
+      (item) => item.questionId.toString() === questionId
+    );
+    // const updatedAnswer = updatedTest?.answers[0];
 
     return res.status(200).json({
       success: true,
       message: "User answer updated successfully",
-      updatedAnswer
+      updatedAnswer,
     });
   } catch (error) {
     next(error);
@@ -817,12 +796,10 @@ const startQuestionTime = async (
         message: "Question status changed: SEEN",
       });
     }
-
   } catch (error) {
     next(error);
   }
 };
-
 
 export {
   userTestInfo,
