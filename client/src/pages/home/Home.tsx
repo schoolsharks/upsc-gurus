@@ -65,7 +65,7 @@ const Home: React.FC = () => {
 
   const testData = {
     testName: "GRE Practice Test 1",
-    totalTime: "1 hour and 28 minutes",
+    totalTime: "2 hours",
     subjects: ["Verbal Reasoning", "Quantitative Reasoning"],
   };
 
