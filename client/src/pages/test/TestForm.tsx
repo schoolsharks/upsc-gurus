@@ -107,7 +107,7 @@ const TestForm: React.FC = () => {
           POWERPREP™ Online
         </Typography> */}
         <Typography variant="h6" component="h2" gutterBottom>
-          Test Preview Tool
+          Choose your mode:
         </Typography>
         <p>Enter your first and last name in the following fields.</p>
 
@@ -156,105 +156,23 @@ const TestForm: React.FC = () => {
           </Stack>
         </Stack>
 
-        {/* Checkbox for Accommodations */}
-        <Box className="checkbox-section">
-          <label>
-            {/* <input type="checkbox" /> */}
-            <Checkbox />
-            Select testing accommodations for this practice test
-          </label>
-          <ul>
-            <li>
-              Testing accommodations for the GRE General Test are available to
-              test takers with disabilities and health-related needs who meet
-              ETS requirements.
-            </li>
-            <li>
-              To ensure you have as authentic an experience as possible when
-              taking the practice test, we recommend that you use Google Chrome,
-              and select only those accommodations for which you have been or
-              may be approved when taking the actual test.
-            </li>
-            <li>
-              You have the option of taking this practice test under extended
-              time and extra break conditions. You can also select screen color
-              or magnification accommodations. Do not use your own screen color
-              and/or magnification software when taking the practice test. In
-              addition, you must disable your own magnification software to
-              prevent any conflicts.
-            </li>
-            <li>
-              Select the accommodations you require below. After selecting the
-              accommodations, the service will check to make sure you have the
-              appropriate system requirements before launching the practice
-              test.
-            </li>
-          </ul>
-        </Box>
-
-        <p className="note">
-          <strong>NOTE:</strong> Selectable accommodations available to Mac
-          users include additional breaks and extended time. Mac users who need
-          screen magnification, selectable colors, screen reader, or refreshable
-          braille accommodations will need to use Mac accessibility features or
-          third-party tools when taking the POWERPREP Online practice tests.
-        </p>
-
-        {/* Checkboxes */}
-        <div className="checkbox-group">
-          <label>
-            <Checkbox />
-            {/* <input
-              type="checkbox"
-              name="magnification"
-              checked={selectedOptions.magnification}
-              onChange={handleCheckBoxChange}
-            /> */}
-            Screen magnification
-          </label>
-
-          <label>
-            <Checkbox />
-            {/* <input
-              type="checkbox"
-              name="colors"
-              checked={selectedOptions.colors}
-              onChange={handleCheckBoxChange}
-            /> */}
-            Selectable foreground and background colors
-          </label>
-
-          <label>
-            <Checkbox />
-            {/* <input
-              type="checkbox"
-              name="audio"
-              checked={selectedOptions.audio}
-              onChange={handleCheckBoxChange}
-            /> */}
-            Screen reader with audio only
-          </label>
-
-          <label>
-            <Checkbox />
-            {/* <input
-              type="checkbox"
-              name="braille"
-              checked={selectedOptions.braille}
-              onChange={handleCheckBoxChange}
-            /> */}
-            Refreshable braille with screen reader
-          </label>
-        </div>
-
-        {/* Submit Button */}
-        <Button type="submit" variant="contained">
+        <div className="flex gap-4 mt-5">
+         {/* Submit Button */}
+         <Button type="submit" variant="contained">
           {loading ? (
             <CircularProgress size={24} sx={{ color: "#fff" }} />
           ) : (
-            "Launch Test"
+            "Start Test mode"
           )}
         </Button>
+        <Button type="submit" variant="contained" disabled>
+          {loading ? (
+            <CircularProgress size={24} sx={{ color: "#fff" }} />
+          ) : (
+            "Learn Mode"
+          )}
+        </Button>
+       </div>
 
         <hr />
         <p className="copytext">
