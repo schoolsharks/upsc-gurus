@@ -1,6 +1,6 @@
-import Header from '@/components/Header';
 import  { useState } from 'react';
 import './verbal.css';
+import Header from '../../components/Header';
 
 const ForthVerbalQuest = () => {
   const options = ['conjure up', 'covet', 'deflect', 'grasp', 'shrug off', 'understand'];

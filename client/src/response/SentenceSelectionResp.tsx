@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Button, Divider } from "@mui/material";
 import "./SentenceSelectionResp.css"; // Importing the CSS file for styles
-import Header from "@/components/Header";
 import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
 
 interface HeaderProps {
   showHeader?: boolean;

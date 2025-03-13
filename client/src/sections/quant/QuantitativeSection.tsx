@@ -1,10 +1,10 @@
 import React from "react";
 import { Typography, Divider } from "@mui/material";
-import { RootState, AppDispatch } from '../../store/store';
-import Header from "@/components/Header"; // Ensure this path is correct
 import { useNavigate } from "react-router-dom"
-import  {fetchQuestions} from "../../store/questionReducer"
 import { useDispatch, useSelector } from "react-redux";
+import { fetchQuestions } from "../../redux/actions/questionActions";
+import { AppDispatch, RootState } from "../../redux/store";
+import Header from "../../components/Header";
 
 interface HeaderProps {
   showHeader?: boolean;

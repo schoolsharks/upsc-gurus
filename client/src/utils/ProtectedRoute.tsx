@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 import { RootState } from "../redux/store";
 import { AuthStates } from "../redux/reducers/userReducer";
+import { JSX } from "react";
 
 interface ProtectedRouteProps {
   element: JSX.Element;

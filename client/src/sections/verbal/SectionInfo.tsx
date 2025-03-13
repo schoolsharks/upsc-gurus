@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Typography, Divider } from "@mui/material";
 import { useSelector } from "react-redux";
-import {RootState } from "@/store/store";
-import { selectQuestionSets } from "@/store/questionReducer";
+import { selectQuestionSets } from "../../redux/reducers/questionReducer";
+import { RootState } from "../../redux/store";
 // import Loader from "@/components/Loader";
 
 interface HeaderProps {
