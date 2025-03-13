@@ -130,6 +130,7 @@ const Home: React.FC = () => {
                   sx={cardStyles}
                 >
                   <Stack>
+                    <Stack direction="row" justifyContent={"space-between"}>
                     <Typography
                       style={{
                         fontSize: "1.25rem",
@@ -138,6 +139,8 @@ const Home: React.FC = () => {
                     >
                       {test.testName ?? testData.testName}
                     </Typography>
+                    <Box bgcolor={"#03900547"} sx={{fontSize:"12px",padding:"2px 8px",fontWeight:"600",borderRadius:"12px",height:"fit-content",color:"#039005"}}>In Progress</Box>
+                    </Stack>
                     <Typography
                       variant="body2"
                       style={{ color: "#656565", marginBottom: "12px" }}
