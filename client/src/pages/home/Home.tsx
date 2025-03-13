@@ -302,7 +302,7 @@ const Home: React.FC = () => {
                     <Stack direction={"row"} justifyContent={"space-between"}>
                       <Typography fontWeight={"600"}>Total</Typography>
                       <Typography fontWeight={"600"}>
-                        {(test?.verbalScore ?? 130) + (test?.quantitativeScore ?? 130)}/{340}
+                        {(test?.verbalScore ?? 130) + (test?.quantitativeScore ?? 130)}/{200}
                       </Typography>
                     </Stack>
                   </Stack>

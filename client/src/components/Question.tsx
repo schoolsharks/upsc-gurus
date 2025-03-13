@@ -158,7 +158,7 @@ const QuestionComponent: React.FC = () => {
                         return (
                           <button
                             key={idx}
-                            className={`inline-flex items-center gap-4 py-2 px-3 border cursor-pointer rounded-md min-w-max${
+                            className={`inline-flex items-center gap-4 py-2 px-3 border rounded-md min-w-max cursor-pointer whitespace-nowrap ${
                               selectedAnswers.length > 0 &&
                               selectedAnswers[0] === option
                                 ? "bg-black text-white"
