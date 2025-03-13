@@ -258,7 +258,7 @@ const Home: React.FC = () => {
               fontWeight: "600",
             }}
           >
-            Completed Tests
+            Previous Attempts
           </Typography>
           {completedTests.length ? (
             <Stack direction={"row"} gap={"1rem"} flexWrap={"wrap"}>
