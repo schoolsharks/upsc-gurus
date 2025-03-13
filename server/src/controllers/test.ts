@@ -318,12 +318,21 @@ const handleCreateTest = async (
       throw new AppError("Test has already been attempted", 410);
   }
 
-  const testTemplate = await TestTemplate.findById(testTemplateId);
+
+  interface IQuestion {
+    _id: string;
+    correctAnswer: string[][];
+  } 
+  
+  const testTemplate = await TestTemplate.findById(testTemplateId)
+  .populate<{ questionIds: IQuestion[] }>("questionIds");
 
   if(!testTemplate){
     throw new AppError("Invalid testTemplateId",404);
   }
-  const questions = testTemplate?.questionIds
+ 
+
+  const questions: IQuestion[] = testTemplate.questionIds as IQuestion[];
 
   // Fetch all questions related to the test template
   // const questions = await Question.find().lean(); // Modify this if you filter by template ID
