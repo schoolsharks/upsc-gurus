@@ -348,13 +348,13 @@ const Home: React.FC = () => {
             <Button
               variant="outlined"
               onClick={() => setLogoutDialogOpen(false)}
-              sx={{ borderRadius: "50px" }}
+              sx={{ borderRadius: "50px", border:"1px solid black", color:"black" }}
             >
               No
             </Button>
             <Button
               variant="contained"
-              sx={{ borderRadius: "50px" }}
+              sx={{ borderRadius: "50px",background:"black" }}
               onClick={handleLogout}
             >
               Yes
