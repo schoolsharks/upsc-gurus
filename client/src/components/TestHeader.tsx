@@ -119,13 +119,13 @@ const TestHeader: React.FC<TestHeaderProps> = ({
                   <Button
                     variant="outlined"
                     onClick={() => setSubmitDialogOpen(false)}
-                    sx={{ borderRadius: "50px" }}
+                    sx={{ borderRadius: "50px", border:"1px solid black", color:"black" }}
                   >
                     No
                   </Button>
                   <Button
                     variant="contained"
-                    sx={{ borderRadius: "50px" }}
+                    sx={{ borderRadius: "50px", background:"black" }}
                     onClick={handleSubmit}
                   >
                     Yes
