@@ -12,13 +12,13 @@ import {
   useTheme,
   // IconButton,
 } from "@mui/material";
-import "./home.css"; 
+import "./home.css";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import { logout, setUserInfo } from "../../redux/reducers/userReducer";
 import { MdLogout } from "react-icons/md";
-import { convertSecondsToTime } from '../../utils/formatTime'
+import { convertSecondsToTime } from "../../utils/formatTime";
 import userApi from "../../api/userApi";
 // import { paymentGateway } from "@/libs/paymentGateway";
 
@@ -44,7 +44,7 @@ const Home: React.FC = () => {
     boxShadow: "none",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "space-between", 
+    justifyContent: "space-between",
   };
 
   useEffect(() => {
@@ -60,7 +60,7 @@ const Home: React.FC = () => {
       }
     };
 
-   fetchUserInfo()
+    fetchUserInfo();
   }, []);
 
   const testData = {
@@ -122,24 +122,38 @@ const Home: React.FC = () => {
           >
             All Tests
           </Typography>
-          <Stack direction={"row"} gap={"1rem"} flexWrap={"wrap"} marginTop={"14px"}>
-            
-            {inProgressTests?.length ? (
-              inProgressTests?.map((test: any,index) => (
-                <Card key={index}
-                  sx={cardStyles}
-                >
+          {inProgressTests.length > 0 || unAttemptedTests.length > 0 ? (
+            <Stack
+              direction={"row"}
+              gap={"1rem"}
+              flexWrap={"wrap"}
+              marginTop={"14px"}
+            >
+              {inProgressTests?.map((test: any, index) => (
+                <Card key={index} sx={cardStyles}>
                   <Stack>
                     <Stack direction="row" justifyContent={"space-between"}>
-                    <Typography
-                      style={{
-                        fontSize: "1.25rem",
-                        fontWeight: "400",
-                      }}
-                    >
-                      {test.testName ?? testData.testName}
-                    </Typography>
-                    <Box bgcolor={"#03900547"} sx={{fontSize:"12px",padding:"2px 8px",fontWeight:"600",borderRadius:"12px",height:"fit-content",color:"#039005"}}>In Progress</Box>
+                      <Typography
+                        style={{
+                          fontSize: "1.25rem",
+                          fontWeight: "400",
+                        }}
+                      >
+                        {test.testName ?? testData.testName}
+                      </Typography>
+                      <Box
+                        bgcolor={"#03900547"}
+                        sx={{
+                          fontSize: "12px",
+                          padding: "2px 8px",
+                          fontWeight: "600",
+                          borderRadius: "12px",
+                          height: "fit-content",
+                          color: "#039005",
+                        }}
+                      >
+                        In Progress
+                      </Box>
                     </Stack>
                     <Typography
                       variant="body2"
@@ -165,7 +179,9 @@ const Home: React.FC = () => {
                     </Stack>
                     <Box textAlign="center">
                       <Button
-                        onClick={() => navigate(`/test/question/${test.testId}`)}
+                        onClick={() =>
+                          navigate(`/test/question/${test.testId}`)
+                        }
                         variant="contained"
                         style={{
                           marginTop: "16px",
@@ -181,59 +197,60 @@ const Home: React.FC = () => {
                     </Box>
                   </Stack>
                 </Card>
-              ))
-            ) : (
-              <Typography>No Tests available</Typography>
-            )}
-          {unAttemptedTests?.length ? (
-  unAttemptedTests?.map((test: any, index) => (
-    <Card
-      key={index}
-      sx={{
-        ...cardStyles,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-      }}
-    >
-      <Stack sx={{ flexGrow: 1 }}> {/* Allows the content to fill available space */}
-        <Typography
-          style={{
-            fontSize: "1.25rem",
-            fontWeight: "400",
-          }}
-        >
-          {test.testName}
-        </Typography>
-        <Typography
-          variant="body2"
-          style={{ color: "#656565", marginBottom: "12px" }}
-        >
-          <span style={{ color: "#D5D5D5" }}>●</span> Total Time {testData.totalTime}
-        </Typography>
-      </Stack>
-      <Box textAlign="center">
-        <Button
-          onClick={() => navigate(`/launch-test/${test?.testTemplateId}`)}
-          variant="contained"
-          style={{
-            backgroundColor: "black",
-            color: "white",
-            padding: "8px 16px",
-            borderRadius: "8px",
-            width: "100%",
-          }}
-        >
-          Begin Test
-        </Button>
-      </Box>
-    </Card>
-  ))
-) : (
-  <Typography>Soon new test will be added.</Typography>
-)}
+              ))}
 
-          </Stack>
+              {unAttemptedTests?.map((test: any, index) => (
+                <Card
+                  key={index}
+                  sx={{
+                    ...cardStyles,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Stack sx={{ flexGrow: 1 }}>
+                    {" "}
+                    {/* Allows the content to fill available space */}
+                    <Typography
+                      style={{
+                        fontSize: "1.25rem",
+                        fontWeight: "400",
+                      }}
+                    >
+                      {test.testName}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      style={{ color: "#656565", marginBottom: "12px" }}
+                    >
+                      <span style={{ color: "#D5D5D5" }}>●</span> Total Time{" "}
+                      {testData.totalTime}
+                    </Typography>
+                  </Stack>
+                  <Box textAlign="center">
+                    <Button
+                      onClick={() =>
+                        navigate(`/launch-test/${test?.testTemplateId}`)
+                      }
+                      variant="contained"
+                      style={{
+                        backgroundColor: "black",
+                        color: "white",
+                        padding: "8px 16px",
+                        borderRadius: "8px",
+                        width: "100%",
+                      }}
+                    >
+                      Begin Test
+                    </Button>
+                  </Box>
+                </Card>
+              ))}
+            </Stack>
+          ) : (
+            <div>New Tests will be added soon.</div>
+          )}
         </section>
 
         {/* Unattempted Tests */}
@@ -265,8 +282,9 @@ const Home: React.FC = () => {
           </Typography>
           {completedTests.length ? (
             <Stack direction={"row"} gap={"1rem"} flexWrap={"wrap"}>
-              {completedTests.map((test,index) => (
-                <Card key={index}
+              {completedTests.map((test, index) => (
+                <Card
+                  key={index}
                   sx={{
                     border: "1px solid #00000033",
                     borderRadius: "20px",
@@ -351,13 +369,17 @@ const Home: React.FC = () => {
             <Button
               variant="outlined"
               onClick={() => setLogoutDialogOpen(false)}
-              sx={{ borderRadius: "50px", border:"1px solid black", color:"black" }}
+              sx={{
+                borderRadius: "50px",
+                border: "1px solid black",
+                color: "black",
+              }}
             >
               No
             </Button>
             <Button
               variant="contained"
-              sx={{ borderRadius: "50px",background:"black" }}
+              sx={{ borderRadius: "50px", background: "black" }}
               onClick={handleLogout}
             >
               Yes
@@ -375,14 +397,10 @@ const Home: React.FC = () => {
             Test in Progress
           </Typography>
           <Typography fontSize="1rem" color={theme.palette.text.secondary}>
-            You have an ongoing test. Please complete it before starting another one.
+            You have an ongoing test. Please complete it before starting another
+            one.
           </Typography>
-          <Stack
-            direction={"row"}
-            gap={"1rem"}
-            flex="1"
-            marginTop={"1rem"}
-          >
+          <Stack direction={"row"} gap={"1rem"} flex="1" marginTop={"1rem"}>
             <Button
               variant="outlined"
               onClick={() => setInProgressDialogOpen(false)}
