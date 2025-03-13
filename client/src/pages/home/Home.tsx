@@ -33,6 +33,20 @@ const Home: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
 
+  const cardStyles = {
+    flex: "1",
+    border: "1px solid #00000033",
+    borderRadius: "20px",
+    minWidth: "280px",
+    maxWidth: "300px",
+    minHeight: "200px",
+    padding: "20px",
+    boxShadow: "none",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between", 
+  };
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -100,26 +114,20 @@ const Home: React.FC = () => {
           </div>
         </header> */}
 
-        {/* In-Progress Tests */}
+        {/* All Tests */}
         <section className="test-section">
           <Typography
             sx={{ fontSize: "1.25rem", fontWeight: "600" }}
             variant="h5"
           >
-            In Progress
+            All Tests
           </Typography>
           <Stack direction={"row"} gap={"1rem"} flexWrap={"wrap"} marginTop={"14px"}>
+            
             {inProgressTests?.length ? (
               inProgressTests?.map((test: any,index) => (
                 <Card key={index}
-                  sx={{
-                    flex: "1",
-                    border: "1px solid #00000033",
-                    borderRadius: "20px",
-                    maxWidth: "300px",
-                    padding: "20px",
-                    boxShadow: "none",
-                  }}
+                  sx={cardStyles}
                 >
                   <Stack>
                     <Typography
@@ -172,13 +180,61 @@ const Home: React.FC = () => {
                 </Card>
               ))
             ) : (
-              <Typography>No in-progress tests.</Typography>
+              <Typography>No Tests available</Typography>
             )}
+          {unAttemptedTests?.length ? (
+  unAttemptedTests?.map((test: any, index) => (
+    <Card
+      key={index}
+      sx={{
+        ...cardStyles,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+      }}
+    >
+      <Stack sx={{ flexGrow: 1 }}> {/* Allows the content to fill available space */}
+        <Typography
+          style={{
+            fontSize: "1.25rem",
+            fontWeight: "400",
+          }}
+        >
+          {test.testName}
+        </Typography>
+        <Typography
+          variant="body2"
+          style={{ color: "#656565", marginBottom: "12px" }}
+        >
+          <span style={{ color: "#D5D5D5" }}>●</span> Total Time {testData.totalTime}
+        </Typography>
+      </Stack>
+      <Box textAlign="center">
+        <Button
+          onClick={() => navigate(`/launch-test/${test?.testTemplateId}`)}
+          variant="contained"
+          style={{
+            backgroundColor: "black",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: "8px",
+            width: "100%",
+          }}
+        >
+          Begin Test
+        </Button>
+      </Box>
+    </Card>
+  ))
+) : (
+  <Typography>Soon new test will be added.</Typography>
+)}
+
           </Stack>
         </section>
 
         {/* Unattempted Tests */}
-        <section className="test-section">
+        {/* <section className="test-section">
           <Typography
             sx={{
               fontSize: "1.25rem",
@@ -186,67 +242,12 @@ const Home: React.FC = () => {
               marginBottom: "20px",
             }}
           >
-            Unattempted Tests
+            All Tests
           </Typography>
           <Stack direction={"row"} flexWrap={"wrap"} gap={"1rem"} marginTop={"14px"}>
-            {unAttemptedTests?.length ? (
-              unAttemptedTests?.map((test: any,index) => (
-                <Card key={index}
-                  sx={{
-                    border: "1px solid #00000033",
-                    borderRadius: "20px",
-                    maxWidth: "300px",
-                    padding: "20px",
-                    boxShadow: "none",
-                  }}
-                >
-                  <Stack>
-                    <Typography
-                      style={{
-                        fontSize: "1.25rem",
-                        fontWeight: "400",
-                      }}
-                    >
-                      {test.testName}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      style={{ color: "#656565", marginBottom: "12px" }}
-                    >
-                      <span style={{ color: "#D5D5D5" }}>●</span> Total Time{" "}
-                      {testData.totalTime}
-                    </Typography>
-                    {/* <Typography
-                      variant="body2"
-                      style={{ fontWeight: "500", marginBottom: "16px" }}
-                    >
-                      <span style={{ fontWeight: "600" }}>Subjects Covered:</span>{" "}
-                      {testData.subjects.join(", ")}
-                    </Typography> */}
-                    <Box textAlign="center">
-                      <Button
-                        onClick={() => navigate(`/launch-test/${test?.testTemplateId}`)
-                        }
-                        variant="contained"
-                        style={{
-                          backgroundColor: "black",
-                          color: "white",
-                          padding: "8px 16px",
-                          borderRadius: "8px",
-                          width: "100%",
-                        }}
-                      >
-                        Begin Test
-                      </Button>
-                    </Box>
-                  </Stack>
-                </Card>
-              ))
-            ) : 
-            (<Typography>Soon new test will be added.</Typography>)
-            }
+           
           </Stack>
-        </section>
+        </section> */}
 
         {/* Completed Tests */}
         <section>
