@@ -15,17 +15,27 @@ import "../styles/QuestionStyles.css";
 import DOMPurify from "dompurify";
 
 const QuestionComponent: React.FC = () => {
-  const [selectedAnswers, setSelectedAnswers] = useState<string[][]>([]);
   const location = useLocation();
   const dispatch = useDispatch();
   const queryParams = new URLSearchParams(location.search);
   const testId = useParams().testId;
   const questions = useSelector(selectQuestions);
+  const [selectedAnswers, setSelectedAnswers] = useState<string[][]>([]);
   const index = parseInt(queryParams.get("question") || "0", 10);
   const currentQuestion = questions[index];
 
   useEffect(() => {
     if (!currentQuestion || !questions || !questions[index]) return;
+
+    if (currentQuestion?.questionId) {
+      const storedAnswer =
+        questions.find(q => q.questionId === currentQuestion.questionId)
+          ?.userAnswer || [];
+      setSelectedAnswers(storedAnswer);
+
+      console.log("storedAnswer", storedAnswer[0],currentQuestion.options[0]);
+      console.log("options",currentQuestion.options)
+    }
 
     const startQuestionTimer = async () => {
       try {
@@ -120,6 +130,7 @@ const QuestionComponent: React.FC = () => {
     }
   };
 
+
   return (
     <div className="flex min-w-screen">
       <div className="flex-1">
@@ -154,13 +165,13 @@ const QuestionComponent: React.FC = () => {
                   <div className="options-section flex flex-col gap-2 justify-center">
                     {currentQuestion.optionType === "singleCorrectMCQ" &&
                       currentQuestion.options.map((option, idx) => {
-                        const optionLetter = String.fromCharCode(65 + idx); // A, B, C, D
+                        const optionLetter = String.fromCharCode(65 + idx);
                         return (
                           <button
                             key={idx}
                             className={`inline-flex items-center gap-4 py-2 px-3 border rounded-md min-w-max cursor-pointer whitespace-nowrap ${
                               selectedAnswers.length > 0 &&
-                              selectedAnswers[0] === option
+                              JSON.stringify(selectedAnswers[0]) === JSON.stringify(option)
                                 ? "bg-black text-white"
                                 : "bg-white border-gray-300"
                             }`}
