@@ -15,8 +15,7 @@ interface Test {
   startDate?: string;
   completeDate?: string;
   testTimeSpent?: number;
-  testTimeLimit?: number;
-  verbalScore?: number;
+  totalScore?: number;
   quantitativeScore?: number;
   testCompletionPercent?: number;
 }

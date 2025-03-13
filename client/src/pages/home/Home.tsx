@@ -26,7 +26,7 @@ const Home: React.FC = () => {
   // const [userInfo, setUserInfo] = useState<User | null>(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [inProgressDialogOpen, setInProgressDialogOpen] = useState(false);
-  const { completedTests, inProgressTests, unAttemptedTests, email } = useSelector(
+  const { completedTests, inProgressTests, unAttemptedTests } = useSelector(
     (state: RootState) => state.user
   );
   const navigate = useNavigate();
@@ -110,8 +110,8 @@ const Home: React.FC = () => {
           </Typography>
           <Stack direction={"row"} gap={"1rem"} flexWrap={"wrap"} marginTop={"14px"}>
             {inProgressTests?.length ? (
-              inProgressTests?.map((test: any) => (
-                <Card
+              inProgressTests?.map((test: any,index) => (
+                <Card key={index}
                   sx={{
                     flex: "1",
                     border: "1px solid #00000033",
@@ -190,8 +190,8 @@ const Home: React.FC = () => {
           </Typography>
           <Stack direction={"row"} flexWrap={"wrap"} gap={"1rem"} marginTop={"14px"}>
             {unAttemptedTests?.length ? (
-              unAttemptedTests?.map((test: any) => (
-                <Card
+              unAttemptedTests?.map((test: any,index) => (
+                <Card key={index}
                   sx={{
                     border: "1px solid #00000033",
                     borderRadius: "20px",
@@ -261,8 +261,8 @@ const Home: React.FC = () => {
           </Typography>
           {completedTests.length ? (
             <Stack direction={"row"} gap={"1rem"} flexWrap={"wrap"}>
-              {completedTests.map((test) => (
-                <Card
+              {completedTests.map((test,index) => (
+                <Card key={index}
                   key={test.testId}
                   sx={{
                     border: "1px solid #00000033",
@@ -302,7 +302,7 @@ const Home: React.FC = () => {
                     <Stack direction={"row"} justifyContent={"space-between"}>
                       <Typography fontWeight={"600"}>Total</Typography>
                       <Typography fontWeight={"600"}>
-                        {(test?.verbalScore ?? 130) + (test?.quantitativeScore ?? 130)}/{200}
+                        {test?.totalScore}/{200}
                       </Typography>
                     </Stack>
                   </Stack>
