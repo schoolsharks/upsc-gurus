@@ -5,5 +5,5 @@ server/node_modules/
 # Ignore other unwanted files
 .env
 .DS_Store
-dist/
+# dist/
 build/
