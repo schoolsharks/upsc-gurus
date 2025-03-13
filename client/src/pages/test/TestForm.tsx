@@ -95,7 +95,7 @@ const TestForm: React.FC = () => {
       >
         <img
           src="/public/images/logo.png"
-          alt="Career Geek Logo"
+          alt="Upsc Gururs Logo"
           style={{ width: "170px" }}
         />
       </Stack>
@@ -103,9 +103,9 @@ const TestForm: React.FC = () => {
 
       {/* Form Container */}
       <form className="form-container" onSubmit={handleSubmit}>
-        <Typography variant="h4" component="h1" gutterBottom>
+        {/* <Typography variant="h4" component="h1" gutterBottom>
           POWERPREP™ Online
-        </Typography>
+        </Typography> */}
         <Typography variant="h6" component="h2" gutterBottom>
           Test Preview Tool
         </Typography>
@@ -258,10 +258,7 @@ const TestForm: React.FC = () => {
 
         <hr />
         <p className="copytext">
-          Copyright © 2024 by Educational Testing Service.All rights reserved.
-          ETS, GRADUATE RECORD EXAMINATIONS and GRE are registered trademarks of
-          Educational Testing Service (ETS) in the United States and other
-          countries The Eight-Point logo is a trademark of ETS.
+          Copyright © 2025 by Upsc Gurus.All rights reserved.
         </p>
       </form>
     </>

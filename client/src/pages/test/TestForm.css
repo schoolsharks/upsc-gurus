@@ -16,13 +16,13 @@
   .gradient-line {
     width: 100%;
   
-    height: 35px;
+    height: 10px;
     background: linear-gradient(
       270deg,
       rgba(255, 255, 255, 0.25) 0%,
-      rgba(252, 191, 18, 0.25) 100%
+      rgba(0, 0, 0, 0.7) 100%
     );
-    margin-bottom: 20px;
+    margin-bottom: 20px; 
   }
   
   .accommodation-checkbox {

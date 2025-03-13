@@ -150,7 +150,7 @@ const QuestionComponent: React.FC = () => {
                     }}
                   />
                 </div>
-                <div className="options-container w-fit mx-auto">
+                <div className="options-container w-[70%] mx-auto">
                   <div className="options-section flex flex-col gap-2 justify-center">
                     {currentQuestion.optionType === "singleCorrectMCQ" &&
                       currentQuestion.options.map((option, idx) => {
@@ -158,7 +158,7 @@ const QuestionComponent: React.FC = () => {
                         return (
                           <button
                             key={idx}
-                            className={`inline-flex items-center gap-4 py-2 px-3 border rounded-md min-w-max whitespace-nowrap ${
+                            className={`inline-flex items-center gap-4 py-2 px-3 border cursor-pointer rounded-md min-w-max${
                               selectedAnswers.length > 0 &&
                               selectedAnswers[0] === option
                                 ? "bg-black text-white"

@@ -91,18 +91,14 @@ const Home: React.FC = () => {
         sx={{ [theme.breakpoints.down("sm")]: { padding: 0 } }}
       >
         {/* Header Section */}
-        <header className="header">
+        {/* <header className="header">
           <div>
             <Typography variant="h4" component="h2">
               Welcome!
-              {/* {name}! */}
             </Typography>
             <Typography variant="body1">{email}</Typography>
           </div>
-          {/* <IconButton onClick={ () =>paymentGateway("6741a8dfdcfd60d391154ca4")}>
-            <EditOutlined />
-          </IconButton>  */}
-        </header>
+        </header> */}
 
         {/* In-Progress Tests */}
         <section className="test-section">
@@ -162,7 +158,7 @@ const Home: React.FC = () => {
                         variant="contained"
                         style={{
                           marginTop: "16px",
-                          backgroundColor: "#142E79",
+                          backgroundColor: "black",
                           color: "white",
                           padding: "8px 16px",
                           borderRadius: "8px",
@@ -220,20 +216,20 @@ const Home: React.FC = () => {
                       <span style={{ color: "#D5D5D5" }}>●</span> Total Time{" "}
                       {testData.totalTime}
                     </Typography>
-                    <Typography
+                    {/* <Typography
                       variant="body2"
                       style={{ fontWeight: "500", marginBottom: "16px" }}
                     >
                       <span style={{ fontWeight: "600" }}>Subjects Covered:</span>{" "}
                       {testData.subjects.join(", ")}
-                    </Typography>
+                    </Typography> */}
                     <Box textAlign="center">
                       <Button
                         onClick={() => navigate(`/launch-test/${test?.testTemplateId}`)
                         }
                         variant="contained"
                         style={{
-                          backgroundColor: "#142E79",
+                          backgroundColor: "black",
                           color: "white",
                           padding: "8px 16px",
                           borderRadius: "8px",
@@ -291,7 +287,7 @@ const Home: React.FC = () => {
                     </Typography>
                   </Stack>
                   <Stack marginTop={"20px"} gap="8px">
-                    <Stack direction={"row"} justifyContent={"space-between"}>
+                    {/* <Stack direction={"row"} justifyContent={"space-between"}>
                       <Typography>Quantitative Reasoning</Typography>
                       <Typography>
                         {test.quantitativeScore ?? 130}/{170}
@@ -302,7 +298,7 @@ const Home: React.FC = () => {
                       <Typography>
                         {test.verbalScore ?? 130}/{170}
                       </Typography>
-                    </Stack>
+                    </Stack> */}
                     <Stack direction={"row"} justifyContent={"space-between"}>
                       <Typography fontWeight={"600"}>Total</Typography>
                       <Typography fontWeight={"600"}>

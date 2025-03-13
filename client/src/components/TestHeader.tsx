@@ -2,6 +2,8 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import userApi from "../api/userApi";
 import { markQuestion } from "../redux/reducers/questionReducer";
 import { useDispatch } from "react-redux";
+import { Button, Dialog, Stack, Typography, useTheme } from "@mui/material";
+import { useState } from "react";
 
 interface TestHeaderProps {
   currentIndex: number;
@@ -17,6 +19,9 @@ const TestHeader: React.FC<TestHeaderProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+  const theme = useTheme();
+
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
 
   const handleNavigation = (direction: "next" | "prev") => {
     const newIndex = direction === "next" ? currentIndex + 1 : currentIndex - 1;
@@ -86,12 +91,48 @@ const TestHeader: React.FC<TestHeaderProps> = ({
           Next
         </button>
         <button
-          onClick={() => handleSubmit()}
+          onClick={() => setSubmitDialogOpen(true)}
           className="px-2 py-3 w-[200px] bg-[#039005] text-white rounded-lg cursor-pointer"
         >
           Submit Test
         </button>
       </div>
+
+          <Dialog
+              open={submitDialogOpen}
+              onClose={() => setSubmitDialogOpen(false)}
+            >
+              <Stack sx={{ padding: "2rem", maxWidth: "400px" }}>
+                <Typography fontSize="1.5rem" fontWeight={"600"}>
+                  Confirm Submission
+                </Typography>
+                <Typography fontSize="1rem" color={theme.palette.text.secondary}>
+                  Are you sure you submit the test?
+                </Typography>
+                <Stack
+                  direction={"row"}
+                  // justifyContent="space-between"
+                  gap={"1rem"}
+                  flex="1"
+                  marginTop={"1rem"}
+                >
+                  <Button
+                    variant="outlined"
+                    onClick={() => setSubmitDialogOpen(false)}
+                    sx={{ borderRadius: "50px" }}
+                  >
+                    No
+                  </Button>
+                  <Button
+                    variant="contained"
+                    sx={{ borderRadius: "50px" }}
+                    onClick={handleSubmit}
+                  >
+                    Yes
+                  </Button>
+                </Stack>
+              </Stack>
+            </Dialog>
     </div>
   );
 };
