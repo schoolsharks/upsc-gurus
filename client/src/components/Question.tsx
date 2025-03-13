@@ -28,6 +28,7 @@ const QuestionComponent: React.FC = () => {
     if (!currentQuestion || !questions || !questions[index]) return;
 
     if (currentQuestion?.questionId) {
+      console.log("currentQuestion", currentQuestion);
       const storedAnswer =
         questions.find(q => q.questionId === currentQuestion.questionId)
           ?.userAnswer || [];
@@ -82,14 +83,16 @@ const QuestionComponent: React.FC = () => {
 
   const handleSelectAnswer = (option: string[]) => {
     let updatedAnswers: string[][] = [];
-
-    // Check if the selected option is already chosen
-    if (selectedAnswers.length > 0 && selectedAnswers[0] === option) {
-      updatedAnswers = [[]]; // Unselecting the option
+  
+    const isOptionSelected = selectedAnswers.length > 0 && 
+                            JSON.stringify(selectedAnswers[0]) === JSON.stringify(option);
+    
+    if (isOptionSelected) {
+      updatedAnswers = [[]]; 
     } else {
-      updatedAnswers = [option]; // Selecting the option
+      updatedAnswers = [option];
     }
-
+  
     setSelectedAnswers(updatedAnswers);
     sendUserResponse(updatedAnswers);
   };
@@ -115,10 +118,11 @@ const QuestionComponent: React.FC = () => {
         response?.data?.updatedAnswer ?? structuredClone(newSelectedAnswers);
       const status = response.data.updatedAnswer.questionStatus;
 
+
       dispatch(
         updateUserResponse({
           questionId: currentQuestion.questionId,
-          userResponse: updatedResponse,
+          userResponse: updatedResponse.userAnswer,
           questionStatus: status,
         })
       );
