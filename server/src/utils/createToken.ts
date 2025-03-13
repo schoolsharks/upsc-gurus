@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
-require("dotenv").config();
+import dotenv from "dotenv";
 import { Payload } from "../types/interface";
+
+dotenv.config();
 
 export const createAccessToken = (payload: Payload) => {
     const secret = process.env.JWT_ACCESS_SECRET;
