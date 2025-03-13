@@ -142,7 +142,7 @@ const Home: React.FC = () => {
                       variant="body2"
                       style={{ color: "#656565", marginBottom: "12px" }}
                     >
-                      <span style={{ color: "#FFD661" }}>●</span> Started on{" "}
+                      <span style={{ color: "green" }}>●</span> Started on{" "}
                       {new Date(test.startDate || "").toLocaleDateString()}
                     </Typography>
                     <Stack direction={"row"} justifyContent={"space-between"}>
