@@ -153,8 +153,9 @@ const userTestInfo = async (
                 testTemplateId: "$testIds.testTemplateId",
                 testName: { $arrayElemAt: ["$testTemplates.testName", 0] },
                 completeDate: "$tests.updatedAt",
-                verbalScore: "$tests.verbalScore",
-                quantitativeScore: "$tests.quantitativeScore",
+                totalScore:"$tests.totalScore",
+                // verbalScore: "$tests.verbalScore",
+                // quantitativeScore: "$tests.quantitativeScore",
                 testTimeSpent: "$tests.testTimeSpent",
               },
               else: null,
@@ -262,6 +263,8 @@ const userTestInfo = async (
     return next(new AppError("User not found", 404));
   }
 
+
+
   // Ensure tests arrays exist even if empty
   const result = {
     _id: user[0]._id,
@@ -323,7 +326,7 @@ const handleCreateTest = async (
     _id: string;
     correctAnswer: string[][];
   } 
-  
+
   const testTemplate = await TestTemplate.findById(testTemplateId)
   .populate<{ questionIds: IQuestion[] }>("questionIds");
 
@@ -749,15 +752,37 @@ const lockTest = async (req: Request, res: Response, next: NextFunction) => {
   if (!testId) throw new AppError("TestId not found", 400);
 
   const lockedTest = await Test.findByIdAndUpdate(
-    new mongoose.Types.ObjectId(String(testId)),
-    {
-      $set: {
-        testStatus: TestStatusEnum.LOCKED,
-        new: true,
-      },
-    },
+    testId,
+    [
+      {
+        $set: {
+          testStatus: TestStatusEnum.LOCKED,
+          totalScore: {
+            $sum: {
+              $map: {
+                input: "$answers",
+                as: "answer",
+                in: {
+                  $cond: {
+                    if: { $eq: ["$$answer.isCorrect", true] }, then: 2,
+                    else: {
+                      $cond: {
+                        if: { $eq: ["$$answer.isCorrect", false] }, then: -0.6,
+                        else: 0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ],
     { new: true }
   );
+  
+
 
   if (!lockedTest)
     throw new AppError("testId not found/ faile to lock test", 404);

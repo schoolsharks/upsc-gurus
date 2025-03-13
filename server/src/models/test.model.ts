@@ -20,8 +20,9 @@ interface TestType extends Document {
     testTimeLimit: Number;
     testTimeSpent: Number;
     testCompletionPercent: Number;
-    verbalScore: Number | null;
-    quantitativeScore: Number | null;
+    totalScore: Number | null;
+    // verbalScore: Number | null;
+    // quantitativeScore: Number | null;
     answers: AnswerType[];
 }
 
@@ -90,6 +91,10 @@ const testSchema = new Schema<TestType>({
     testCompletionPercent: {
         type: Number,
         default: 0
+    },
+    totalScore: {
+        type: Number,
+        default: null
     },
     answers: [answerSchema]
 }, {

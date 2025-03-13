@@ -74,6 +74,7 @@ const handleLoginUser = async (
         return next(new AppError("All fields are required", 400));
     }
 
+
     // if user exist (email)
     const user = await User.findOne({ email });
     if (!user) {
@@ -91,6 +92,7 @@ const handleLoginUser = async (
         email: user.email,
         id: user._id as string
     }
+    
     const accessToken = createAccessToken(payload);
     const refreshToken = createRefreshToken(payload);
 
