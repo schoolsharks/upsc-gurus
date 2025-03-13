@@ -263,7 +263,6 @@ const Home: React.FC = () => {
             <Stack direction={"row"} gap={"1rem"} flexWrap={"wrap"}>
               {completedTests.map((test,index) => (
                 <Card key={index}
-                  key={test.testId}
                   sx={{
                     border: "1px solid #00000033",
                     borderRadius: "20px",
