@@ -1,7 +1,8 @@
-import mongoose, { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 import Test from "../models/test.model";
 import User from "../models/user.model";
 import { evaluateAndUpdateTestScore } from "./Calculation";
+import { Schema } from "mongoose";
 
 interface Answer {
     questionId: string;
@@ -25,7 +26,7 @@ interface Test {
 
 function evaluateSetCompletion(set: Set): number {
     // if set is locked thus means set completion is 100%
-    if(set.setStatus === "LOCKED")
+    if (set.setStatus === "LOCKED")
         return 1;
 
     const totalQuestions = set.answers.length;
@@ -47,7 +48,7 @@ function evaluateSetCompletion(set: Set): number {
 
 function evaluateTestCompletion(test: Test): number {
     // if test is locked thus means test is 100% completed
-    if(test.testStatus === 'LOCKED')
+    if (test.testStatus === 'LOCKED')
         return 100;
 
     const numberOfSets = 4;
@@ -83,14 +84,13 @@ function evaluateSetTimeSpent(test: Test, setName: string) {
         newtestTimeSpent = testTimeSpent;
     }
 
-    return { testTimeSpent:newtestTimeSpent, setTimeSpent: timeSpent };
+    return { testTimeSpent: newtestTimeSpent, setTimeSpent: timeSpent };
 }
 
-export const lockAndUpdateTestScore = async (userId: string, activeTestId: string) => {
+export const lockAndUpdateTestScore = async (userId: string, testId: mongoose.Types.ObjectId) => {
     // ------------- locking test
-    const user = await User.findById(userId).select("activeTest");
     const updatedTest = await Test.findByIdAndUpdate(
-        { _id: activeTestId },
+        { _id: testId },
         {
             $set: {
                 testStatus: "LOCKED",
@@ -101,26 +101,18 @@ export const lockAndUpdateTestScore = async (userId: string, activeTestId: strin
         }
     );
 
-    if (updatedTest) {
-        if (user) {
-            user.activeTest = null;
-            await user.save();
-        }
-    }
-    else
-        return false;
 
     // ------------- updating score
-    const updateStatus = await evaluateAndUpdateTestScore(activeTestId.toString());
-    if (updateStatus)
-        console.log("Score evaluated and updated");
-    else
-        console.log("Score not updated");
+    // const updateStatus = await evaluateAndUpdateTestScore(activeTestId.toString());
+    // if (updateStatus)
+    //     console.log("Score evaluated and updated");
+    // else
+    //     console.log("Score not updated");
 
     return true;
 }
 
-export const updateTestCompletionAndTimeSpent = async (activeTestId: ObjectId, setName: string) => {
+export const updateTestCompletionAndTimeSpent = async (activeTestId: Schema.Types.ObjectId, setName: string) => {
 
     const test = await Test.aggregate([
         {
@@ -195,11 +187,11 @@ export const updateTestCompletionAndTimeSpent = async (activeTestId: ObjectId, s
     return updatedSetSpentTimeAndCompletionPercent;
 }
 
-export const getActiveTestAndTestTemplateId = async ( userId:string)=>{
+export const getActiveTestAndTestTemplateId = async (userId: string) => {
 
     const userTest = await User.aggregate([
-        { 
-            $match: { _id: new mongoose.Types.ObjectId(userId) } 
+        {
+            $match: { _id: new mongoose.Types.ObjectId(userId) }
         },
         {
             $project: {
@@ -231,5 +223,5 @@ export const getActiveTestAndTestTemplateId = async ( userId:string)=>{
         }
     ]);
 
-    return userTest.length !=0 ? userTest[0] : [];
+    return userTest.length != 0 ? userTest[0] : [];
 }

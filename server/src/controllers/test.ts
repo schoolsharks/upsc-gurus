@@ -6,6 +6,7 @@ import Test from "../models/test.model";
 import { QuestionStatusEnum, TestStatusEnum } from "../types/enum";
 import Question from "../models/questions.model";
 import TestTemplate from "../models/testTemplate.model";
+import { lockAndUpdateTestScore } from "../dbFunctions/Test";
 
 export function calulateAccuracyOfUserAnswer(
   userAnswer: string[][],
@@ -76,6 +77,22 @@ export function checkIfAllEmpty(userAnswer: any[][]): boolean {
   // Check if all subarrays are empty
   return userAnswer.every((subArray) => subArray.length === 0);
 }
+
+
+async function checkSectionTestTimeLimit(
+  userId: string,
+  testId: mongoose.Types.ObjectId
+) {
+  const test = await Test.findById(testId).select("testTimeLimit testTimeSpent testStatus");
+  if (test) {
+    if (test.testTimeSpent > test.testTimeLimit) {
+      const lockAndUpdateSectionalTestStatus = lockAndUpdateTestScore(userId, testId);
+      return true;
+    }
+  }
+  return false;
+}
+
 const userTestInfo = async (
   req: Request,
   res: Response,
@@ -153,7 +170,7 @@ const userTestInfo = async (
                 testTemplateId: "$testIds.testTemplateId",
                 testName: { $arrayElemAt: ["$testTemplates.testName", 0] },
                 completeDate: "$tests.updatedAt",
-                totalScore:"$tests.totalScore",
+                totalScore: "$tests.totalScore",
                 // verbalScore: "$tests.verbalScore",
                 // quantitativeScore: "$tests.quantitativeScore",
                 testTimeSpent: "$tests.testTimeSpent",
@@ -325,15 +342,15 @@ const handleCreateTest = async (
   interface IQuestion {
     _id: string;
     correctAnswer: string[][];
-  } 
+  }
 
   const testTemplate = await TestTemplate.findById(testTemplateId)
-  .populate<{ questionIds: IQuestion[] }>("questionIds");
+    .populate<{ questionIds: IQuestion[] }>("questionIds");
 
-  if(!testTemplate){
-    throw new AppError("Invalid testTemplateId",404);
+  if (!testTemplate) {
+    throw new AppError("Invalid testTemplateId", 404);
   }
- 
+
 
   const questions: IQuestion[] = testTemplate.questionIds as IQuestion[];
 
@@ -494,65 +511,57 @@ const handleGetTestQuestions = async (
 
     console.log("Received testId:", testId);
 
-    const test = await Test.aggregate([
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(String(testId)),
-          testStatus: { $ne: "LOCKED" },
-        },
-      },
-      {
-        $unwind: "$answers",
-      },
-      {
-        $lookup: {
-          from: "questions",
-          let: { questionId: "$answers.questionId" },
-          pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$questionId"] } } }],
-          as: "questionDetails",
-        },
-      },
-      {
-        $unwind: { path: "$questionDetails", preserveNullAndEmptyArrays: true },
-      },
-      {
-        $group: {
-          _id: "$_id",
-          timeLimit: { $first: "$testTimeLimit" },
-          timeSpent: { $first: "$testTimeSpent" },
-          questionDetails: {
-            $push: {
-              _id: "$questionDetails._id",
-              question: "$questionDetails.question",
-              positioning: "$questionDetails.positioning",
-              options: "$questionDetails.options",
-              optionType: "$questionDetails.optionType",
-              difficulty: "$questionDetails.difficulty",
-              // questionStatus: "$answers.questionStatus",
-              userAnswer: "$answers.userAnswer",
-            },
-          },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          timeLimit: 1,
-          timeSpent: 1,
-          timeRemaining: { $subtract: ["$timeLimit", "$timeSpent"] },
-          questionDetails: { $ifNull: ["$questionDetails", []] },
-        },
-      },
-    ]);
+    // const test = await Test.aggregate([
+    //   {
+    //     $match: {
+    //       _id: new mongoose.Types.ObjectId(String(testId)),
+    //       testStatus: { $ne: "LOCKED" },
+    //     },
+    //   },
+    //   {
+    //     $unwind: "$answers",
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "questions",
+    //       let: { questionId: "$answers.questionId" },
+    //       pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$questionId"] } } }],
+    //       as: "questionDetails",
+    //     },
+    //   },
+    //   {
+    //     $unwind: { path: "$questionDetails", preserveNullAndEmptyArrays: true },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$_id",
+    //       timeLimit: { $first: "$testTimeLimit" },
+    //       timeSpent: { $first: "$testTimeSpent" },
+    //       questionDetails: {
+    //         $push: {
+    //           _id: "$questionDetails._id",
+    //           question: "$questionDetails.question",
+    //           positioning: "$questionDetails.positioning",
+    //           options: "$questionDetails.options",
+    //           optionType: "$questionDetails.optionType",
+    //           difficulty: "$questionDetails.difficulty",
+    //           // questionStatus: "$answers.questionStatus",
+    //           userAnswer: "$answers.userAnswer",
+    //         },
+    //       },
+    //     },
+    //   },
+    //   {
+    //     $project: {
+    //       _id: 0,
+    //       timeLimit: 1,
+    //       timeSpent: 1,
+    //       timeRemaining: { $subtract: ["$timeLimit", "$timeSpent"] },
+    //       questionDetails: { $ifNull: ["$questionDetails", []] },
+    //     },
+    //   },
+    // ]);
 
-    // // Find the test by ID and populate only the questions, excluding answers
-    // const test = await Test.findById(testId)
-    //   .populate({
-    //     path: "answers.questionId",
-    //     select: "question positioning options optionType difficulty userAnswer",
-    //   })
-    //   .select("answers");
-    //   // console.log(test);
 
     const testA = await Test.aggregate([
       {
@@ -605,21 +614,14 @@ const handleGetTestQuestions = async (
       },
     ]);
 
-    // console.log("test", testA)
 
-    if (!test.length) {
+    if (!testA.length) {
       return next(new AppError("Test not found", 404));
     }
 
-    // console.log("tes", test)
-
-    // // Extract only the populated questions from the answers array
-    // const questions = test.answers.map((answer) => answer.questionId);
-    // console.log(questions)
-
     res.status(200).json({
       success: true,
-      questionsList: testA[0].questionDetails,
+      questionsList: testA[0],
     });
   } catch (error) {
     next(error);
@@ -781,7 +783,6 @@ const lockTest = async (req: Request, res: Response, next: NextFunction) => {
     ],
     { new: true }
   );
-  
 
 
   if (!lockedTest)
@@ -799,7 +800,69 @@ const startQuestionTime = async (
   next: NextFunction
 ) => {
   try {
-    const { testId, questionId } = req.body;
+    const { testId, questionId } = req.query;
+    const userId: string = req.user?.id;
+
+    if (!testId) {
+      throw new AppError("Test not Found", 400);
+    }
+    if (!questionId) {
+      throw new AppError("Question not Found", 400);
+    }
+    if (!userId) {
+      throw new AppError("User not Authenticated", 400);
+    }
+
+    // Find the test and check if the question exists
+    const test = await Test.findOne(
+      { _id: testId, "answers.questionId": questionId },
+      { "answers.$": 1 } // Fetch only the specific question entry
+    );
+
+    if (!test || !test.answers.length) {
+      return next(new AppError("Question answer entry not found", 404));
+    }
+    const questionAnswer = test.answers[0];
+
+    // updating question time by seting new Date()
+    let updateFields: any = {
+      "answers.$[answer].questionStartTime": new Date()
+    };
+
+    if (questionAnswer.questionStatus !== QuestionStatusEnum.MARKED) {
+      updateFields["answers.$[answer].questionStatus"] = QuestionStatusEnum.SEEN
+    }
+
+    const updatedQuestion = await Test.findByIdAndUpdate(
+      new mongoose.Types.ObjectId(String(testId)),
+      {
+        $set: updateFields
+      },
+      {
+        new: true,
+        arrayFilters: [
+          { "answer.questionId": new mongoose.Types.ObjectId(String(questionId)) }
+        ]
+      }
+    )
+
+    return res.status(200).json({
+      message: "Question start time recorded successfully",
+      data: updatedQuestion,
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+const endQuestionTime = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { testId, questionId } = req.query;
     const userId: string = req.user?.id;
 
     if (!testId) {
@@ -824,27 +887,133 @@ const startQuestionTime = async (
 
     const questionAnswer = test.answers[0];
 
-    // Only update the status if it's currently "UNSEEN"
-    if (questionAnswer.questionStatus === QuestionStatusEnum.UNSEEN) {
-      await Test.findOneAndUpdate(
-        {
-          _id: testId,
-          "answers.questionId": questionId,
-        },
-        {
-          $set: { "answers.$.questionStatus": QuestionStatusEnum.SEEN },
-        }
-      );
+    const { questionStartTime, timeTaken } = questionAnswer ?? { questionStartTime: null, timeTaken: 0 };;
+    let questionTimeTaken = Number(timeTaken);
 
-      return res.status(200).json({
-        success: true,
-        message: "Question status changed: SEEN",
-      });
+    if (questionStartTime) {
+      questionTimeTaken += (Math.floor((new Date().getTime() - questionStartTime.getTime()) / 1000))
     }
+
+    const updatedQuestion = await Test.findByIdAndUpdate(
+      new mongoose.Types.ObjectId(String(testId)),
+      {
+        $set: {
+          "answers.$[answer].timeTaken": questionTimeTaken,
+          "answers.$[answer].questionStartTime": null
+        },
+      },
+      {
+        new: true,
+        arrayFilters: [
+          { "answer.questionId": new mongoose.Types.ObjectId(String(questionId)) },
+        ],
+      }
+    );
+
+    if (!updatedQuestion)
+      throw new AppError("Time not paused", 403);
+
+    return res.status(200).json({
+      message: "Question time recorded successfully",
+      data: updatedQuestion,
+    });
+
   } catch (error) {
     next(error);
   }
 };
+
+const startTestTime = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { testId } = req.query;
+  const userId: string = req.user?.id;
+
+
+  const testStatus = await checkSectionTestTimeLimit(userId, new mongoose.Types.ObjectId(String(testId)));
+  if (testStatus)
+    throw new AppError("Test time is over", 423);
+
+  const updatedTestStartTime = await Test.findByIdAndUpdate(
+    {
+      _id: new mongoose.Types.ObjectId(String(testId))
+    },
+    {
+      $set: {
+        testStartTime: new Date()
+      }
+    },
+    { new: true }
+  );
+
+  if (!updatedTestStartTime)
+    throw new AppError("Time not updated", 403);
+
+  return res.status(200).json({
+    success: true,
+    message: "Test timer started",
+    updatedTestStartTime,
+  });
+}
+
+const endTestTime = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { testId } = req.query;
+  const userId: string = req.user?.id;
+
+
+  const test = await Test.aggregate([
+    {
+      $match: { _id: new mongoose.Types.ObjectId(String(testId)) },
+    },
+    {
+      $project: {
+        _id: 0,
+        testTimeLimit: 1,
+        startTime: "$testStartTime",
+        timeSpent: "$testTimeSpent",
+        answers: "$answers"
+      }
+    }
+  ]);
+
+  const { testTimeLimit, startTime, timeSpent, answers } = test ? test[0] : null;
+  let testTimeSpent: number;
+  if (startTime) {
+    testTimeSpent = timeSpent + Math.floor((new Date().getTime() - startTime.getTime()) / 1000)
+  }
+  else
+    testTimeSpent = timeSpent;
+
+  const updatedTestTimeSpent = await Test.findByIdAndUpdate(
+    new mongoose.Types.ObjectId(String(testId)),
+    {
+      $set: {
+        testTimeSpent: testTimeSpent,
+        testStartTime: null,
+      }
+    },
+    { new: true }
+  );
+
+  if (!updatedTestTimeSpent)
+    throw new AppError("Time not updated", 403);
+
+  const testStatus = await checkSectionTestTimeLimit(userId, new mongoose.Types.ObjectId(String(testId)));
+  if (testStatus)
+    throw new AppError("Test time is over", 423);
+
+  return res.status(200).json({
+    success: true,
+    message: "Test timer paused",
+    testId: updatedTestTimeSpent
+  })
+}
 
 export {
   userTestInfo,
@@ -854,4 +1023,7 @@ export {
   lockTest,
   handleMark,
   startQuestionTime,
+  endQuestionTime,
+  startTestTime,
+  endTestTime
 };
