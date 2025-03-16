@@ -61,11 +61,13 @@ const TestHeader: React.FC<TestHeaderProps> = ({
     <div className="flex justify-between items-center p-4 px-8  shadow-sm">
       {/* Logo Section */}
       <div className="flex items-center">
+      <button onClick={() => navigate("/")} className="focus:outline-none">
         <img
           src="/images/logo.png"
           alt="UPSC Gurus Logo"
-          className="logo mr-3"
+          className="logo mr-3 cursor-pointer"
         />
+      </button>
       </div>
 
       {/* Navigation Controls */}

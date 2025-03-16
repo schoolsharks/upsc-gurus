@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
-  markQuestion,
   setQuestions,
+  setQuestionSets,
   updateUserResponse,
 } from "../redux/reducers/questionReducer";
 import userApi from "../api/userApi";
@@ -14,63 +14,129 @@ import { Question } from "../types/QuestionType";
 import "../styles/QuestionStyles.css";
 import DOMPurify from "dompurify";
 
+interface QuestionSet {
+  setName?: string;
+  setStatus?: string;
+  timeLimit: number;
+  timeRemaining: number;
+  timeSpent: number;
+  questionDetails: Question[];
+}
+
 const QuestionComponent: React.FC = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const queryParams = new URLSearchParams(location.search);
-  const testId = useParams().testId;
+  const { testId } = useParams<{ testId: string }>();
   const questions = useSelector(selectQuestions);
   const [selectedAnswers, setSelectedAnswers] = useState<string[][]>([]);
   const index = parseInt(queryParams.get("question") || "0", 10);
   const currentQuestion = questions[index];
+  const [prevIndex, setPrevIndex] = useState<number | null>(null);
+  const navigate = useNavigate();
 
+  const startSetTimer = async (testId: string) => {
+    try {
+      let satrtSetResp;
+      satrtSetResp = await userApi.put("/test/startTestTime", { testId });
+      // start sectional test time
+      await userApi.put("/sectional/startTestTime");
+
+      console.log("Set timer started for:", testId, satrtSetResp);
+    } catch (error) {
+      console.error("Error starting set timer:", error);
+    }
+  };
+
+  const endSetTimer = async (testId: string) => {
+    try {
+      await userApi.put("/test/endTestTime", { testId });
+
+      // console.log("Set timer ended for", setName,endSetResp);
+    } catch (error) {
+      console.error("Error ending set timer:", error);
+    }
+  };
+
+  const startQuestionTimer = async (
+    testId: string,
+    questionId: string,
+    index: number
+  ) => {
+    try {
+      await userApi.put("/test/startQuestionTime", {
+        testId,
+        questionId,
+      });
+      index; // To use unused variable (build errors resolution)
+
+      // console.log("Question timer started for question:",index, questionId,startQuesResp);
+    } catch (error) {
+      console.error("Error starting question timer:", error);
+    }
+  };
+
+  const endQuestionTimer = async (testId: string, questionId: string) => {
+    try {
+      await userApi.put("/test/endQuestionTime", {
+        testId,
+        questionId,
+      });
+      // console.log("Question timer ended for question: previous question",index-1,questionId, endQuesResp);
+    } catch (error) {
+      console.error("Error ending question timer:", error);
+    }
+  };
+  
+  // Effect for question timers
   useEffect(() => {
     if (!currentQuestion || !questions || !questions[index]) return;
-
-    if (currentQuestion?.questionId) {
-      console.log("currentQuestion", currentQuestion);
-      const storedAnswer =
-        questions.find(q => q.questionId === currentQuestion.questionId)
-          ?.userAnswer || [];
-      setSelectedAnswers(storedAnswer);
-
-      console.log("storedAnswer", storedAnswer[0],currentQuestion.options[0]);
-      console.log("options",currentQuestion.options)
+    if (currentQuestion && index !== prevIndex&&testId) {
+      startQuestionTimer(testId, currentQuestion.questionId, index);
     }
 
-    const startQuestionTimer = async () => {
-      try {
-        await userApi.put("/test/startQuestionTime", {
-          testId,
-          questionId: currentQuestion.questionId,
-        });
-        dispatch(
-          markQuestion({
-            questionId: currentQuestion.questionId,
-            questionStatus: "SEEN",
-          })
-        );
-      } catch (error: any) {
-        console.error(
-          "Error starting question timer:",
-          error?.response?.data || error.message
-        );
-      }
+    if (prevIndex !== null && questions[prevIndex]) {
+      endQuestionTimer(
+        testId,
+        questions[prevIndex].questionId
+      );
+    }
+    setPrevIndex(index);
+  }, [index, testId,questions]);
+
+  // Effect for set timers
+  useEffect(() => {
+    if (!testId || questions.length === 0) return;
+  
+    startSetTimer(testId);
+  
+    const handleBeforeUnload = () => {
+      endSetTimer(testId);
     };
-
-    startQuestionTimer();
-  }, [index, currentQuestion?.questionId, testId, questions]);
-
+  
+    window.addEventListener("beforeunload", handleBeforeUnload);
+  
+    return () => {
+      endSetTimer(testId);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [testId, questions.length]); 
+  
+  //fetch questions
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await userApi.get<{ questionsList: Question[] }>(
+        const response = await userApi.get<{ questionsList: QuestionSet[] }>(
           "/test/getQuestions",
           {
             params: { testId },
           }
         );
-        dispatch(setQuestions(response.data.questionsList));
+
+        dispatch(
+          setQuestions(response.data.questionsList?.questionDetails ?? [])
+        );
+        dispatch(setQuestionSets(response.data.questionsList));
       } catch (error: any) {
         console.log(
           error.response?.data?.message || "Failed to fetch user information."
@@ -81,18 +147,20 @@ const QuestionComponent: React.FC = () => {
     fetchQuestions();
   }, [testId]);
 
+  
   const handleSelectAnswer = (option: string[]) => {
     let updatedAnswers: string[][] = [];
-  
-    const isOptionSelected = selectedAnswers.length > 0 && 
-                            JSON.stringify(selectedAnswers[0]) === JSON.stringify(option);
-    
+
+    const isOptionSelected =
+      selectedAnswers.length > 0 &&
+      JSON.stringify(selectedAnswers[0]) === JSON.stringify(option);
+
     if (isOptionSelected) {
-      updatedAnswers = [[]]; 
+      updatedAnswers = [[]];
     } else {
       updatedAnswers = [option];
     }
-  
+
     setSelectedAnswers(updatedAnswers);
     sendUserResponse(updatedAnswers);
   };
@@ -118,7 +186,6 @@ const QuestionComponent: React.FC = () => {
         response?.data?.updatedAnswer ?? structuredClone(newSelectedAnswers);
       const status = response.data.updatedAnswer.questionStatus;
 
-
       dispatch(
         updateUserResponse({
           questionId: currentQuestion.questionId,
@@ -133,7 +200,6 @@ const QuestionComponent: React.FC = () => {
       );
     }
   };
-
 
   return (
     <div className="flex min-w-screen">
@@ -175,7 +241,8 @@ const QuestionComponent: React.FC = () => {
                             key={idx}
                             className={`inline-flex items-center gap-4 py-2 px-3 border rounded-md min-w-max cursor-pointer whitespace-nowrap ${
                               selectedAnswers.length > 0 &&
-                              JSON.stringify(selectedAnswers[0]) === JSON.stringify(option)
+                              JSON.stringify(selectedAnswers[0]) ===
+                                JSON.stringify(option)
                                 ? "bg-black text-white"
                                 : "bg-white border-gray-300"
                             }`}

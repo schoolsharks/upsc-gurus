@@ -1,6 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
-import { fetchQuestions, fetchSectionalTestQuestions } from "../actions/questionActions";
+import {
+  fetchQuestions,
+  fetchSectionalTestQuestions,
+} from "../actions/questionActions";
 
 // Question interface
 interface Question {
@@ -17,9 +20,9 @@ interface Question {
 }
 
 // QuestionSet interface
-interface QuestionSet {
-  setName: string;
-  setStatus: string;
+export interface QuestionSet {
+  setName?: string;
+  setStatus?: string;
   timeLimit: number;
   timeRemaining: number;
   timeSpent: number;
@@ -51,27 +54,31 @@ const questionSlice = createSlice({
     setQuestionSets: (state, action: PayloadAction<QuestionSet[]>) => {
       state.questionSets = action.payload;
     },
-    updateTimeRemaining:(state,action)=>{
-      if(state.questionSets && state.questionSets[0]){
-        state.questionSets[0].timeRemaining=state.questionSets[0].timeRemaining-action.payload
+    updateTimeRemaining: (state, action) => {
+      if (state.questionSets && state.questionSets.timeRemaining) {
+        state.questionSets.timeRemaining =
+          state.questionSets.timeRemaining - action.payload;
       }
     },
-    markQuestion:(state,action)=>{
-      state.questions=state.questions.map((q)=>{
-        if(q.questionId===action.payload.questionId){
-          return({
+    markQuestion: (state, action) => {
+      state.questions = state.questions.map((q) => {
+        if (q.questionId === action.payload.questionId) {
+          return {
             ...q,
-            questionStatus:action.payload.questionStatus
-          })
+            questionStatus: action.payload.questionStatus,
+          };
+        } else {
+          return { ...q };
         }
-        else{
-          return({...q})
-        }
-      })
+      });
     },
     updateUserResponse: (
       state,
-      action: PayloadAction<{questionId:string,userResponse:string[][],questionStatus:string}>
+      action: PayloadAction<{
+        questionId: string;
+        userResponse: string[][];
+        questionStatus: string;
+      }>
     ) => {
       const question = state.questions.find(
         (item) => item.questionId === action.payload.questionId
@@ -94,7 +101,9 @@ const questionSlice = createSlice({
           state.questionSets = action.payload;
 
           // Flatten the question details for easy access
-          console.log(action.payload.flatMap((set)=>console.log(set.questionDetails)))
+          console.log(
+            action.payload.flatMap((set) => console.log(set.questionDetails))
+          );
 
           state.questions = action.payload.flatMap(
             (set) =>
@@ -113,8 +122,7 @@ const questionSlice = createSlice({
           (action.payload as string) || "Failed to fetch questions.";
       })
 
-
-      // active sectional test questions 
+      // active sectional test questions
       .addCase(fetchSectionalTestQuestions.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -126,7 +134,9 @@ const questionSlice = createSlice({
           state.questionSets = action.payload;
 
           // Flatten the question details for easy access
-          console.log(action.payload.flatMap((set)=>console.log(set.questionDetails)))
+          console.log(
+            action.payload.flatMap((set) => console.log(set.questionDetails))
+          );
 
           state.questions = action.payload.flatMap(
             (set) =>
@@ -155,7 +165,13 @@ export const selectIsLoading = (state: RootState) => state.question.isLoading;
 export const selectError = (state: RootState) => state.question.error;
 
 // Export actions
-export const { setQuestionSets, setQuestions ,updateUserResponse,updateTimeRemaining,markQuestion} = questionSlice.actions;
+export const {
+  setQuestionSets,
+  setQuestions,
+  updateUserResponse,
+  updateTimeRemaining,
+  markQuestion,
+} = questionSlice.actions;
 
 // Export reducer
 export default questionSlice.reducer;

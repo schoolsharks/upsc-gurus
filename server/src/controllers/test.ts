@@ -800,7 +800,8 @@ const startQuestionTime = async (
   next: NextFunction
 ) => {
   try {
-    const { testId, questionId } = req.query;
+    const { testId, questionId } = req.body;
+    console.log("startQuestionTime",testId,questionId);
     const userId: string = req.user?.id;
 
     if (!testId) {
@@ -862,7 +863,7 @@ const endQuestionTime = async (
   next: NextFunction
 ) => {
   try {
-    const { testId, questionId } = req.query;
+    const { testId, questionId } = req.body;
     const userId: string = req.user?.id;
 
     if (!testId) {
@@ -928,7 +929,7 @@ const startTestTime = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { testId } = req.query;
+  const { testId } = req.body;
   const userId: string = req.user?.id;
 
 
@@ -963,7 +964,7 @@ const endTestTime = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { testId } = req.query;
+  const { testId } = req.body;
   const userId: string = req.user?.id;
 
 

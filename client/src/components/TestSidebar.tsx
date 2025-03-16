@@ -1,7 +1,9 @@
 import { Box, Stack, Chip } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Question } from "../types/QuestionType";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { selectQuestionSets, updateTimeRemaining } from "../redux/reducers/questionReducer";
 
 interface TestSidebarProps {
   questions: Question[];
@@ -16,11 +18,43 @@ const sidebarBottom = [
 
 const TestSidebar: React.FC<TestSidebarProps> = ({ questions }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const questionSets = useSelector(selectQuestionSets);
+  console.log("questionSets",questionSets);
+  const timeRemaining = questionSets?.timeRemaining;
+  console.log("timeRemaining",timeRemaining); 
+  const [timeui, setTimeui] = useState(false);
+  useEffect(() => {
+    if (timeRemaining > 0) {
+      setTimeui(true);
+    }
+  }, [timeRemaining]);
+  useEffect(() => {
+  if (timeRemaining <= 0) return;
 
+  const timer = setInterval(() => {
+    console.log("Dispatching time update...");
+    dispatch(updateTimeRemaining(1)); 
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, [timeRemaining, dispatch]);
+
+
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(
+      2,
+      "0"
+    )}`;
+  };
   return (
     <div className="flex flex-col bg-[#F8F8F8] border border-[#ccc] h-screen items-center pt-4">
       <div className="flex flex-col gap-2 font-semibold mb-8">
         <div className="tracking-wider">TIME LEFT</div>
+        <div>{formatTime(timeRemaining)}</div>
       </div>
       <div className="flex gap-2 text-[1.25rem]">
         <span>Questions: {questions.length}</span>|
