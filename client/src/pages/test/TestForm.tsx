@@ -16,7 +16,7 @@ const TestForm: React.FC = () => {
   const [lastName, setLastName] = useState<string>("");
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
-  const [mode, setMode] = useState<"test" | "learn">("test"); // Track selected mode
+  const [mode, setMode] = useState<"test" | "learn">("test");
 
   const { testTemplateId } = useParams();
 

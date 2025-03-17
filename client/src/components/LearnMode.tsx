@@ -25,7 +25,7 @@ interface QuestionSet {
   questionDetails: Question[];
 }
 
-const QuestionComponent: React.FC = () => {
+const LearnMode: React.FC = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const queryParams = new URLSearchParams(location.search);
@@ -36,19 +36,21 @@ const QuestionComponent: React.FC = () => {
   const currentQuestion = questions[index];
   const [prevIndex, setPrevIndex] = useState<number | null>(null);
   const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 1024);
-   const questionSets = useSelector(selectQuestionSets);
-    const timeRemaining = questionSets?.timeRemaining;
+  const questionSets = useSelector(selectQuestionSets);
+  const timeRemaining = questionSets?.[0]?.timeRemaining;
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
+  const [correctAnswer, setCorrectAnswer] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-    }, [timeRemaining]);
-    useEffect(() => {
+  useEffect(() => {}, [timeRemaining]);
+  useEffect(() => {
     if (timeRemaining <= 0) return;
-  
+
     const timer = setInterval(() => {
       console.log("Dispatching time update...");
-      dispatch(updateTimeRemaining(1)); 
+      dispatch(updateTimeRemaining(1));
     }, 1000);
-  
+
     return () => clearInterval(timer);
   }, [timeRemaining, dispatch]);
 
@@ -69,7 +71,7 @@ const QuestionComponent: React.FC = () => {
         setShowSidebar(true); // Always show sidebar on lg screens and above
       }
     };
-  
+
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -126,41 +128,38 @@ const QuestionComponent: React.FC = () => {
       console.error("Error ending question timer:", error);
     }
   };
-  
+
   // Effect for question timers
   useEffect(() => {
     if (!currentQuestion || !questions || !questions[index]) return;
-    if (currentQuestion && index !== prevIndex&&testId) {
+    if (currentQuestion && index !== prevIndex && testId) {
       startQuestionTimer(testId, currentQuestion.questionId, index);
     }
 
     if (prevIndex !== null && questions[prevIndex]) {
-      endQuestionTimer(
-        testId,
-        questions[prevIndex].questionId
-      );
+      endQuestionTimer(testId, questions[prevIndex].questionId);
     }
     setPrevIndex(index);
-  }, [index, testId,questions]);
+  }, [index, testId, questions]);
 
   // Effect for set timers
   useEffect(() => {
     if (!testId || questions.length === 0) return;
-  
+
     startSetTimer(testId);
-  
+
     const handleBeforeUnload = () => {
       endSetTimer(testId);
     };
-  
+
     window.addEventListener("beforeunload", handleBeforeUnload);
-  
+
     return () => {
       endSetTimer(testId);
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [testId, questions.length]); 
-  
+  }, [testId, questions.length]);
+
   //fetch questions
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -186,7 +185,6 @@ const QuestionComponent: React.FC = () => {
     fetchQuestions();
   }, [testId]);
 
-  
   const handleSelectAnswer = (option: string[]) => {
     let updatedAnswers: string[][] = [];
 
@@ -210,17 +208,20 @@ const QuestionComponent: React.FC = () => {
     if (!currentQuestion?.questionId || !testId) return;
 
     try {
+      setIsSubmitting(true); // Set loading state to true before API call
+
       const userResponse = {
         questionId: currentQuestion.questionId,
         userAnswer: newSelectedAnswers,
         testId,
       };
-      console.log(userResponse);
       const response = await userApi.put(
         "/test/updateQuestionResponse",
         userResponse
       );
       console.log("response", response);
+      setIsAnswerCorrect(response?.data.updatedAnswer.isCorrect);
+      setCorrectAnswer(response?.data.updatedAnswer.correctAnswer[0][0]);
       const updatedResponse =
         response?.data?.updatedAnswer ?? structuredClone(newSelectedAnswers);
       const status = response.data.updatedAnswer.questionStatus;
@@ -232,7 +233,10 @@ const QuestionComponent: React.FC = () => {
           questionStatus: status,
         })
       );
+
+      setIsSubmitting(false); // Set loading state to false after API response
     } catch (error: any) {
+      setIsSubmitting(false); // Also set loading state to false on error
       console.error(
         "Error sending response:",
         error?.response?.data || error.message
@@ -277,21 +281,36 @@ const QuestionComponent: React.FC = () => {
                   <div className="options-section flex flex-col gap-2 justify-center text-[0.9rem] sm:text-[1rem]">
                     {currentQuestion.optionType === "singleCorrectMCQ" &&
                       currentQuestion.options.map((option, idx) => {
-                        const optionLetter = String.fromCharCode(65 + idx);
                         return (
                           <button
                             key={idx}
-                            className={`inline-flex items-center gap-4 py-2 px-3 border rounded-md min-w-max cursor-pointer whitespace-nowrap ${
-                              selectedAnswers.length > 0 &&
-                              JSON.stringify(selectedAnswers[0]) ===
-                                JSON.stringify(option)
-                                ? "bg-black text-white"
-                                : "bg-white border-gray-300"
-                            }`}
-                            onClick={() => handleSelectAnswer(option)}
+                            className={`inline-flex items-center gap-4 py-2 px-3 border rounded-md cursor-pointer whitespace-nowrap transition-colors duration-200
+                              ${
+                                isSubmitting &&
+                                selectedAnswers.length > 0 &&
+                                JSON.stringify(selectedAnswers[0]) ===
+                                  JSON.stringify(option)
+                                  ? "" // Loading state
+                                  : selectedAnswers.length > 0 &&
+                                    JSON.stringify(selectedAnswers[0]) ===
+                                      JSON.stringify(option)
+                                  ? isAnswerCorrect
+                                    ? "bg-green-500 text-white border-green-600"
+                                    : "bg-red-500 text-white border-red-600" 
+                                  : selectedAnswers.length > 0 &&
+                                    !isAnswerCorrect &&
+                                    JSON.stringify(correctAnswer) ===
+                                      JSON.stringify(option[0])
+                                  ? "bg-green-500 text-white border-green-600" 
+                                  : "bg-white border-gray-300"
+                              }`}
+                            onClick={() =>
+                              !isSubmitting && handleSelectAnswer(option)
+                            }
+                            disabled={isSubmitting}
                           >
                             <span className="w-8 h-8 flex items-center justify-center rounded-full border">
-                              {optionLetter}
+                              {String.fromCharCode(65 + idx)}
                             </span>
                             {option}
                           </button>
@@ -305,10 +324,10 @@ const QuestionComponent: React.FC = () => {
         </div>
       </div>
       <div className="w-[280px] sm:w-[350px] absolute top-16 md:top-20 right-0 z-10 lg:relative lg:top-0">
-        {showSidebar && <TestSidebar questions={questions} time={time}/>}
+        {showSidebar && <TestSidebar questions={questions} time={time} />}
       </div>
     </div>
   );
 };
 
-export default QuestionComponent;
+export default LearnMode;

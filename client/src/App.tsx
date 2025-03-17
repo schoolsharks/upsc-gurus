@@ -11,6 +11,7 @@ import Home from "./pages/home/Home";
 import TestForm from "./pages/test/TestForm";
 import TestTakerInfo from "./pages/test/TestTakerInfo";
 import QuestionComponent from "./components/Question";
+import LearnMode from "./components/LearnMode";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -54,6 +55,10 @@ function App() {
       <Route
         path="/test/question/:testId"
         element={<ProtectedRoute element={<QuestionComponent />} />}
+      />
+       <Route
+        path="learn/test/question/:testId"
+        element={<ProtectedRoute element={<LearnMode />} />}
       />
     </Routes>
   );
