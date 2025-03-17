@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useParams } from "react-router-dom";
 import {
-  selectQuestionSets,
+  // selectQuestionSets,
   setQuestions,
-  setQuestionSets,
+  // setQuestionSets,
   updateTimeRemaining,
   updateUserResponse,
 } from "../redux/reducers/questionReducer";
@@ -12,22 +12,24 @@ import userApi from "../api/userApi";
 import TestHeader from "./TestHeader";
 import TestSidebar from "./TestSidebar";
 import { selectQuestions } from "../redux/reducers/questionReducer";
-import { Question } from "../types/QuestionType";
+// import { Question } from "../types/QuestionType";
 import "../styles/QuestionStyles.css";
 import DOMPurify from "dompurify";
+import {QuestionList } from "../redux/actions/questionActions";
+import { AppDispatch, RootState } from "../redux/store";
 
-interface QuestionSet {
-  setName?: string;
-  setStatus?: string;
-  timeLimit: number;
-  timeRemaining: number;
-  timeSpent: number;
-  questionDetails: Question[];
-}
+// interface QuestionSet {
+//   setName?: string;
+//   setStatus?: string;
+//   timeLimit: number;
+//   timeRemaining: number;
+//   timeSpent: number;
+//   questionDetails: Question[];
+// }
 
 const LearnMode: React.FC = () => {
   const location = useLocation();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const queryParams = new URLSearchParams(location.search);
   const { testId } = useParams<{ testId: string }>();
   const questions = useSelector(selectQuestions);
@@ -36,6 +38,10 @@ const LearnMode: React.FC = () => {
   const currentQuestion = questions[index];
   const [prevIndex, setPrevIndex] = useState<number | null>(null);
   const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 1024);
+  const timeRemaining = useSelector(
+    (state: RootState) => state.question.timeRemaining
+  );
+  // const timeRemaining = questionSets?.timeRemaining;
   const questionSets = useSelector(selectQuestionSets);
   const timeRemaining = questionSets?.[0]?.timeRemaining;
   const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
@@ -44,7 +50,7 @@ const LearnMode: React.FC = () => {
 
   useEffect(() => {}, [timeRemaining]);
   useEffect(() => {
-    if (timeRemaining <= 0) return;
+    if (timeRemaining && timeRemaining <= 0) return;
 
     const timer = setInterval(() => {
       console.log("Dispatching time update...");
@@ -63,7 +69,7 @@ const LearnMode: React.FC = () => {
     )}`;
   };
 
-  const time = formatTime(timeRemaining);
+  const time = formatTime(timeRemaining ?? 0);
 
   useEffect(() => {
     const handleResize = () => {
@@ -137,7 +143,10 @@ const LearnMode: React.FC = () => {
     }
 
     if (prevIndex !== null && questions[prevIndex]) {
-      endQuestionTimer(testId, questions[prevIndex].questionId);
+      endQuestionTimer(
+        testId,
+        questions[prevIndex].questionId
+      );
     }
     setPrevIndex(index);
   }, [index, testId, questions]);
@@ -162,19 +171,22 @@ const LearnMode: React.FC = () => {
 
   //fetch questions
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const getQuestions = async () => {
       try {
-        const response = await userApi.get<{ questionsList: QuestionSet[] }>(
+        const response = await userApi.get<{ questionsList: QuestionList }>(
           "/test/getQuestions",
           {
             params: { testId },
           }
         );
+        
 
         dispatch(
           setQuestions(response.data.questionsList?.questionDetails ?? [])
         );
-        dispatch(setQuestionSets(response.data.questionsList));
+        dispatch(
+          updateTimeRemaining(response.data.questionsList.timeRemaining)
+        );
       } catch (error: any) {
         console.log(
           error.response?.data?.message || "Failed to fetch user information."
@@ -182,7 +194,7 @@ const LearnMode: React.FC = () => {
       }
     };
 
-    fetchQuestions();
+    getQuestions();
   }, [testId]);
 
   const handleSelectAnswer = (option: string[]) => {

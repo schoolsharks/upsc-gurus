@@ -6,10 +6,10 @@ import {
 } from "react-icons/fa";
 import "../styles/HeaderStyles.css";
 
-import { selectQuestionSets, updateTimeRemaining } from "../redux/reducers/questionReducer";
+import { updateTimeRemaining } from "../redux/reducers/questionReducer";
 import { useDispatch, useSelector } from "react-redux";
 import { AddCircleOutlineOutlined, EqualizerOutlined, RemoveCircleOutline } from "@mui/icons-material";
-import { AppDispatch } from "../redux/store";
+import { AppDispatch, RootState } from "../redux/store";
 
 interface HeaderProps {
   onContinue?: () => void;
@@ -40,8 +40,7 @@ const Header: React.FC<HeaderProps> = ({
   showTimer=true,
 }) => {
   // const questions = useSelector(selectQuestions);
-  const questionSets = useSelector(selectQuestionSets);
-  const timeRemaining = questionSets[0]?.timeRemaining;
+  const timeRemaining = useSelector((state:RootState)=>state.question.timeRemaining);
 
 
 
@@ -50,13 +49,13 @@ const Header: React.FC<HeaderProps> = ({
   const [timeui, setTimeui] = useState(false);
 
   useEffect(() => {
-    if (timeRemaining > 0 && showTimer) {
+    if (timeRemaining && timeRemaining > 0 && showTimer) {
       setTimeui(true);
     }
   }, [timeRemaining, showTimer]);
 
   useEffect(() => {
-    if (timeRemaining <= 0 || !showTimer) return;
+    if (timeRemaining && timeRemaining <= 0 || !showTimer) return;
   
     const timer = setInterval(() => {
       dispatch(updateTimeRemaining(1)); 
@@ -195,7 +194,7 @@ const Header: React.FC<HeaderProps> = ({
                     color: "#000",
                   }}
                 >
-                  {formatTime(timeRemaining)}
+                  {formatTime(timeRemaining ?? 0)}
                 </span>
               )}
               <button
