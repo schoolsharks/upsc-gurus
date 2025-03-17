@@ -3,7 +3,8 @@ import { SectionEnum, DifficultyEnum } from "../types/enum";
 
 interface QuestionType extends Document {
   section: SectionEnum;
-  subTopicId: Schema.Types.ObjectId;
+  // subTopicId: Schema.Types.ObjectId;
+  topic:string;
   question: string;
   positioning: "split" | "center" | "left";
   options?: string[][];
@@ -24,10 +25,15 @@ interface QuestionType extends Document {
 
 const questionSchema = new Schema<QuestionType>(
   {
-    subTopicId: {
-      type: Schema.Types.ObjectId,
-      ref: "SubTopic",
-      required: true,
+    // subTopicId: {
+    //   type: Schema.Types.ObjectId,
+    //   ref: "SubTopic",
+    //   required: true,
+    // },
+    topic: {
+      type: "String",
+      // required: true,
+      default:"Other"
     },
     question: {
       type: String,

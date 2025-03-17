@@ -13,8 +13,7 @@ import {
   startTestTime,
   endTestTime,
 } from "../../controllers/test";
-import { RouterTwoTone } from "@mui/icons-material";
-import { testScore } from "../../controllers/analysis";
+import { getTestAnalytics } from "../../controllers/analysis";
 
 const router = express.Router();
 
@@ -30,7 +29,10 @@ router.route("/lockTest").put(authHandler, asyncHandler(lockTest));
 router.route("/markForReview").put(authHandler, asyncHandler(handleMark));
 router.route("/startQuestionTime").put(authHandler, asyncHandler(startQuestionTime));
 router.route("/endQuestionTime").put(authHandler, asyncHandler(endQuestionTime));
-router.route("/getTestScore").get(authHandler, asyncHandler(testScore));
+
+// router.route("/getTestScore").get(authHandler, asyncHandler(testScore));
+router.route("/getTestScore").get(authHandler, asyncHandler(getTestAnalytics));
+
 
 router.route("/startTestTime").put(authHandler, asyncHandler(startTestTime));
 router.route("/endTestTime").put(authHandler, asyncHandler(endTestTime));
