@@ -4,6 +4,8 @@ import { markQuestion } from "../redux/reducers/questionReducer";
 import { useDispatch } from "react-redux";
 import { Button, Dialog, Stack, Typography, useTheme } from "@mui/material";
 import { useState } from "react";
+import { MdMenu } from "react-icons/md";
+import { RxCross1 } from "react-icons/rx";
 
 interface TestBottomProps {
   currentIndex: number;
@@ -58,10 +60,10 @@ const TestBottom: React.FC<TestBottomProps> = ({
   };
 
   return (
-      <div className="flex md:hidden items-center gap-3 mb-5 -mt-20">
-       <div className="flex flex-col gap-2 items-center w-full">
-       <div className="flex items-center gap-4 font-medium">
-          <button
+    <div className="flex justify-between items-center md:hidden mb-5 -mt-20">
+      <div className="flex items-center gap-3 w-full">
+        <div className="flex md:hidden items-center gap-4 font-medium flex-col w-full">
+          <div className="flex gap-2"><button
             onClick={() => handleNavigation("prev")}
             disabled={currentIndex === 0}
             className="w-[85px] px-2 py-3 bg-[#D1D1D1] text-black rounded-lg disabled:hidden cursor-pointer"
@@ -80,16 +82,14 @@ const TestBottom: React.FC<TestBottomProps> = ({
             className="w-[85px] px-2 py-3 bg-[#2E2E2E] text-white rounded-lg disabled:hidden cursor-pointer"
           >
             Next
-          </button>
-         
-        </div>
-        <button
+          </button></div>
+          <button
             onClick={() => setSubmitDialogOpen(true)}
             className="px-2 py-3 w-[200px] bg-[#039005] text-white rounded-lg cursor-pointer"
           >
             Submit Test
           </button>
-       </div>
+        </div>
 
         <Dialog
           open={submitDialogOpen}
@@ -131,6 +131,7 @@ const TestBottom: React.FC<TestBottomProps> = ({
           </Stack>
         </Dialog>
       </div>
+    </div>
   );
 };
 
