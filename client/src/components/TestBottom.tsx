@@ -4,25 +4,17 @@ import { markQuestion } from "../redux/reducers/questionReducer";
 import { useDispatch } from "react-redux";
 import { Button, Dialog, Stack, Typography, useTheme } from "@mui/material";
 import { useState } from "react";
-import { MdMenu } from "react-icons/md";
-import { RxCross1 } from "react-icons/rx";
 
-interface TestHeaderProps {
+interface TestBottomProps {
   currentIndex: number;
   totalQuestions: number;
   questionId: string;
-  setShowSidebar: React.Dispatch<React.SetStateAction<boolean>>;
-  showSidebar: boolean;
-  time: string;
 }
 
-const TestHeader: React.FC<TestHeaderProps> = ({
+const TestBottom: React.FC<TestBottomProps> = ({
   currentIndex,
   totalQuestions,
   questionId,
-  setShowSidebar,
-  showSidebar,
-  time,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -66,24 +58,9 @@ const TestHeader: React.FC<TestHeaderProps> = ({
   };
 
   return (
-    <div className="flex justify-between items-center p-4 px-8  shadow-sm h-16 md:h-20">
-      {/* Logo Section */}
-      <div className="flex items-center -mr-10">
-        <button onClick={() => navigate("/")} className="focus:outline-none">
-          <img
-            src="/images/logo.png"
-            alt="UPSC Gurus Logo"
-            className="logo mr-3 cursor-pointer"
-          />
-        </button>
-      </div>
-
-      {/* Time  */}
-      <div className="md:hidden bg-[#74C0FF] px-3 py-1 rounded-lg">{time}</div>
-
-      {/* Navigation Controls */}
-      <div className="flex items-center gap-3">
-        <div className="hidden md:flex items-center gap-4 font-medium">
+      <div className="flex md:hidden items-center gap-3 mb-5 -mt-20">
+       <div className="flex flex-col gap-2 items-center w-full">
+       <div className="flex items-center gap-4 font-medium">
           <button
             onClick={() => handleNavigation("prev")}
             disabled={currentIndex === 0}
@@ -104,13 +81,15 @@ const TestHeader: React.FC<TestHeaderProps> = ({
           >
             Next
           </button>
-          <button
+         
+        </div>
+        <button
             onClick={() => setSubmitDialogOpen(true)}
             className="px-2 py-3 w-[200px] bg-[#039005] text-white rounded-lg cursor-pointer"
           >
             Submit Test
           </button>
-        </div>
+       </div>
 
         <Dialog
           open={submitDialogOpen}
@@ -151,21 +130,8 @@ const TestHeader: React.FC<TestHeaderProps> = ({
             </Stack>
           </Stack>
         </Dialog>
-
-        {showSidebar ? (
-          <RxCross1
-            className="text-2xl lg:hidden cursor-pointer"
-            onClick={() => setShowSidebar(false)}
-          />
-        ) : (
-          <MdMenu
-            className="text-3xl lg:hidden cursor-pointer"
-            onClick={() => setShowSidebar(true)}
-          />
-        )}
       </div>
-    </div>
   );
 };
 
-export default TestHeader;
+export default TestBottom;

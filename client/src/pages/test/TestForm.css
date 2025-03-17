@@ -1,10 +1,8 @@
 .form-container {
     max-width: 1400px;
-    min-height: 812px;
     height: auto;
     background-color: white;
     position: relative;
-    left: 44px;
     gap: 44px;
   }
   

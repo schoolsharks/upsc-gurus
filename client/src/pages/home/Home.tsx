@@ -81,11 +81,13 @@ const Home: React.FC = () => {
         alignItems={"center"}
         padding={"16px 44px"}
       >
-        <img
-          src="/images/logo.png"
-          alt="Career Geek Logo"
-          style={{ width: "170px" }}
-        />
+         <button onClick={() => navigate("/")} className="focus:outline-none">
+          <img
+            src="/images/logo.png"
+            alt="UPSC Gurus Logo"
+            className="logo cursor-pointer"
+          />
+        </button>
         <Button
           endIcon={<MdLogout />}
           onClick={() => setLogoutDialogOpen(true)}
@@ -119,6 +121,7 @@ const Home: React.FC = () => {
           <Typography
             sx={{ fontSize: "1.25rem", fontWeight: "600" }}
             variant="h5"
+            className="text-center md:text-left"
           >
             All Tests
           </Typography>
@@ -128,6 +131,9 @@ const Home: React.FC = () => {
               gap={"1rem"}
               flexWrap={"wrap"}
               marginTop={"14px"}
+              sx={{
+                justifyContent: { xs: "center", sm: "start" },
+              }}
             >
               {inProgressTests?.map((test: any, index) => (
                 <Card key={index} sx={cardStyles}>
@@ -270,18 +276,26 @@ const Home: React.FC = () => {
         </section> */}
 
         {/* Completed Tests */}
-        <section>
+        <section className="mb-8">
           <Typography
             sx={{
               marginBottom: "10px",
               fontSize: "1.25rem",
               fontWeight: "600",
             }}
+            className="text-center md:text-left"
           >
             Previous Attempts
           </Typography>
           {completedTests.length ? (
-            <Stack direction={"row"} gap={"1rem"} flexWrap={"wrap"}>
+            <Stack
+              direction={"row"}
+              gap={"1rem"}
+              flexWrap={"wrap"}
+              sx={{
+                justifyContent: { xs: "center", sm: "start" },
+              }}
+            >
               {completedTests.map((test, index) => (
                 <Card
                   key={index}
@@ -289,7 +303,7 @@ const Home: React.FC = () => {
                     border: "1px solid #00000033",
                     borderRadius: "20px",
                     // width: "100%",
-                    minWidth: "357px",
+                    minWidth: "330px",
                     maxWidth: "425px",
                     flex: "1",
                     padding: "20px",

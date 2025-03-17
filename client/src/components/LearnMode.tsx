@@ -15,7 +15,6 @@ import { selectQuestions } from "../redux/reducers/questionReducer";
 import { Question } from "../types/QuestionType";
 import "../styles/QuestionStyles.css";
 import DOMPurify from "dompurify";
-import TestBottom from "./TestBottom";
 
 interface QuestionSet {
   setName?: string;
@@ -242,7 +241,7 @@ const QuestionComponent: React.FC = () => {
   };
 
   return (
-    <div className="flex min-w-screen flex-col md:flex-row">
+    <div className="flex min-w-screen">
       <div className="flex-1">
         <TestHeader
           currentIndex={index}
@@ -308,9 +307,6 @@ const QuestionComponent: React.FC = () => {
       <div className="w-[280px] sm:w-[350px] absolute top-16 md:top-20 right-0 z-10 lg:relative lg:top-0">
         {showSidebar && <TestSidebar questions={questions} time={time}/>}
       </div>
-      <TestBottom  currentIndex={index}
-          totalQuestions={questions.length}
-          questionId={currentQuestion?.questionId}/>
     </div>
   );
 };

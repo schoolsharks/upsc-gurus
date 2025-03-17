@@ -99,7 +99,7 @@ const Login = () => {
 
   return (
     <div className="mt-12">
-    <div><img src="/public/images/logo.png" alt="" className="mx-auto w-[200px]"/></div>
+    <div><img src="/public/images/logo.png" alt="" className="mx-auto  w-[150px] sm:w-[200px]"/></div>
     <Container>
       <Box
         component="form"
