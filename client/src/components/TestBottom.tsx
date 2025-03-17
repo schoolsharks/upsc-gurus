@@ -4,8 +4,8 @@ import { markQuestion } from "../redux/reducers/questionReducer";
 import { useDispatch } from "react-redux";
 import { Button, Dialog, Stack, Typography, useTheme } from "@mui/material";
 import { useState } from "react";
-import { MdMenu } from "react-icons/md";
-import { RxCross1 } from "react-icons/rx";
+// import { MdMenu } from "react-icons/md";
+// import { RxCross1 } from "react-icons/rx";
 
 interface TestBottomProps {
   currentIndex: number;

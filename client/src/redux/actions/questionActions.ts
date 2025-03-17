@@ -58,13 +58,22 @@ export const fetchSectionalTestQuestions = createAsyncThunk(
   }
 );
 
+
+export interface QuestionList{
+  timeLimit	:number;
+  timeSpent	:number;
+  timeRemaining : number;
+  questionDetails	:Question[]; 
+}
+
 export const fetchQuestions = createAsyncThunk(
     "question/fetchQuestions",
-    async (_, thunkAPI) => {
+    async ({ testId }: { testId: string }, thunkAPI) => {
       console.log("Fetching questions...");
       try {
-        const response = await userApi.get<{ questionsList: QuestionSet[] }>(
-          "/test/getSecQuestion"
+        const response = await userApi.get<{ questionsList: QuestionList }>(
+          "/test/getSecQuestion",
+          { params: { testId } }
         );
         console.log("Successful API response:", response.data);
         return response.data.questionsList;

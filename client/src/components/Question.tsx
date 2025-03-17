@@ -2,9 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useParams } from "react-router-dom";
 import {
-  selectQuestionSets,
+  // selectQuestionSets,
   setQuestions,
-  setQuestionSets,
   updateTimeRemaining,
   updateUserResponse,
 } from "../redux/reducers/questionReducer";
@@ -12,19 +11,21 @@ import userApi from "../api/userApi";
 import TestHeader from "./TestHeader";
 import TestSidebar from "./TestSidebar";
 import { selectQuestions } from "../redux/reducers/questionReducer";
-import { Question } from "../types/QuestionType";
+// import { Question } from "../types/QuestionType";
 import "../styles/QuestionStyles.css";
 import DOMPurify from "dompurify";
 import TestBottom from "./TestBottom";
+import { QuestionList } from "../redux/actions/questionActions";
+import { RootState } from "../redux/store";
 
-interface QuestionSet {
-  setName?: string;
-  setStatus?: string;
-  timeLimit: number;
-  timeRemaining: number;
-  timeSpent: number;
-  questionDetails: Question[];
-}
+// interface QuestionSet {
+//   setName?: string;
+//   setStatus?: string;
+//   timeLimit: number;
+//   timeRemaining: number;
+//   timeSpent: number;
+//   questionDetails: Question[];
+// }
 
 const QuestionComponent: React.FC = () => {
   const location = useLocation();
@@ -37,19 +38,20 @@ const QuestionComponent: React.FC = () => {
   const currentQuestion = questions[index];
   const [prevIndex, setPrevIndex] = useState<number | null>(null);
   const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 1024);
-   const questionSets = useSelector(selectQuestionSets);
-    const timeRemaining = questionSets?.timeRemaining;
 
-    useEffect(() => {
-    }, [timeRemaining]);
-    useEffect(() => {
-    if (timeRemaining <= 0) return;
-  
+  const timeRemaining = useSelector(
+    (state: RootState) => state.question.timeRemaining
+  );
+
+  useEffect(() => {}, [timeRemaining]);
+  useEffect(() => {
+    if (timeRemaining && timeRemaining <= 0) return;
+
     const timer = setInterval(() => {
       console.log("Dispatching time update...");
-      dispatch(updateTimeRemaining(1)); 
+      dispatch(updateTimeRemaining(1));
     }, 1000);
-  
+
     return () => clearInterval(timer);
   }, [timeRemaining, dispatch]);
 
@@ -62,7 +64,7 @@ const QuestionComponent: React.FC = () => {
     )}`;
   };
 
-  const time = formatTime(timeRemaining);
+  const time = formatTime(timeRemaining ?? 0);
 
   useEffect(() => {
     const handleResize = () => {
@@ -70,7 +72,7 @@ const QuestionComponent: React.FC = () => {
         setShowSidebar(true); // Always show sidebar on lg screens and above
       }
     };
-  
+
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -127,46 +129,43 @@ const QuestionComponent: React.FC = () => {
       console.error("Error ending question timer:", error);
     }
   };
-  
+
   // Effect for question timers
   useEffect(() => {
     if (!currentQuestion || !questions || !questions[index]) return;
-    if (currentQuestion && index !== prevIndex&&testId) {
+    if (currentQuestion && index !== prevIndex && testId) {
       startQuestionTimer(testId, currentQuestion.questionId, index);
     }
 
-    if (prevIndex !== null && questions[prevIndex]) {
-      endQuestionTimer(
-        testId,
-        questions[prevIndex].questionId
-      );
+    if (prevIndex !== null && questions[prevIndex] && testId) {
+      endQuestionTimer(testId, questions[prevIndex].questionId);
     }
     setPrevIndex(index);
-  }, [index, testId,questions]);
+  }, [index, testId, questions]);
 
   // Effect for set timers
   useEffect(() => {
     if (!testId || questions.length === 0) return;
-  
+
     startSetTimer(testId);
-  
+
     const handleBeforeUnload = () => {
       endSetTimer(testId);
     };
-  
+
     window.addEventListener("beforeunload", handleBeforeUnload);
-  
+
     return () => {
       endSetTimer(testId);
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [testId, questions.length]); 
-  
+  }, [testId, questions.length]);
+
   //fetch questions
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await userApi.get<{ questionsList: QuestionSet[] }>(
+        const response = await userApi.get<{ questionsList: QuestionList }>(
           "/test/getQuestions",
           {
             params: { testId },
@@ -176,7 +175,8 @@ const QuestionComponent: React.FC = () => {
         dispatch(
           setQuestions(response.data.questionsList?.questionDetails ?? [])
         );
-        dispatch(setQuestionSets(response.data.questionsList));
+        dispatch(updateTimeRemaining(response.data.questionsList.timeRemaining))
+        // dispatch(setQuestionSets(response.data.questionsList));
       } catch (error: any) {
         console.log(
           error.response?.data?.message || "Failed to fetch user information."
@@ -187,7 +187,6 @@ const QuestionComponent: React.FC = () => {
     fetchQuestions();
   }, [testId]);
 
-  
   const handleSelectAnswer = (option: string[]) => {
     let updatedAnswers: string[][] = [];
 
@@ -306,11 +305,13 @@ const QuestionComponent: React.FC = () => {
         </div>
       </div>
       <div className="w-[280px] sm:w-[350px] absolute top-16 md:top-20 right-0 z-10 lg:relative lg:top-0">
-        {showSidebar && <TestSidebar questions={questions} time={time}/>}
+        {showSidebar && <TestSidebar questions={questions} time={time} />}
       </div>
-      <TestBottom  currentIndex={index}
-          totalQuestions={questions.length}
-          questionId={currentQuestion?.questionId}/>
+      <TestBottom
+        currentIndex={index}
+        totalQuestions={questions.length}
+        questionId={currentQuestion?.questionId}
+      />
     </div>
   );
 };
