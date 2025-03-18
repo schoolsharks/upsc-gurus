@@ -830,7 +830,7 @@ const startQuestionTime = async (
       "answers.$[answer].questionStartTime": new Date()
     };
 
-    if (questionAnswer.questionStatus !== QuestionStatusEnum.MARKED) {
+    if (questionAnswer.questionStatus === QuestionStatusEnum.UNSEEN) {
       updateFields["answers.$[answer].questionStatus"] = QuestionStatusEnum.SEEN
     }
 

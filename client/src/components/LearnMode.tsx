@@ -253,6 +253,13 @@ const LearnMode: React.FC = () => {
     }
   };
 
+    useEffect(()=>{
+      if(currentQuestion?.userAnswer){
+        setSelectedAnswers(currentQuestion.userAnswer)
+        // setCorrectAnswer(currentQuestion.correctAnswer)
+      }
+    },[index])
+
   return (
     <div className="flex min-w-screen">
       <div className="flex-1">
