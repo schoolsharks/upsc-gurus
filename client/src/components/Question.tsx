@@ -240,6 +240,13 @@ const QuestionComponent: React.FC = () => {
     }
   };
 
+
+  useEffect(()=>{
+    if(currentQuestion?.userAnswer){
+      setSelectedAnswers(currentQuestion.userAnswer)
+    }
+  },[index,currentQuestion?.userAnswer])
+
   return (
     <div className="flex min-w-screen flex-col md:flex-row">
       <div className="flex-1">

@@ -78,15 +78,19 @@ export function checkIfAllEmpty(userAnswer: any[][]): boolean {
   return userAnswer.every((subArray) => subArray.length === 0);
 }
 
-
 async function checkSectionTestTimeLimit(
   userId: string,
   testId: mongoose.Types.ObjectId
 ) {
-  const test = await Test.findById(testId).select("testTimeLimit testTimeSpent testStatus");
+  const test = await Test.findById(testId).select(
+    "testTimeLimit testTimeSpent testStatus"
+  );
   if (test) {
     if (test.testTimeSpent > test.testTimeLimit) {
-      const lockAndUpdateSectionalTestStatus = lockAndUpdateTestScore(userId, testId);
+      const lockAndUpdateSectionalTestStatus = lockAndUpdateTestScore(
+        userId,
+        testId
+      );
       return true;
     }
   }
@@ -171,8 +175,6 @@ const userTestInfo = async (
                 testName: { $arrayElemAt: ["$testTemplates.testName", 0] },
                 completeDate: "$tests.updatedAt",
                 totalScore: "$tests.totalScore",
-                // verbalScore: "$tests.verbalScore",
-                // quantitativeScore: "$tests.quantitativeScore",
                 testTimeSpent: "$tests.testTimeSpent",
               },
               else: null,
@@ -229,12 +231,7 @@ const userTestInfo = async (
                   in: { $concatArrays: ["$$value", "$$this"] },
                 },
               },
-              completedAndInProgressTestIds: {
-                $concatArrays: [
-                  "$completedTest.testTemplateId",
-                  "$inProgressTest.testTemplateId",
-                ],
-              },
+              inProgressTestIds: "$inProgressTest.testTemplateId",
             },
             in: {
               $let: {
@@ -248,7 +245,7 @@ const userTestInfo = async (
                           in: "$$testTemplate._id",
                         },
                       },
-                      "$$completedAndInProgressTestIds",
+                      "$$inProgressTestIds",
                     ],
                   },
                 },
@@ -280,8 +277,6 @@ const userTestInfo = async (
     return next(new AppError("User not found", 404));
   }
 
-
-
   // Ensure tests arrays exist even if empty
   const result = {
     _id: user[0]._id,
@@ -308,56 +303,53 @@ const handleCreateTest = async (
 
   if (!testTemplateId) throw new AppError("Field not found", 400);
 
-  const usertestStatus = await User.aggregate([
-    {
-      $match: { _id: new mongoose.Types.ObjectId(userId) },
-    },
-    {
-      $unwind: {
-        path: "$testIds",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $project: {
-        _id: 1,
-        testId: "$testIds.testId",
-        testTemplateId: "$testIds.testTemplateId",
-        testIds: 1,
-      },
-    },
-  ]);
+  // const usertestStatus = await User.aggregate([
+  //   {
+  //     $match: { _id: new mongoose.Types.ObjectId(userId) },
+  //   },
+  //   {
+  //     $unwind: {
+  //       path: "$testIds",
+  //       preserveNullAndEmptyArrays: true,
+  //     },
+  //   },
+  //   {
+  //     $project: {
+  //       _id: 1,
+  //       testId: "$testIds.testId",
+  //       testTemplateId: "$testIds.testTemplateId",
+  //       testIds: 1,
+  //     },
+  //   },
+  // ]);
 
-  if (usertestStatus.length === 0) throw new AppError("DB error", 500);
+  // if (usertestStatus.length === 0) throw new AppError("DB error", 500);
 
-  if (usertestStatus[0].testIds) {
-    const isTestTemplateIdExist = usertestStatus.some((doc) =>
-      doc.testTemplateId.equals(testTemplateId)
-    );
-    if (isTestTemplateIdExist)
-      throw new AppError("Test has already been attempted", 410);
-  }
-
+  // if (usertestStatus[0].testIds) {
+  //   const isTestTemplateIdExist = usertestStatus.some((doc) =>
+  //     doc.testTemplateId.equals(testTemplateId)
+  //   );
+  //   if (isTestTemplateIdExist)
+  //     throw new AppError("Test has already been attempted", 410);
+  // }
 
   interface IQuestion {
     _id: string;
     correctAnswer: string[][];
   }
 
-  const testTemplate = await TestTemplate.findById(testTemplateId)
-    .populate<{ questionIds: IQuestion[] }>("questionIds");
+  const testTemplate = await TestTemplate.findById(testTemplateId).populate<{
+    questionIds: IQuestion[];
+  }>("questionIds");
 
   if (!testTemplate) {
     throw new AppError("Invalid testTemplateId", 404);
   }
 
-
   const questions: IQuestion[] = testTemplate.questionIds as IQuestion[];
 
   // Fetch all questions related to the test template
   // const questions = await Question.find().lean(); // Modify this if you filter by template ID
-
-
 
   if (!questions.length) {
     throw new AppError("No questions found for this test", 404);
@@ -562,7 +554,6 @@ const handleGetTestQuestions = async (
     //   },
     // ]);
 
-
     const testA = await Test.aggregate([
       {
         $match: {
@@ -614,7 +605,6 @@ const handleGetTestQuestions = async (
       },
     ]);
 
-
     if (!testA.length) {
       return next(new AppError("Test not found", 404));
     }
@@ -634,7 +624,7 @@ const updateQuestionResponse = async (
   next: NextFunction
 ) => {
   try {
-    console.log("updatequestion")
+    console.log("updatequestion");
     const { questionId, userAnswer, testId } = req.body;
     const userId: string = req.user?.id;
 
@@ -766,24 +756,25 @@ const lockTest = async (req: Request, res: Response, next: NextFunction) => {
                 as: "answer",
                 in: {
                   $cond: {
-                    if: { $eq: ["$$answer.isCorrect", true] }, then: 2,
+                    if: { $eq: ["$$answer.isCorrect", true] },
+                    then: 2,
                     else: {
                       $cond: {
-                        if: { $eq: ["$$answer.isCorrect", false] }, then: -0.6,
-                        else: 0
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                        if: { $eq: ["$$answer.isCorrect", false] },
+                        then: -0.6,
+                        else: 0,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     ],
     { new: true }
   );
-
 
   if (!lockedTest)
     throw new AppError("testId not found/ faile to lock test", 404);
@@ -801,7 +792,7 @@ const startQuestionTime = async (
 ) => {
   try {
     const { testId, questionId } = req.body;
-    console.log("startQuestionTime",testId,questionId);
+    console.log("startQuestionTime", testId, questionId);
     const userId: string = req.user?.id;
 
     if (!testId) {
@@ -827,31 +818,35 @@ const startQuestionTime = async (
 
     // updating question time by seting new Date()
     let updateFields: any = {
-      "answers.$[answer].questionStartTime": new Date()
+      "answers.$[answer].questionStartTime": new Date(),
     };
 
-    if (questionAnswer.questionStatus !== QuestionStatusEnum.MARKED) {
-      updateFields["answers.$[answer].questionStatus"] = QuestionStatusEnum.SEEN
+    if (questionAnswer.questionStatus === QuestionStatusEnum.UNSEEN) {
+      updateFields["answers.$[answer].questionStatus"] =
+        QuestionStatusEnum.SEEN;
     }
 
     const updatedQuestion = await Test.findByIdAndUpdate(
       new mongoose.Types.ObjectId(String(testId)),
       {
-        $set: updateFields
+        $set: updateFields,
       },
       {
         new: true,
         arrayFilters: [
-          { "answer.questionId": new mongoose.Types.ObjectId(String(questionId)) }
-        ]
+          {
+            "answer.questionId": new mongoose.Types.ObjectId(
+              String(questionId)
+            ),
+          },
+        ],
       }
-    )
+    );
 
     return res.status(200).json({
       message: "Question start time recorded successfully",
       data: updatedQuestion,
     });
-
   } catch (error) {
     next(error);
   }
@@ -888,11 +883,16 @@ const endQuestionTime = async (
 
     const questionAnswer = test.answers[0];
 
-    const { questionStartTime, timeTaken } = questionAnswer ?? { questionStartTime: null, timeTaken: 0 };;
+    const { questionStartTime, timeTaken } = questionAnswer ?? {
+      questionStartTime: null,
+      timeTaken: 0,
+    };
     let questionTimeTaken = Number(timeTaken);
 
     if (questionStartTime) {
-      questionTimeTaken += (Math.floor((new Date().getTime() - questionStartTime.getTime()) / 1000))
+      questionTimeTaken += Math.floor(
+        (new Date().getTime() - questionStartTime.getTime()) / 1000
+      );
     }
 
     const updatedQuestion = await Test.findByIdAndUpdate(
@@ -900,25 +900,27 @@ const endQuestionTime = async (
       {
         $set: {
           "answers.$[answer].timeTaken": questionTimeTaken,
-          "answers.$[answer].questionStartTime": null
+          "answers.$[answer].questionStartTime": null,
         },
       },
       {
         new: true,
         arrayFilters: [
-          { "answer.questionId": new mongoose.Types.ObjectId(String(questionId)) },
+          {
+            "answer.questionId": new mongoose.Types.ObjectId(
+              String(questionId)
+            ),
+          },
         ],
       }
     );
 
-    if (!updatedQuestion)
-      throw new AppError("Time not paused", 403);
+    if (!updatedQuestion) throw new AppError("Time not paused", 403);
 
     return res.status(200).json({
       message: "Question time recorded successfully",
       data: updatedQuestion,
     });
-
   } catch (error) {
     next(error);
   }
@@ -932,41 +934,36 @@ const startTestTime = async (
   const { testId } = req.body;
   const userId: string = req.user?.id;
 
-
-  const testStatus = await checkSectionTestTimeLimit(userId, new mongoose.Types.ObjectId(String(testId)));
-  if (testStatus)
-    throw new AppError("Test time is over", 423);
+  const testStatus = await checkSectionTestTimeLimit(
+    userId,
+    new mongoose.Types.ObjectId(String(testId))
+  );
+  if (testStatus) throw new AppError("Test time is over", 423);
 
   const updatedTestStartTime = await Test.findByIdAndUpdate(
     {
-      _id: new mongoose.Types.ObjectId(String(testId))
+      _id: new mongoose.Types.ObjectId(String(testId)),
     },
     {
       $set: {
-        testStartTime: new Date()
-      }
+        testStartTime: new Date(),
+      },
     },
     { new: true }
   );
 
-  if (!updatedTestStartTime)
-    throw new AppError("Time not updated", 403);
+  if (!updatedTestStartTime) throw new AppError("Time not updated", 403);
 
   return res.status(200).json({
     success: true,
     message: "Test timer started",
     updatedTestStartTime,
   });
-}
+};
 
-const endTestTime = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const endTestTime = async (req: Request, res: Response, next: NextFunction) => {
   const { testId } = req.body;
   const userId: string = req.user?.id;
-
 
   const test = await Test.aggregate([
     {
@@ -978,18 +975,20 @@ const endTestTime = async (
         testTimeLimit: 1,
         startTime: "$testStartTime",
         timeSpent: "$testTimeSpent",
-        answers: "$answers"
-      }
-    }
+        answers: "$answers",
+      },
+    },
   ]);
 
-  const { testTimeLimit, startTime, timeSpent, answers } = test ? test[0] : null;
+  const { testTimeLimit, startTime, timeSpent, answers } = test
+    ? test[0]
+    : null;
   let testTimeSpent: number;
   if (startTime) {
-    testTimeSpent = timeSpent + Math.floor((new Date().getTime() - startTime.getTime()) / 1000)
-  }
-  else
-    testTimeSpent = timeSpent;
+    testTimeSpent =
+      timeSpent +
+      Math.floor((new Date().getTime() - startTime.getTime()) / 1000);
+  } else testTimeSpent = timeSpent;
 
   const updatedTestTimeSpent = await Test.findByIdAndUpdate(
     new mongoose.Types.ObjectId(String(testId)),
@@ -997,24 +996,25 @@ const endTestTime = async (
       $set: {
         testTimeSpent: testTimeSpent,
         testStartTime: null,
-      }
+      },
     },
     { new: true }
   );
 
-  if (!updatedTestTimeSpent)
-    throw new AppError("Time not updated", 403);
+  if (!updatedTestTimeSpent) throw new AppError("Time not updated", 403);
 
-  const testStatus = await checkSectionTestTimeLimit(userId, new mongoose.Types.ObjectId(String(testId)));
-  if (testStatus)
-    throw new AppError("Test time is over", 423);
+  const testStatus = await checkSectionTestTimeLimit(
+    userId,
+    new mongoose.Types.ObjectId(String(testId))
+  );
+  if (testStatus) throw new AppError("Test time is over", 423);
 
   return res.status(200).json({
     success: true,
     message: "Test timer paused",
-    testId: updatedTestTimeSpent
-  })
-}
+    testId: updatedTestTimeSpent,
+  });
+};
 
 export {
   userTestInfo,
@@ -1026,5 +1026,5 @@ export {
   startQuestionTime,
   endQuestionTime,
   startTestTime,
-  endTestTime
+  endTestTime,
 };
