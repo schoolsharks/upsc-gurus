@@ -1,9 +1,9 @@
 import React from "react";
 import { Typography, Divider } from "@mui/material";
 import { useNavigate } from "react-router-dom"
-import { useDispatch, useSelector } from "react-redux";
-import { fetchQuestions } from "../../redux/actions/questionActions";
-import { AppDispatch, RootState } from "../../redux/store";
+import { useSelector } from "react-redux";
+// import { fetchQuestions } from "../../redux/actions/questionActions";
+import { RootState } from "../../redux/store";
 import Header from "../../components/Header";
 
 interface HeaderProps {
@@ -11,7 +11,7 @@ interface HeaderProps {
 }
 const QuantitativeSection: React.FC<HeaderProps> = ({showHeader=true}) => {
    const navigate = useNavigate()
-   const dispatch = useDispatch<AppDispatch>();
+  //  const dispatch = useDispatch<AppDispatch>();
 
    const questions = useSelector((state: RootState) => state.question.questions);
 
@@ -33,7 +33,7 @@ const QuantitativeSection: React.FC<HeaderProps> = ({showHeader=true}) => {
   };
 
   const handleContinue = ()=> {
-    dispatch(fetchQuestions());
+    // dispatch(fetchQuestions());
     navigate("/question?=0")
 
    
