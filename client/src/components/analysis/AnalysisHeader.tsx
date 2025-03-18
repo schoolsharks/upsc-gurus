@@ -40,8 +40,11 @@ const AnalysisHeader = () => {
         >
           {buttonText}
         </Button>
-        <Button variant="contained" color="primary" disabled>
+        <Button variant="contained" color="primary" disabled  sx={{ mr: 1 }}>
           Download Analytics
+        </Button>
+        <Button variant="outlined" color="primary"  onClick={() => navigate("/")}>
+          Back to Home
         </Button>
       </Box>
     </Box>

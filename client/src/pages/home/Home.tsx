@@ -325,18 +325,6 @@ const Home: React.FC = () => {
                     </Typography>
                   </Stack>
                   <Stack marginTop={"20px"} gap="8px">
-                    {/* <Stack direction={"row"} justifyContent={"space-between"}>
-                      <Typography>Quantitative Reasoning</Typography>
-                      <Typography>
-                        {test.quantitativeScore ?? 130}/{170}
-                      </Typography>
-                    </Stack>
-                    <Stack direction={"row"} justifyContent={"space-between"}>
-                      <Typography>Verbal Reasoning</Typography>
-                      <Typography>
-                        {test.verbalScore ?? 130}/{170}
-                      </Typography>
-                    </Stack> */}
                     <Stack direction={"row"} justifyContent={"space-between"}>
                       <Typography fontWeight={"600"}>Total</Typography>
                       <Typography fontWeight={"600"}>
@@ -344,7 +332,7 @@ const Home: React.FC = () => {
                       </Typography>
                     </Stack>
                   </Stack>
-                  {/* <Typography
+                  <Typography
                     sx={{
                       textDecoration: "underline",
                       color: "#142E79",
@@ -354,7 +342,7 @@ const Home: React.FC = () => {
                     onClick={() => navigate(`/analysis/${test.testId}`)}
                   >
                     View Report Card
-                  </Typography> */}
+                  </Typography>
                 </Card>
               ))}
             </Stack>
