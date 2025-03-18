@@ -11,6 +11,8 @@ import Home from "./pages/home/Home";
 import TestForm from "./pages/test/TestForm";
 import TestTakerInfo from "./pages/test/TestTakerInfo";
 import QuestionComponent from "./components/Question";
+import Analysis from "./pages/analysis/Analysis";
+import ReviewTest from "./pages/reviewtest/ReviewTest";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -37,6 +39,9 @@ function App() {
   if (loading) return <Loader />;
 
   return (
+    <>
+    {/* <Analysis/> */}
+    {/* <ReviewTest/> */}
     <Routes>
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
@@ -56,6 +61,7 @@ function App() {
         element={<ProtectedRoute element={<QuestionComponent />} />}
       />
     </Routes>
+    </>
   );
 }
 
