@@ -32,6 +32,7 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
+  console.log(completedTests)
 
   const cardStyles = {
     flex: "1",
@@ -304,11 +305,13 @@ const Home: React.FC = () => {
                     borderRadius: "20px",
                     // width: "100%",
                     minWidth: "330px",
-                    maxWidth: "425px",
+                    maxWidth: "400px",
                     flex: "1",
                     padding: "20px",
                     boxShadow: "none",
                   }}
+                  className="cursor-pointer"
+                  onClick={() => navigate(`/analysis/${test.testId}`)}
                 >
                   <Stack>
                     <Stack direction={"row"}>
@@ -337,7 +340,7 @@ const Home: React.FC = () => {
                     <Stack direction={"row"} justifyContent={"space-between"}>
                       <Typography fontWeight={"600"}>Total</Typography>
                       <Typography fontWeight={"600"}>
-                        {test?.totalScore}/{200}
+                      {(test?.totalScore ?? 0).toFixed(2)}/{200}
                       </Typography>
                     </Stack>
                   </Stack>

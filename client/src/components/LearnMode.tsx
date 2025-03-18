@@ -41,9 +41,6 @@ const LearnMode: React.FC = () => {
   const timeRemaining = useSelector(
     (state: RootState) => state.question.timeRemaining
   );
-  // const timeRemaining = questionSets?.timeRemaining;
-  const questionSets = useSelector(selectQuestionSets);
-  const timeRemaining = questionSets?.[0]?.timeRemaining;
   const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
   const [correctAnswer, setCorrectAnswer] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -142,7 +139,7 @@ const LearnMode: React.FC = () => {
       startQuestionTimer(testId, currentQuestion.questionId, index);
     }
 
-    if (prevIndex !== null && questions[prevIndex]) {
+    if (prevIndex !== null && questions[prevIndex] && testId) {
       endQuestionTimer(
         testId,
         questions[prevIndex].questionId

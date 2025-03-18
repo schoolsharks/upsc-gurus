@@ -12,6 +12,8 @@ import TestForm from "./pages/test/TestForm";
 import TestTakerInfo from "./pages/test/TestTakerInfo";
 import QuestionComponent from "./components/Question";
 import LearnMode from "./components/LearnMode";
+import ReviewTest from "./components/ReviewTest";
+import Analysis from "./pages/analysis/Analysis";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -56,9 +58,17 @@ function App() {
         path="/test/question/:testId"
         element={<ProtectedRoute element={<QuestionComponent />} />}
       />
-       <Route
+      <Route
         path="learn/test/question/:testId"
         element={<ProtectedRoute element={<LearnMode />} />}
+      />
+      <Route
+        path="analysis/:testId"
+        element={<ProtectedRoute element={<Analysis />} />}
+      />
+      <Route
+        path="review-test/:testId"
+        element={<ProtectedRoute element={<ReviewTest />} />}
       />
     </Routes>
   );

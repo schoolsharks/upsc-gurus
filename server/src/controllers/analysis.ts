@@ -107,6 +107,7 @@ export const getTestAnalytics = async (
         isCorrect: answer.isCorrect,
         timeTaken: answer.timeTaken || 0,
         markedForReview: answer.questionStatus===QuestionStatusEnum.MARKED || false,
+        questionStatus: answer.questionStatus || null
       };
     });
 
@@ -127,5 +128,82 @@ export const getTestAnalytics = async (
       message: "Internal server error",
       error: error instanceof Error ? error.message : String(error),
     });
+  }
+};
+
+
+export const getTestReviewQuestions = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { testId } = req.query;
+    if (!testId) {
+      return next(new AppError("Test ID is required", 400));
+    }
+
+    console.log("Received testId:", testId)
+    const testA = await Test.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(String(testId)),
+        },
+      },
+      {
+        $unwind: "$answers",
+      },
+      {
+        $lookup: {
+          from: "questions",
+          let: { questionId: "$answers.questionId" },
+          pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$questionId"] } } }],
+          as: "questionDetails",
+        },
+      },
+      {
+        $unwind: { path: "$questionDetails", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          timeLimit: { $first: "$testTimeLimit" },
+          timeSpent: { $first: "$testTimeSpent" },
+          questionDetails: {
+            $push: {
+              questionId: "$questionDetails._id",
+              question: "$questionDetails.question",
+              positioning: "$questionDetails.positioning",
+              options: "$questionDetails.options",
+              optionType: "$questionDetails.optionType",
+              difficulty: "$questionDetails.difficulty",
+              questionStatus: "$answers.questionStatus",
+              userAnswer: "$answers.userAnswer",
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          timeLimit: 1,
+          timeSpent: 1,
+          timeRemaining: { $subtract: ["$timeLimit", "$timeSpent"] },
+          questionDetails: { $ifNull: ["$questionDetails", []] },
+        },
+      },
+    ]);
+
+
+    if (!testA.length) {
+      return next(new AppError("Test not found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      questionsList: testA[0],
+    });
+  } catch (error) {
+    next(error);
   }
 };

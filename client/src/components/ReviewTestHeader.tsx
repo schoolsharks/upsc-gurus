@@ -7,22 +7,20 @@ import { useState } from "react";
 import { MdMenu } from "react-icons/md";
 import { RxCross1 } from "react-icons/rx";
 
-interface TestHeaderProps {
+interface ReviewTestHeaderProps {
   currentIndex: number;
   totalQuestions: number;
   questionId: string;
   setShowSidebar: React.Dispatch<React.SetStateAction<boolean>>;
   showSidebar: boolean;
-  time: string;
 }
 
-const TestHeader: React.FC<TestHeaderProps> = ({
+const ReviewTestHeader: React.FC<ReviewTestHeaderProps> = ({
   currentIndex,
   totalQuestions,
   questionId,
   setShowSidebar,
   showSidebar,
-  time,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,7 +57,7 @@ const TestHeader: React.FC<TestHeaderProps> = ({
         testId,
       });
       console.log("submitResponse", response);
-      navigate(`/analysis/${testId}`);
+      navigate("/");
     } catch (error: any) {
       console.log("Error Submitting Test", error.message);
     }
@@ -77,9 +75,6 @@ const TestHeader: React.FC<TestHeaderProps> = ({
           />
         </button>
       </div>
-
-      {/* Time  */}
-      <div className="md:hidden bg-[#74C0FF] px-3 py-1 rounded-lg">{time}</div>
 
       {/* Navigation Controls */}
       <div className="flex items-center gap-3">
@@ -168,4 +163,4 @@ const TestHeader: React.FC<TestHeaderProps> = ({
   );
 };
 
-export default TestHeader;
+export default ReviewTestHeader;
