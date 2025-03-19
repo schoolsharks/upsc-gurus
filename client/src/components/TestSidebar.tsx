@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 interface TestSidebarProps {
   questions: Question[];
-  time: string
+  time: string;
 }
 
 const sidebarBottom = [
@@ -15,9 +15,9 @@ const sidebarBottom = [
   { label: "Not Visited", bgColor: "", borderColor: "#AFAFAF" },
 ];
 
-const TestSidebar: React.FC<TestSidebarProps> = ({ questions, time}) => {
+const TestSidebar: React.FC<TestSidebarProps> = ({ questions, time }) => {
   const navigate = useNavigate();
-  
+
   return (
     <div className="flex flex-col bg-[#F8F8F8] border border-[#ccc] h-full items-center pt-4">
       <div className="flex flex-col gap-1 font-semibold mb-4 sm:mb-8 text-center">
@@ -43,7 +43,7 @@ const TestSidebar: React.FC<TestSidebarProps> = ({ questions, time}) => {
             justifyContent: "center", // Centers Chips inside the Box
             alignItems: "center",
             height: "65vh",
-            msOverflowY:"scroll"
+            msOverflowY: "scroll",
           }}
         >
           {questions.map((question, index) => {
@@ -51,24 +51,24 @@ const TestSidebar: React.FC<TestSidebarProps> = ({ questions, time}) => {
             let textColor = "#000";
             let bgColor = "transparent";
             let borderColor = "transparent";
-
-            switch (question.questionStatus) {
-              case "ATTEMPTED":
-                textColor = "#fff";
-                bgColor = "#111111";
-                break;
-              case "MARKED":
-                textColor = "#FFBD00";
-                borderColor = "#FFBD00";
-                break;
-              case "SEEN":
-                textColor = "#FB3030";
-                borderColor = "#FB3030";
-                break;
-              default:
-                textColor = "#AFAFAF";
-                borderColor = "#AFAFAF";
-            }
+              switch (question.questionStatus) {
+                case "ATTEMPTED":
+                  textColor = "#fff";
+                  bgColor = "#111111";
+                  break;
+                case "MARKED":
+                  textColor = "#FFBD00";
+                  borderColor = "#FFBD00";
+                  break;
+                case "SEEN":
+                  textColor = "#FB3030";
+                  borderColor = "#FB3030";
+                  break;
+                default:
+                  textColor = "#AFAFAF";
+                  borderColor = "#AFAFAF";
+              }
+            
 
             chipStyles = {
               color: textColor,
@@ -77,9 +77,9 @@ const TestSidebar: React.FC<TestSidebarProps> = ({ questions, time}) => {
                 borderColor !== "transparent"
                   ? `1px solid ${borderColor}`
                   : "none",
-                  width: { xs: "35px", sm: "40px", md: "45px" },
-                  height: { xs: "25px", sm: "28px", md: "32px" },
-                  fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
+              width: { xs: "35px", sm: "40px", md: "45px" },
+              height: { xs: "25px", sm: "28px", md: "32px" },
+              fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
               margin: "4px",
             };
 
@@ -97,7 +97,6 @@ const TestSidebar: React.FC<TestSidebarProps> = ({ questions, time}) => {
           })}
         </Box>
       </Stack>
-
       <div className="my-5">
         <div className="flex flex-col gap-2">
           {sidebarBottom.map((item, index) => (

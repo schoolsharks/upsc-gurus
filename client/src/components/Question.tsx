@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import {
-  // selectQuestionSets,
   setQuestions,
   updateTimeRemaining,
   updateUserResponse,
@@ -11,25 +10,16 @@ import userApi from "../api/userApi";
 import TestHeader from "./TestHeader";
 import TestSidebar from "./TestSidebar";
 import { selectQuestions } from "../redux/reducers/questionReducer";
-// import { Question } from "../types/QuestionType";
 import "../styles/QuestionStyles.css";
 import DOMPurify from "dompurify";
 import TestBottom from "./TestBottom";
 import { QuestionList } from "../redux/actions/questionActions";
 import { RootState } from "../redux/store";
 
-// interface QuestionSet {
-//   setName?: string;
-//   setStatus?: string;
-//   timeLimit: number;
-//   timeRemaining: number;
-//   timeSpent: number;
-//   questionDetails: Question[];
-// }
-
 const QuestionComponent: React.FC = () => {
   const location = useLocation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   const { testId } = useParams<{ testId: string }>();
   const questions = useSelector(selectQuestions);
@@ -38,24 +28,32 @@ const QuestionComponent: React.FC = () => {
   const currentQuestion = questions[index];
   const [prevIndex, setPrevIndex] = useState<number | null>(null);
   const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 1024);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const timeRemaining = useSelector(
     (state: RootState) => state.question.timeRemaining
   );
 
-  useEffect(() => {}, [timeRemaining]);
+  // Handle auto-submission when timer reaches zero
   useEffect(() => {
-    if (timeRemaining && timeRemaining <= 0) return;
+    if (timeRemaining !== null && timeRemaining <= 0 && !isSubmitting) {
+      handleSubmit();
+    }
+  }, [timeRemaining]);
+
+  // Timer countdown effect
+  useEffect(() => {
+    if (timeRemaining === null || timeRemaining <= 0) return;
 
     const timer = setInterval(() => {
-      console.log("Dispatching time update...");
-      dispatch(updateTimeRemaining(1));
+      dispatch(updateTimeRemaining({ type: "decrement" }));
     }, 1000);
 
     return () => clearInterval(timer);
   }, [timeRemaining, dispatch]);
 
   const formatTime = (seconds: number) => {
+    if (seconds < 0) seconds = 0; // Prevent negative time display
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(
@@ -65,6 +63,23 @@ const QuestionComponent: React.FC = () => {
   };
 
   const time = formatTime(timeRemaining ?? 0);
+
+  // Handle auto-submit
+  const handleSubmit = async () => {
+    if (isSubmitting) return; // Prevent multiple submissions
+
+    setIsSubmitting(true);
+    try {
+      const response = await userApi.put("/test/lockTest", {
+        testId,
+      });
+      console.log("submitResponse", response);
+      navigate(`/analysis/${testId}`);
+    } catch (error: any) {
+      console.log("Error Submitting Test", error.message);
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -79,12 +94,9 @@ const QuestionComponent: React.FC = () => {
 
   const startSetTimer = async (testId: string) => {
     try {
-      let satrtSetResp;
-      satrtSetResp = await userApi.put("/test/startTestTime", { testId });
-      // start sectional test time
-      await userApi.put("/sectional/startTestTime");
-
-      console.log("Set timer started for:", testId, satrtSetResp);
+      let startSetResp;
+      startSetResp = await userApi.put("/test/startTestTime", { testId });
+      console.log("Set timer started for:", testId, startSetResp);
     } catch (error) {
       console.error("Error starting set timer:", error);
     }
@@ -93,26 +105,17 @@ const QuestionComponent: React.FC = () => {
   const endSetTimer = async (testId: string) => {
     try {
       await userApi.put("/test/endTestTime", { testId });
-
-      // console.log("Set timer ended for", setName,endSetResp);
     } catch (error) {
       console.error("Error ending set timer:", error);
     }
   };
 
-  const startQuestionTimer = async (
-    testId: string,
-    questionId: string,
-    index: number
-  ) => {
+  const startQuestionTimer = async (testId: string, questionId: string) => {
     try {
       await userApi.put("/test/startQuestionTime", {
         testId,
         questionId,
       });
-      index; // To use unused variable (build errors resolution)
-
-      // console.log("Question timer started for question:",index, questionId,startQuesResp);
     } catch (error) {
       console.error("Error starting question timer:", error);
     }
@@ -124,7 +127,6 @@ const QuestionComponent: React.FC = () => {
         testId,
         questionId,
       });
-      // console.log("Question timer ended for question: previous question",index-1,questionId, endQuesResp);
     } catch (error) {
       console.error("Error ending question timer:", error);
     }
@@ -134,7 +136,7 @@ const QuestionComponent: React.FC = () => {
   useEffect(() => {
     if (!currentQuestion || !questions || !questions[index]) return;
     if (currentQuestion && index !== prevIndex && testId) {
-      startQuestionTimer(testId, currentQuestion.questionId, index);
+      startQuestionTimer(testId, currentQuestion.questionId);
     }
 
     if (prevIndex !== null && questions[prevIndex] && testId) {
@@ -172,11 +174,16 @@ const QuestionComponent: React.FC = () => {
           }
         );
 
+        // Initialize the timer properly
+        dispatch(
+          updateTimeRemaining({
+            type: "init",
+            value: response.data.questionsList.timeRemaining,
+          })
+        );
         dispatch(
           setQuestions(response.data.questionsList?.questionDetails ?? [])
         );
-        dispatch(updateTimeRemaining(response.data.questionsList.timeRemaining))
-        // dispatch(setQuestionSets(response.data.questionsList));
       } catch (error: any) {
         console.log(
           error.response?.data?.message || "Failed to fetch user information."
@@ -239,13 +246,18 @@ const QuestionComponent: React.FC = () => {
       );
     }
   };
+  useEffect(() => {
+    if(!currentQuestion?.userAnswer?.length)
+    sendUserResponse([[]]);
+  }, [index]);
 
-
-  useEffect(()=>{
-    if(currentQuestion?.userAnswer){
-      setSelectedAnswers(currentQuestion.userAnswer)
+  useEffect(() => {
+    if (currentQuestion?.userAnswer) {
+      setSelectedAnswers(currentQuestion.userAnswer);
+    } else {
+      setSelectedAnswers([]);
     }
-  },[index,currentQuestion?.userAnswer])
+  }, [index, currentQuestion?.userAnswer]);
 
   return (
     <div className="flex min-w-screen flex-col md:flex-row">
@@ -257,6 +269,7 @@ const QuestionComponent: React.FC = () => {
           setShowSidebar={setShowSidebar}
           showSidebar={showSidebar}
           time={time}
+          onSubmit={handleSubmit}
         />
         <div className="test-copy-disable mt-5">
           <div
@@ -311,7 +324,7 @@ const QuestionComponent: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="w-[280px] sm:w-[350px] absolute top-16 md:top-20 right-0 z-10 lg:relative lg:top-0">
+      <div className="w-[280px] sm:w-[350px] absolute top-16 md:top-20 right-0 z-50 lg:relative lg:top-0">
         {showSidebar && <TestSidebar questions={questions} time={time} />}
       </div>
       <TestBottom

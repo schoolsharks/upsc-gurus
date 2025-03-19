@@ -165,6 +165,27 @@ const userTestInfo = async (
         _id: "$_id",
         userName: { $first: { $concat: ["$firstName", " ", "$lastName"] } },
         email: { $first: "$email" },
+        // Add a new field to collect ALL tests regardless of status
+        allTests: {
+          $push: {
+            $cond: {
+              if: { $ifNull: ["$tests._id", false] },
+              then: {
+                testId: "$tests._id",
+                testTemplateId: "$testIds.testTemplateId",
+                testName: { $arrayElemAt: ["$testTemplates.testName", 0] },
+                testStatus: "$tests.testStatus",
+                startDate: "$tests.createdAt",
+                completeDate: "$tests.updatedAt",
+                totalScore: "$tests.totalScore",
+                testTimeSpent: "$tests.testTimeSpent",
+                testMode: "$tests.testMode",
+                testCompletionPercent: "$tests.testCompletionPercent",
+              },
+              else: null,
+            },
+          },
+        },
         completedTest: {
           $push: {
             $cond: {
@@ -191,6 +212,7 @@ const userTestInfo = async (
                 testId: "$tests._id",
                 testTemplateId: "$testIds.testTemplateId",
                 testName: { $arrayElemAt: ["$testTemplates.testName", 0] },
+                testMode: "$tests.testMode",
                 startDate: "$tests.createdAt",
                 testTimeSpent: "$tests.testTimeSpent",
                 testCompletionPercent: "$tests.testCompletionPercent",
@@ -207,6 +229,14 @@ const userTestInfo = async (
         _id: 1,
         userName: 1,
         email: 1,
+        // Filter out null values from allTests
+        allTests: {
+          $filter: {
+            input: "$allTests",
+            as: "test",
+            cond: { $ne: ["$$test", null] },
+          },
+        },
         completedTest: {
           $filter: {
             input: "$completedTest",
@@ -282,6 +312,7 @@ const userTestInfo = async (
     _id: user[0]._id,
     userName: user[0].userName,
     email: user[0].email,
+    allTests: user[0].allTests || [], // Add the new allTests field
     completedTest: user[0].completedTest || [],
     inProgressTest: user[0].inProgressTest || [],
     unAttemptedTest: user[0].unAttemptedTest || [],
@@ -298,40 +329,10 @@ const handleCreateTest = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { testTemplateId } = req.body;
+  const { testTemplateId, mode } = req.body;
   let userId: string = req.user?.id;
 
   if (!testTemplateId) throw new AppError("Field not found", 400);
-
-  // const usertestStatus = await User.aggregate([
-  //   {
-  //     $match: { _id: new mongoose.Types.ObjectId(userId) },
-  //   },
-  //   {
-  //     $unwind: {
-  //       path: "$testIds",
-  //       preserveNullAndEmptyArrays: true,
-  //     },
-  //   },
-  //   {
-  //     $project: {
-  //       _id: 1,
-  //       testId: "$testIds.testId",
-  //       testTemplateId: "$testIds.testTemplateId",
-  //       testIds: 1,
-  //     },
-  //   },
-  // ]);
-
-  // if (usertestStatus.length === 0) throw new AppError("DB error", 500);
-
-  // if (usertestStatus[0].testIds) {
-  //   const isTestTemplateIdExist = usertestStatus.some((doc) =>
-  //     doc.testTemplateId.equals(testTemplateId)
-  //   );
-  //   if (isTestTemplateIdExist)
-  //     throw new AppError("Test has already been attempted", 410);
-  // }
 
   interface IQuestion {
     _id: string;
@@ -370,6 +371,7 @@ const handleCreateTest = async (
 
   const newTest = new Test({
     testTemplateId: new mongoose.Types.ObjectId(String(testTemplateId)),
+    testMode: mode,
     answers, // Attach pre-filled answers
   });
 

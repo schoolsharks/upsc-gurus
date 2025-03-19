@@ -1,22 +1,14 @@
 import { useState, FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  Typography,
-  Button,
-  Stack,
-  TextField,
-  CircularProgress,
-} from "@mui/material";
+import { Typography, Button, Stack, CircularProgress } from "@mui/material";
 
 import "./TestForm.css";
 import userApi from "../../api/userApi";
 
 const TestForm: React.FC = () => {
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
-  const [mode, setMode] = useState<"test" | "learn">("test");
+  const [mode, setMode] = useState<"TEST" | "LEARN">("TEST");
 
   const { testTemplateId } = useParams();
 
@@ -25,7 +17,10 @@ const TestForm: React.FC = () => {
   const accessToken = localStorage.getItem("accessToken");
 
   // Handle form submission
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>, selectedMode: "test" | "learn") => {
+  const handleSubmit = async (
+    e: FormEvent<HTMLFormElement>,
+    selectedMode: "TEST" | "LEARN"
+  ) => {
     e.preventDefault();
 
     if (!userId || !accessToken) {
@@ -33,24 +28,17 @@ const TestForm: React.FC = () => {
       return;
     }
 
-    const data = {
-      firstName,
-      lastName,
-    };
-
-    sessionStorage.setItem("test-taker-fn", data.firstName);
-    sessionStorage.setItem("test-taker-ln", data.lastName);
-
     setLoading(true);
     setMode(selectedMode);
 
     try {
       const response = await userApi.post("/test/launchTest", {
         testTemplateId,
+        mode: selectedMode,
       });
 
       if ([200, 201, 202, 204].includes(response.status)) {
-        if (selectedMode === "test") {
+        if (selectedMode === "TEST") {
           navigate(`/test/question/${response.data.testId}?question=0`);
         } else {
           navigate(`/learn/test/question/${response.data.testId}?question=0`);
@@ -82,59 +70,27 @@ const TestForm: React.FC = () => {
       <div className="gradient-line"></div>
 
       {/* Form Container */}
-      <form className="form-container px-8" onSubmit={(e) => handleSubmit(e, mode)}>
+      <form
+        className="form-container px-8"
+        onSubmit={(e) => handleSubmit(e, mode)}
+      >
         <Typography variant="h6" component="h2" gutterBottom>
           Choose your mode:
         </Typography>
-        <p>Enter your first and last name in the following fields.</p>
-
-        {/* Input Fields */}
-        <Stack direction={{ xs: "column", sm: "row" }} marginTop={"20px"} gap={"20px"}>
-          <Stack direction={"row"} alignItems={"center"} gap={"4px"}>
-            <Typography fontWeight={"600"}>First Name :</Typography>
-            <TextField
-              type="text"
-              required
-              id="firstName"
-              name="firstName"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              size="small"
-              sx={{
-                "& .MuiInputBase-root": { height: "36px" },
-                "& .MuiInputBase-input": { padding: "8px" },
-              }}
-            />
-          </Stack>
-
-          <Stack direction={"row"} alignItems={"center"} gap={"4px"}>
-            <Typography fontWeight={"600"}>Last Name :</Typography>
-            <TextField
-              type="text"
-              id="lastName"
-              name="lastName"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              size="small"
-              sx={{
-                "& .MuiInputBase-root": { height: "36px" },
-                "& .MuiInputBase-input": { padding: "8px" },
-              }}
-            />
-          </Stack>
-        </Stack>
 
         <div className="flex gap-4 mt-5 flex-col sm:flex-row">
           {/* Start Test Mode Button */}
           <Button
             type="button"
             variant="contained"
-            onClick={(e) => handleSubmit(e as unknown as FormEvent<HTMLFormElement>, "test")}
+            onClick={(e) =>
+              handleSubmit(e as unknown as FormEvent<HTMLFormElement>, "TEST")
+            }
           >
-            {loading && mode === "test" ? (
+            {loading && mode === "TEST" ? (
               <CircularProgress size={24} sx={{ color: "#fff" }} />
             ) : (
-              "Start Test mode"
+              "Test mode"
             )}
           </Button>
 
@@ -142,18 +98,22 @@ const TestForm: React.FC = () => {
           <Button
             type="button"
             variant="contained"
-            onClick={(e) => handleSubmit(e as unknown as FormEvent<HTMLFormElement>, "learn")}
+            onClick={(e) =>
+              handleSubmit(e as unknown as FormEvent<HTMLFormElement>, "LEARN")
+            }
           >
-            {loading && mode === "learn" ? (
+            {loading && mode === "LEARN" ? (
               <CircularProgress size={24} sx={{ color: "#fff" }} />
             ) : (
-              "Learn Mode"
+              "Learning Mode"
             )}
           </Button>
         </div>
 
         <hr />
-        <p className="copytext">Copyright © 2025 by Upsc Gurus. All rights reserved.</p>
+        <p className="copytext">
+          Copyright © 2025 by Upsc Gurus. All rights reserved.
+        </p>
       </form>
     </>
   );

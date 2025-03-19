@@ -3,14 +3,10 @@ import {
   Typography,
   Button,
   Card,
-  // CardContent,
-  // CardActions,
   Box,
   Stack,
-  // IconButton,
   Dialog,
   useTheme,
-  // IconButton,
 } from "@mui/material";
 import "./home.css";
 import { useNavigate } from "react-router-dom";
@@ -20,25 +16,22 @@ import { logout, setUserInfo } from "../../redux/reducers/userReducer";
 import { MdLogout } from "react-icons/md";
 import { convertSecondsToTime } from "../../utils/formatTime";
 import userApi from "../../api/userApi";
-// import { paymentGateway } from "@/libs/paymentGateway";
 
 const Home: React.FC = () => {
-  // const [userInfo, setUserInfo] = useState<User | null>(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [inProgressDialogOpen, setInProgressDialogOpen] = useState(false);
-  const { completedTests, inProgressTests, unAttemptedTests } = useSelector(
+  const { completedTests, inProgressTests, unAttemptedTests,allTests } = useSelector(
     (state: RootState) => state.user
   );
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
-  console.log(completedTests)
 
   const cardStyles = {
     flex: "1",
     border: "1px solid #00000033",
     borderRadius: "20px",
-    minWidth: "280px",
+    minWidth: "310px",
     maxWidth: "300px",
     minHeight: "200px",
     padding: "20px",
@@ -52,6 +45,7 @@ const Home: React.FC = () => {
     const fetchUserInfo = async () => {
       try {
         const response = await userApi.get(`/test/userTestInfo`);
+        console.log(response.data)
         dispatch(setUserInfo(response.data.user));
       } catch (err: any) {
         dispatch(setUserInfo(err));
@@ -74,6 +68,16 @@ const Home: React.FC = () => {
     dispatch(logout());
     localStorage.removeItem("accessToken");
   };
+
+  const handleResumeTest = (testMode: string, testId: string) => {
+    if (testMode === "TEST") {
+      navigate(`/test/question/${testId}`);
+    }
+    else {
+      navigate(`/learn/test/question/${testId}`);
+    }
+  };
+  
   return (
     <>
       <Stack
@@ -82,14 +86,15 @@ const Home: React.FC = () => {
         alignItems={"center"}
         padding={"16px 44px"}
       >
-         <button onClick={() => navigate("/")} className="focus:outline-none">
+        <button onClick={() => navigate("/")} className="focus:outline-none">
           <img
             src="/images/logo.png"
             alt="UPSC Gurus Logo"
             className="logo cursor-pointer"
           />
         </button>
-        <Button
+      <Stack direction={"row"} gap={"16px"}>
+      <Button
           endIcon={<MdLogout />}
           onClick={() => setLogoutDialogOpen(true)}
           sx={{
@@ -100,6 +105,17 @@ const Home: React.FC = () => {
         >
           Log Out
         </Button>
+        {/* <Button
+          variant="outlined"
+        >
+          +91 0123456789
+        </Button>
+        <Button
+          variant="outlined"
+        >
+          +91 0123456789
+        </Button> */}
+      </Stack>
       </Stack>
       <div className="gradient-line"></div>
 
@@ -107,26 +123,23 @@ const Home: React.FC = () => {
         className="dashboard"
         sx={{ [theme.breakpoints.down("sm")]: { padding: 0 } }}
       >
-        {/* Header Section */}
-        {/* <header className="header">
-          <div>
-            <Typography variant="h4" component="h2">
-              Welcome!
+        <Typography
+              sx={{ fontSize: "1.25rem", fontWeight: "600" }}
+              variant="h5"
+              className="text-center md:text-left"
+            >
+              All Tests
             </Typography>
-            <Typography variant="body1">{email}</Typography>
-          </div>
-        </header> */}
-
-        {/* All Tests */}
-        <section className="test-section">
-          <Typography
-            sx={{ fontSize: "1.25rem", fontWeight: "600" }}
-            variant="h5"
-            className="text-center md:text-left"
-          >
-            All Tests
-          </Typography>
-          {inProgressTests.length > 0 || unAttemptedTests.length > 0 ? (
+        {/* In Progress Tests Section */}
+        {inProgressTests.length > 0 && (
+          <section className="test-section mb-8">
+            <Typography
+              sx={{ fontSize: "1.25rem", fontWeight: "600" }}
+              variant="h5"
+              className="text-center md:text-left"
+            >
+              In Progress Tests
+            </Typography>
             <Stack
               direction={"row"}
               gap={"1rem"}
@@ -162,17 +175,32 @@ const Home: React.FC = () => {
                         In Progress
                       </Box>
                     </Stack>
-                    <Typography
-                      variant="body2"
-                      style={{ color: "#656565", marginBottom: "12px" }}
-                    >
-                      <span style={{ color: "green" }}>●</span> Started on{" "}
-                      {new Date(test.startDate || "").toLocaleDateString()}
-                    </Typography>
+                    <Stack direction="row" justifyContent={"space-between"}>
+                      <Typography
+                        variant="body2"
+                        style={{ color: "#656565", marginBottom: "12px" }}
+                      >
+                        <span style={{ color: "green" }}>●</span> Started on{" "}
+                        {new Date(test.startDate || "").toLocaleDateString()}
+                      </Typography>
+                      <Box
+                        bgcolor={"white"}
+                        sx={{
+                          fontSize: "12px",
+                          padding: "2px 8px",
+                          fontWeight: "600",
+                          borderRadius: "12px",
+                          height: "fit-content",
+                          color: "#FFBD00",
+                        }}
+                      >
+                        {test.testMode === "TEST" ? "Test Mode" : "Learning Mode"}
+                      </Box>
+                    </Stack>
+                    
                     <Stack direction={"row"} justifyContent={"space-between"}>
                       <Typography fontSize={"0.9rem"}>Time Spent:</Typography>
                       <Typography fontSize={"0.9rem"}>
-                        {/* {(test.testTimeSpent/60).toFixed(2)  || "N/A"} */}
                         {`${convertSecondsToTime(test.testTimeSpent)} minutes`}
                       </Typography>
                     </Stack>
@@ -187,7 +215,7 @@ const Home: React.FC = () => {
                     <Box textAlign="center">
                       <Button
                         onClick={() =>
-                          navigate(`/test/question/${test.testId}`)
+                          handleResumeTest(test.testMode, test.testId)
                         }
                         variant="contained"
                         style={{
@@ -205,8 +233,30 @@ const Home: React.FC = () => {
                   </Stack>
                 </Card>
               ))}
+            </Stack>
+          </section>
+        )}
 
-              {unAttemptedTests?.map((test: any, index) => (
+        {/* Start New Test Section */}
+        {allTests.length > 0 && (
+          <section className="test-section mb-8">
+            <Typography
+              sx={{ fontSize: "1.25rem", fontWeight: "600" }}
+              variant="h5"
+              className="text-center md:text-left"
+            >
+              Start New Test
+            </Typography>
+            <Stack
+              direction={"row"}
+              gap={"1rem"}
+              flexWrap={"wrap"}
+              marginTop={"14px"}
+              sx={{
+                justifyContent: { xs: "center", sm: "start" },
+              }}
+            >
+              {allTests?.map((test: any, index) => (
                 <Card
                   key={index}
                   sx={{
@@ -217,8 +267,6 @@ const Home: React.FC = () => {
                   }}
                 >
                   <Stack sx={{ flexGrow: 1 }}>
-                    {" "}
-                    {/* Allows the content to fill available space */}
                     <Typography
                       style={{
                         fontSize: "1.25rem",
@@ -255,28 +303,26 @@ const Home: React.FC = () => {
                 </Card>
               ))}
             </Stack>
-          ) : (
-            <div>New Tests will be added soon.</div>
-          )}
-        </section>
+          </section>
+        )}
 
-        {/* Unattempted Tests */}
-        {/* <section className="test-section">
-          <Typography
-            sx={{
-              fontSize: "1.25rem",
-              fontWeight: "600",
-              marginBottom: "20px",
-            }}
-          >
-            All Tests
-          </Typography>
-          <Stack direction={"row"} flexWrap={"wrap"} gap={"1rem"} marginTop={"14px"}>
-           
-          </Stack>
-        </section> */}
+        {/* Empty State Message */}
+        {inProgressTests.length === 0 && unAttemptedTests.length === 0 && (
+          <section className="test-section mb-8">
+            <Typography
+              sx={{ fontSize: "1.25rem", fontWeight: "600" }}
+              variant="h5"
+              className="text-center md:text-left"
+            >
+              Available Tests
+            </Typography>
+            <Box sx={{ mt: 2 }}>
+              <Typography>New Tests will be added soon.</Typography>
+            </Box>
+          </section>
+        )}
 
-        {/* Completed Tests */}
+        {/* Completed Tests Section */}
         <section className="mb-8">
           <Typography
             sx={{
@@ -303,7 +349,6 @@ const Home: React.FC = () => {
                   sx={{
                     border: "1px solid #00000033",
                     borderRadius: "20px",
-                    // width: "100%",
                     minWidth: "330px",
                     maxWidth: "400px",
                     flex: "1",
@@ -328,7 +373,7 @@ const Home: React.FC = () => {
                     <Stack direction={"row"} justifyContent={"space-between"}>
                       <Typography fontWeight={"600"}>Total</Typography>
                       <Typography fontWeight={"600"}>
-                      {(test?.totalScore ?? 0).toFixed(2)}/{200}
+                        {(test?.totalScore ?? 0).toFixed(2)}/{200}
                       </Typography>
                     </Stack>
                   </Stack>
@@ -352,6 +397,7 @@ const Home: React.FC = () => {
         </section>
       </Box>
 
+      {/* Dialogs */}
       <Dialog
         open={logoutDialogOpen}
         onClose={() => setLogoutDialogOpen(false)}
@@ -366,7 +412,6 @@ const Home: React.FC = () => {
           </Typography>
           <Stack
             direction={"row"}
-            // justifyContent="space-between"
             gap={"1rem"}
             flex="1"
             marginTop={"1rem"}

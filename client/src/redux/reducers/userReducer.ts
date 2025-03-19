@@ -27,6 +27,7 @@ interface UserState {
   completedTests: Test[];
   inProgressTests: Test[];
   unAttemptedTests: Test[];
+  allTests: Test[];
   authState: AuthStates;
   loading: boolean;
   error: string | null;
@@ -40,6 +41,7 @@ const initialState: UserState = {
   completedTests: [],
   inProgressTests: [],
   unAttemptedTests: [],
+  allTests: [],
   authState: AuthStates.IDLE,
   loading: false,
   error: null,
@@ -55,6 +57,7 @@ const userSlice = createSlice({
       state.completedTests = [];
       state.inProgressTests = [];
       state.unAttemptedTests = [];
+      state.allTests = [];
       state.authState = AuthStates.IDLE;
       state.error = null;
     },
@@ -74,6 +77,8 @@ const userSlice = createSlice({
         action.payload.completedTest ?? state.completedTests;
         state.email = action.payload.email;
       state.error = action.payload.error ?? state.error;
+      state.allTests =
+        action.payload.allTests ?? state.allTests;
     }
   },
   extraReducers: (builder) => {

@@ -14,6 +14,7 @@ interface TestHeaderProps {
   setShowSidebar: React.Dispatch<React.SetStateAction<boolean>>;
   showSidebar: boolean;
   time: string;
+  onSubmit?: () => void; // Added prop for submission handler
 }
 
 const TestHeader: React.FC<TestHeaderProps> = ({
@@ -23,6 +24,7 @@ const TestHeader: React.FC<TestHeaderProps> = ({
   setShowSidebar,
   showSidebar,
   time,
+  onSubmit,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,19 +56,26 @@ const TestHeader: React.FC<TestHeaderProps> = ({
   };
 
   const handleSubmit = async () => {
-    try {
-      const response = await userApi.put("/test/lockTest", {
-        testId,
-      });
-      console.log("submitResponse", response);
-      navigate(`/analysis/${testId}`);
-    } catch (error: any) {
-      console.log("Error Submitting Test", error.message);
+    setSubmitDialogOpen(false);
+    if (onSubmit) {
+      // Use the provided submit handler if available
+      onSubmit();
+    } else {
+      // Fallback to the default implementation
+      try {
+        const response = await userApi.put("/test/lockTest", {
+          testId,
+        });
+        console.log("submitResponse", response);
+        navigate(`/analysis/${testId}`);
+      } catch (error: any) {
+        console.log("Error Submitting Test", error.message);
+      }
     }
   };
 
   return (
-    <div className="flex justify-between items-center p-4 px-8  shadow-sm h-16 md:h-20">
+    <div className="flex justify-between items-center p-4 px-8 shadow-sm h-16 md:h-20">
       {/* Logo Section */}
       <div className="flex items-center -mr-10">
         <button onClick={() => navigate("/")} className="focus:outline-none">
@@ -121,11 +130,10 @@ const TestHeader: React.FC<TestHeaderProps> = ({
               Confirm Submission
             </Typography>
             <Typography fontSize="1rem" color={theme.palette.text.secondary}>
-              Are you sure you submit the test?
+              Are you sure you want to submit the test?
             </Typography>
             <Stack
               direction={"row"}
-              // justifyContent="space-between"
               gap={"1rem"}
               flex="1"
               marginTop={"1rem"}
