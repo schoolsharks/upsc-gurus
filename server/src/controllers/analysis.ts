@@ -118,7 +118,7 @@ export const getTestAnalytics = async (
       correctCount: test.answers.filter((ans) => ans.isCorrect === true).length,
       incorrectCount: test.answers.filter((ans) => ans.isCorrect === false).length,
       correctAnswerScore: test.answers.filter((ans) => ans.isCorrect === true).length * 2,
-      negativeMarks: test.answers.filter((ans) => ans.isCorrect === false).length * 0.06,
+      negativeMarks: test.answers.filter((ans) => ans.isCorrect === false).length * 0.66,
       testTimeSpent: test.testTimeSpent,
       topicWiseAnalysis: Object.values(topicAnalysis),
       reviewTest,

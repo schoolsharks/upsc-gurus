@@ -30,7 +30,7 @@ export interface UserTypes {
   email: string;
   testAttempt: number;
   totalTimeTaken: string;
-  totalScore: number;
+  totalScore: string;
   maxScore: number;
   totalQuestions: number;
   attempted: number;
@@ -131,7 +131,7 @@ const Analysis = () => {
     email: "JohnSmith@john.com",
     testAttempt: 4,
     totalTimeTaken: "3 hrs 45 min",
-    totalScore: report.correctAnswerScore,
+    totalScore: `${(report.correctAnswerScore - report.negativeMarks).toFixed(2)}`,
     maxScore: 200,
     totalQuestions: report.totalQuestions,
     attempted: report.attemptedCount,
