@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   // selectQuestionSets,
   setQuestions,
@@ -15,8 +15,9 @@ import { selectQuestions } from "../redux/reducers/questionReducer";
 // import { Question } from "../types/QuestionType";
 import "../styles/QuestionStyles.css";
 import DOMPurify from "dompurify";
-import {QuestionList } from "../redux/actions/questionActions";
+import { QuestionList } from "../redux/actions/questionActions";
 import { AppDispatch, RootState } from "../redux/store";
+import TestBottom from "./TestBottom";
 
 // interface QuestionSet {
 //   setName?: string;
@@ -29,6 +30,7 @@ import { AppDispatch, RootState } from "../redux/store";
 
 const LearnMode: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const queryParams = new URLSearchParams(location.search);
   const { testId } = useParams<{ testId: string }>();
@@ -45,13 +47,19 @@ const LearnMode: React.FC = () => {
   const [correctAnswer, setCorrectAnswer] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {}, [timeRemaining]);
+  // Handle auto-submission when timer reaches zero
   useEffect(() => {
-    if (timeRemaining && timeRemaining <= 0) return;
+    if (timeRemaining !== null && timeRemaining <= 0 && !isSubmitting) {
+      handleSubmit();
+    }
+  }, [timeRemaining]);
+
+  // Timer countdown effect
+  useEffect(() => {
+    if (timeRemaining === null || timeRemaining <= 0) return;
 
     const timer = setInterval(() => {
-      console.log("Dispatching time update...");
-      dispatch(updateTimeRemaining(1));
+      dispatch(updateTimeRemaining({ type: "decrement" }));
     }, 1000);
 
     return () => clearInterval(timer);
@@ -78,13 +86,26 @@ const LearnMode: React.FC = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+  const handleSubmit = async () => {
+    if (isSubmitting) return; // Prevent multiple submissions
+
+    setIsSubmitting(true);
+    try {
+      const response = await userApi.put("/test/lockTest", {
+        testId,
+      });
+      console.log("submitResponse", response);
+      navigate(`/analysis/${testId}`);
+    } catch (error: any) {
+      console.log("Error Submitting Test", error.message);
+      setIsSubmitting(false);
+    }
+  };
 
   const startSetTimer = async (testId: string) => {
     try {
       let satrtSetResp;
       satrtSetResp = await userApi.put("/test/startTestTime", { testId });
-      // start sectional test time
-      await userApi.put("/sectional/startTestTime");
 
       console.log("Set timer started for:", testId, satrtSetResp);
     } catch (error) {
@@ -140,10 +161,7 @@ const LearnMode: React.FC = () => {
     }
 
     if (prevIndex !== null && questions[prevIndex] && testId) {
-      endQuestionTimer(
-        testId,
-        questions[prevIndex].questionId
-      );
+      endQuestionTimer(testId, questions[prevIndex].questionId);
     }
     setPrevIndex(index);
   }, [index, testId, questions]);
@@ -168,7 +186,7 @@ const LearnMode: React.FC = () => {
 
   //fetch questions
   useEffect(() => {
-    const getQuestions = async () => {
+    const fetchQuestions = async () => {
       try {
         const response = await userApi.get<{ questionsList: QuestionList }>(
           "/test/getQuestions",
@@ -176,13 +194,16 @@ const LearnMode: React.FC = () => {
             params: { testId },
           }
         );
-        
 
+        // Initialize the timer properly
         dispatch(
-          setQuestions(response.data.questionsList?.questionDetails ?? [])
+          updateTimeRemaining({
+            type: "init",
+            value: response.data.questionsList.timeRemaining,
+          })
         );
         dispatch(
-          updateTimeRemaining(response.data.questionsList.timeRemaining)
+          setQuestions(response.data.questionsList?.questionDetails ?? [])
         );
       } catch (error: any) {
         console.log(
@@ -191,7 +212,7 @@ const LearnMode: React.FC = () => {
       }
     };
 
-    getQuestions();
+    fetchQuestions();
   }, [testId]);
 
   const handleSelectAnswer = (option: string[]) => {
@@ -252,16 +273,19 @@ const LearnMode: React.FC = () => {
       );
     }
   };
-
-    useEffect(()=>{
-      if(currentQuestion?.userAnswer){
-        setSelectedAnswers(currentQuestion.userAnswer)
-        // setCorrectAnswer(currentQuestion.correctAnswer)
-      }
-    },[index])
+  useEffect(() => {
+      if(!currentQuestion?.userAnswer?.length)
+      sendUserResponse([[]]);
+    }, [index]);
+  useEffect(() => {
+    if (currentQuestion?.userAnswer) {
+      setSelectedAnswers(currentQuestion.userAnswer);
+      // setCorrectAnswer(currentQuestion.correctAnswer)
+    }
+  }, [index]);
 
   return (
-    <div className="flex min-w-screen">
+    <div className="flex min-w-screen flex-col md:flex-row">
       <div className="flex-1">
         <TestHeader
           currentIndex={index}
@@ -312,12 +336,12 @@ const LearnMode: React.FC = () => {
                                       JSON.stringify(option)
                                   ? isAnswerCorrect
                                     ? "bg-green-500 text-white border-green-600"
-                                    : "bg-red-500 text-white border-red-600" 
+                                    : "bg-red-500 text-white border-red-600"
                                   : selectedAnswers.length > 0 &&
                                     !isAnswerCorrect &&
                                     JSON.stringify(correctAnswer) ===
                                       JSON.stringify(option[0])
-                                  ? "bg-green-500 text-white border-green-600" 
+                                  ? "bg-green-500 text-white border-green-600"
                                   : "bg-white border-gray-300"
                               }`}
                             onClick={() =>
@@ -339,9 +363,14 @@ const LearnMode: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="w-[280px] sm:w-[350px] absolute top-16 md:top-20 right-0 z-10 lg:relative lg:top-0">
+      <div className="w-[280px] sm:w-[350px] absolute top-16 md:top-20 right-0 z-50 lg:relative lg:top-0">
         {showSidebar && <TestSidebar questions={questions} time={time} />}
       </div>
+      <TestBottom
+              currentIndex={index}
+              totalQuestions={questions.length}
+              questionId={currentQuestion?.questionId}
+            />
     </div>
   );
 };

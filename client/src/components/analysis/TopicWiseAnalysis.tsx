@@ -35,9 +35,6 @@ import {
                 Not Attempted
               </TableCell>
               <TableCell sx={{ fontSize: "20px", fontWeight: "bolder" }}>
-                Difficulty
-              </TableCell>
-              <TableCell sx={{ fontSize: "20px", fontWeight: "bolder" }}>
                 Accuracy
               </TableCell>
               <TableCell sx={{ fontSize: "20px", fontWeight: "bolder" }}>
@@ -58,9 +55,6 @@ import {
                 </TableCell>
                 <TableCell sx={{ borderBottom: "none" }}>
                   {row.notAttempted}
-                </TableCell>
-                <TableCell sx={{ borderBottom: "none" }}>
-                  {row.difficulty}
                 </TableCell>
                 <TableCell
                   sx={{ borderBottom: "none" }}

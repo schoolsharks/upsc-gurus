@@ -24,6 +24,7 @@ interface TestType extends Document {
     // verbalScore: Number | null;
     // quantitativeScore: Number | null;
     answers: AnswerType[];
+    testMode :string;
 }
 
 const answerSchema = new Schema<AnswerType>({
@@ -70,6 +71,11 @@ const testSchema = new Schema<TestType>({
     testTemplateId: {
         type: Schema.Types.ObjectId,
         ref: 'TestTemplate'
+    },
+    testMode: {
+        type: String,
+        enum: ['TEST', 'LEARN'],
+        default: 'TEST'
     },
     testStatus: {
         type: String,

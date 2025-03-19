@@ -1,9 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
-import {
-  fetchQuestions,
-  // fetchSectionalTestQuestions,
-} from "../actions/questionActions";
+import { fetchQuestions } from "../actions/questionActions";
 
 // Question interface
 interface Question {
@@ -19,32 +16,26 @@ interface Question {
   userAnswer?: string[][];
 }
 
-// QuestionSet interface
-// export interface QuestionSet {
-//   setName?: string;
-//   setStatus?: string;
-//   timeLimit: number;
-//   timeRemaining: number;
-//   timeSpent: number;
-//   questionDetails: Question[];
-// }
-
 // QuestionState interface
 interface QuestionState {
-  questions: Question[]; // Flattened question details
-  // questionSets: QuestionSet[];
-  timeRemaining:number | null ;
+  questions: Question[];
+  timeRemaining: number | null;
   isLoading: boolean;
   error: string | null;
 }
 
 const initialState: QuestionState = {
   questions: [],
-  // questionSets: [],
   isLoading: false,
-  timeRemaining:null,
+  timeRemaining: null,
   error: null,
 };
+
+// Timer action type
+interface TimerAction {
+  type: "init" | "decrement";
+  value?: number;
+}
 
 const questionSlice = createSlice({
   name: "question",
@@ -53,16 +44,14 @@ const questionSlice = createSlice({
     setQuestions: (state, action: PayloadAction<Question[]>) => {
       state.questions = action.payload;
     },
-    // setQuestionSets: (state, action: PayloadAction<QuestionSet[]>) => {
-    //   state.questionSets = action.payload;
-    // },
-    updateTimeRemaining: (state, action) => {
-      if (state.timeRemaining) {
-        state.timeRemaining =
-          state.timeRemaining - action.payload;
-      }
-      else{
-        state.timeRemaining=action.payload
+    updateTimeRemaining: (state, action: PayloadAction<TimerAction>) => {
+      if (
+        action.payload.type === "init" &&
+        action.payload.value !== undefined
+      ) {
+        state.timeRemaining = action.payload.value;
+      } else if (state.timeRemaining !== null && state.timeRemaining > 0) {
+        state.timeRemaining = state.timeRemaining - 1;
       }
     },
     markQuestion: (state, action) => {
@@ -105,13 +94,7 @@ const questionSlice = createSlice({
         console.log("action.payload", action.payload);
 
         if (action.payload) {
-          // state.questionSets = action.payload;
-
-          // Flatten the question details for easy access
-          // console.log(
-          //   action.payload.flatMap((set) => console.log(set.questionDetails))
-          // );
-          state.timeRemaining=action.payload.timeRemaining;
+          state.timeRemaining = action.payload.timeRemaining;
           state.questions = action.payload.questionDetails;
         } else {
           console.warn("No questions received from the API.");
@@ -121,40 +104,7 @@ const questionSlice = createSlice({
         state.isLoading = false;
         state.error =
           (action.payload as string) || "Failed to fetch questions.";
-      })
-
-      // // active sectional test questions
-      // .addCase(fetchSectionalTestQuestions.pending, (state) => {
-      //   state.isLoading = true;
-      //   state.error = null;
-      // })
-      // .addCase(fetchSectionalTestQuestions.fulfilled, (state, action) => {
-      //   state.isLoading = false;
-      //   console.log("action.payload", action.payload);
-      //   if (action.payload) {
-      //     state.questionSets = action.payload;
-
-      //     // Flatten the question details for easy access
-      //     console.log(
-      //       action.payload.flatMap((set) => console.log(set.questionDetails))
-      //     );
-
-      //     state.questions = action.payload.flatMap(
-      //       (set) =>
-      //         set?.questionDetails?.map((detail) => ({
-      //           ...detail,
-      //           section: set.setName,
-      //         })) || []
-      //     );
-      //   } else {
-      //     console.warn("No questions received from the API.");
-      //   }
-      // })
-      // .addCase(fetchSectionalTestQuestions.rejected, (state, action) => {
-      //   state.isLoading = false;
-      //   state.error =
-      //     (action.payload as string) || "Failed to fetch questions.";
-      // });
+      });
   },
 });
 
@@ -167,7 +117,6 @@ export const selectError = (state: RootState) => state.question.error;
 
 // Export actions
 export const {
-  // setQuestionSets,
   setQuestions,
   updateUserResponse,
   updateTimeRemaining,
