@@ -58,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({
     if (timeRemaining && timeRemaining <= 0 || !showTimer) return;
   
     const timer = setInterval(() => {
-      dispatch(updateTimeRemaining(1)); 
+       dispatch(updateTimeRemaining({ type: "decrement" }));
     }, 1000);
   
     return () => clearInterval(timer);
