@@ -165,21 +165,19 @@ const userTestInfo = async (
         _id: "$_id",
         userName: { $first: { $concat: ["$firstName", " ", "$lastName"] } },
         email: { $first: "$email" },
-        // Add a new field to collect ALL tests regardless of status
-        allTests: {
+        inProgressTest: {
           $push: {
             $cond: {
-              if: { $ifNull: ["$tests._id", false] },
+              if: {
+                $in: ["$tests.testStatus", ["IN_PROGRESS", "NOT_STARTED"]],
+              },
               then: {
                 testId: "$tests._id",
                 testTemplateId: "$testIds.testTemplateId",
                 testName: { $arrayElemAt: ["$testTemplates.testName", 0] },
-                testStatus: "$tests.testStatus",
-                startDate: "$tests.createdAt",
-                completeDate: "$tests.updatedAt",
-                totalScore: "$tests.totalScore",
-                testTimeSpent: "$tests.testTimeSpent",
                 testMode: "$tests.testMode",
+                startDate: "$tests.createdAt",
+                testTimeSpent: "$tests.testTimeSpent",
                 testCompletionPercent: "$tests.testCompletionPercent",
               },
               else: null,
@@ -202,25 +200,6 @@ const userTestInfo = async (
             },
           },
         },
-        inProgressTest: {
-          $push: {
-            $cond: {
-              if: {
-                $in: ["$tests.testStatus", ["IN_PROGRESS", "NOT_STARTED"]],
-              },
-              then: {
-                testId: "$tests._id",
-                testTemplateId: "$testIds.testTemplateId",
-                testName: { $arrayElemAt: ["$testTemplates.testName", 0] },
-                testMode: "$tests.testMode",
-                startDate: "$tests.createdAt",
-                testTimeSpent: "$tests.testTimeSpent",
-                testCompletionPercent: "$tests.testCompletionPercent",
-              },
-              else: null,
-            },
-          },
-        },
         allTestTemplates: { $addToSet: "$allTestTemplates" },
       },
     },
@@ -229,10 +208,9 @@ const userTestInfo = async (
         _id: 1,
         userName: 1,
         email: 1,
-        // Filter out null values from allTests
-        allTests: {
+        inProgressTest: {
           $filter: {
-            input: "$allTests",
+            input: "$inProgressTest",
             as: "test",
             cond: { $ne: ["$$test", null] },
           },
@@ -244,14 +222,7 @@ const userTestInfo = async (
             cond: { $ne: ["$$test", null] },
           },
         },
-        inProgressTest: {
-          $filter: {
-            input: "$inProgressTest",
-            as: "test",
-            cond: { $ne: ["$$test", null] },
-          },
-        },
-        unAttemptedTest: {
+        allTests: {
           $let: {
             vars: {
               allTestTemplateIdsFlattened: {
@@ -291,12 +262,6 @@ const userTestInfo = async (
               },
             },
           },
-        },
-        completedAndInProgressTestIds: {
-          $concatArrays: [
-            "$completedTest.testTemplateId",
-            "$inProgressTest.testTemplateId",
-          ],
         },
       },
     },

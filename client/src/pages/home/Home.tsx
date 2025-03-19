@@ -20,7 +20,7 @@ import userApi from "../../api/userApi";
 const Home: React.FC = () => {
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [inProgressDialogOpen, setInProgressDialogOpen] = useState(false);
-  const { completedTests, inProgressTests, unAttemptedTests,allTests } = useSelector(
+  const { completedTests, inProgressTests,allTests } = useSelector(
     (state: RootState) => state.user
   );
   const navigate = useNavigate();
@@ -306,21 +306,6 @@ const Home: React.FC = () => {
           </section>
         )}
 
-        {/* Empty State Message */}
-        {inProgressTests.length === 0 && unAttemptedTests.length === 0 && (
-          <section className="test-section mb-8">
-            <Typography
-              sx={{ fontSize: "1.25rem", fontWeight: "600" }}
-              variant="h5"
-              className="text-center md:text-left"
-            >
-              Available Tests
-            </Typography>
-            <Box sx={{ mt: 2 }}>
-              <Typography>New Tests will be added soon.</Typography>
-            </Box>
-          </section>
-        )}
 
         {/* Completed Tests Section */}
         <section className="mb-8">
