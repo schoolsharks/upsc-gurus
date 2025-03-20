@@ -59,7 +59,6 @@ const userSchema = new Schema<UserType>({
     },
     resetPasswordExpires: {
         type: Date
-    }
     },
     purchasedPackages: [{
         type: Schema.Types.ObjectId,
