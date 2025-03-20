@@ -4,7 +4,7 @@ import UserInfo from "../../components/analysis/UserInfo";
 import OverAllAnalysis from "../../components/analysis/OverAllAnalysis";
 import TopicWiseAnalysis from "../../components/analysis/TopicWiseAnalysis";
 import TopicWiseBarGraph from "../../components/analysis/TopicWiseBarGraph";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import userApi from "../../api/userApi";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,6 +13,7 @@ import {
   updateTestAnalytics,
 } from "../../redux/reducers/testAnalysisReducer";
 import { RootState } from "../../redux/store";
+import { downloadAnalyticsPdf } from "../../utils/downloadAnalytics";
 
 export interface TopicAnalysis {
   topic: string;
@@ -56,6 +57,7 @@ interface TestAnalyticsResponse {
 
 const Analysis = () => {
   const { testId } = useParams<{ testId: string }>();
+  const pageRef=useRef<HTMLDivElement>(null)
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -142,10 +144,15 @@ const Analysis = () => {
     timeTaken: formatTime(report.testTimeSpent),
   };
 
+
+  const handleDownloadAnalysis=()=>{
+    downloadAnalyticsPdf(pageRef,testId??"")
+  }
+
   return (
     <>
-      <div className="px-24"><AnalysisHeader/></div>
-      <Box sx={{ px: 15 }}>
+      <div className="px-24"><AnalysisHeader onDownloadAnalysis={handleDownloadAnalysis}/></div>
+      <Box ref={pageRef} sx={{ px: 15 }}>
         <UserInfo user={user} />
         <Typography
           align="center"

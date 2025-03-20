@@ -728,7 +728,7 @@ const lockTest = async (req: Request, res: Response, next: NextFunction) => {
                     else: {
                       $cond: {
                         if: { $eq: ["$$answer.isCorrect", false] },
-                        then: -0.6,
+                        then: -0.66,
                         else: 0,
                       },
                     },

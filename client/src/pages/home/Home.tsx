@@ -16,6 +16,10 @@ import { logout, setUserInfo } from "../../redux/reducers/userReducer";
 import { MdLogout } from "react-icons/md";
 import { convertSecondsToTime } from "../../utils/formatTime";
 import userApi from "../../api/userApi";
+import { LockOutlined } from "@mui/icons-material";
+
+
+const tests=["Polity","Geography","Art and Culture","Environment","Economics","Science and IR","GS Full Syllabus Test","Full GS","Full CSAT test"]
 
 const Home: React.FC = () => {
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
@@ -302,6 +306,53 @@ const Home: React.FC = () => {
                   </Box>
                 </Card>
               ))}
+
+
+              {/* Static temporary data */}
+              {
+                tests.map((test,index)=>(<Card
+                  key={index}
+                  sx={{
+                    ...cardStyles,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Stack sx={{ flexGrow: 1 }}>
+                    <Typography
+                      style={{
+                        fontSize: "1.25rem",
+                        fontWeight: "400",
+                      }}
+                    >
+                      {test}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      style={{ color: "#656565", marginBottom: "12px" }}
+                    >
+                      <span style={{ color: "#D5D5D5" }}>●</span> Total Time{" "}
+                      2 hours
+                    </Typography>
+                  </Stack>
+                  <Box textAlign="center">
+                    <Button
+                      disabled={true}
+                      variant="contained"
+                      startIcon={<LockOutlined/>}
+                      sx={{
+                        color: "white",
+                        padding: "8px 16px",
+                        borderRadius: "8px",
+                        width: "100%",
+                      }}
+                    >
+                      Unlock on 27/03/2025
+                    </Button>
+                  </Box>
+                </Card>))
+              }
             </Stack>
           </section>
         )}

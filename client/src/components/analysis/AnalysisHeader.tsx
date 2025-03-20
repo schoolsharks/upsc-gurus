@@ -1,7 +1,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 
-const AnalysisHeader = () => {
+const AnalysisHeader = ({onDownloadAnalysis}:{onDownloadAnalysis?:()=>void}) => {
   const navigate = useNavigate();
   const { testId } = useParams<{ testId: string }>();
   const location = useLocation();
@@ -40,9 +40,9 @@ const AnalysisHeader = () => {
         >
           {buttonText}
         </Button>
-        <Button variant="contained" color="primary" disabled  sx={{ mr: 1 }}>
+       {onDownloadAnalysis && <Button variant="contained" color="primary" onClick={onDownloadAnalysis}  sx={{ mr: 1 }}>
           Download Analytics
-        </Button>
+        </Button>}
         <Button variant="outlined" color="primary"  onClick={() => navigate("/")}>
           Back to Home
         </Button>

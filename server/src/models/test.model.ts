@@ -88,7 +88,7 @@ const testSchema = new Schema<TestType>({
     },
     testTimeLimit: {
         type: Number,
-        default: 88 * 60  // 18+23+21+26
+        default: 120 * 60  // 18+23+21+26
     },
     testTimeSpent: {
         type: Number,
