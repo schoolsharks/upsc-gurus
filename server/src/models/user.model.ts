@@ -12,6 +12,7 @@ interface UserType extends Document {
     accessToken: string;
     resetPasswordToken: string | null;
     resetPasswordExpires: Date;
+    purchasedPackages: Schema.Types.ObjectId[];
 }
 
 const userSchema = new Schema<UserType>({
@@ -59,6 +60,11 @@ const userSchema = new Schema<UserType>({
     resetPasswordExpires: {
         type: Date
     }
+    },
+    purchasedPackages: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Package'
+    }]
 },
     {
         timestamps: true
