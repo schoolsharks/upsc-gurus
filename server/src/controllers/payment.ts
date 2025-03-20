@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import AppError from "../utils/appError";
 import Payment from "../models/payment.model";
-const shortid = require("shortid");
-const Razorpay = require("razorpay");
+// const shortid = require("shortid");
+// const Razorpay = require("razorpay");
 import crypto from "crypto";
 import mongoose from "mongoose";
 import { AccountStatusEnum, PaymentEnum } from "../types/enum";
