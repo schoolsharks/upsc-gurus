@@ -201,7 +201,11 @@ const handlePaymentWebhook = async (
     // Extract payment details from the Razorpay webhook payload
 
     const paymentDetails = req.body;
-    console.log("rzaorpay body req.body", paymentDetails);
+    console.log("___payment details___")
+    console.dir(paymentDetails, { depth: null });
+    console.log("___payment details___")
+
+
     const razorpay_payment_id = paymentDetails.payload.payment.entity.id;
     const razorpay_order_id = paymentDetails.payload.payment.entity.order_id;
     const razorpay_signature = paymentDetails.payload.payment.entity.signature;
