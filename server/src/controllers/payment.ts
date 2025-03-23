@@ -96,6 +96,7 @@ const handlePaymentWebhook = async (
                 .digest('hex');
 
             if (generatedSignature !== razorpaySignature) {
+                console.log("Invalid Signature")
                 return res.status(401).json({
                     success: false,
                     message: "Invalid signature",
@@ -104,6 +105,7 @@ const handlePaymentWebhook = async (
         }
 
         const paymentDetails = req.body;
+        console.log("Payment details received from webhook:");
         console.dir(paymentDetails, { depth: null });
 
         if (!paymentDetails.payload?.payment?.entity) {
