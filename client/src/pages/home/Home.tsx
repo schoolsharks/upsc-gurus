@@ -10,12 +10,18 @@ import {
   Menu,
   MenuItem,
   IconButton,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import "./home.css";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
-import { logout, setUserInfo } from "../../redux/reducers/userReducer";
+import {
+  logout,
+  setUserInfo,
+  TestTypes,
+} from "../../redux/reducers/userReducer";
 import { MdLogout, MdMenu } from "react-icons/md";
 import { convertSecondsToTime } from "../../utils/formatTime";
 import userApi from "../../api/userApi";
@@ -28,6 +34,11 @@ const tests = [
   "Full GS",
   "Full CSAT test",
 ];
+const pyqs=[
+  "PYQs 2023",
+  "PYQs 2021",
+  "PYQs 2022",
+]
 
 const Home: React.FC = () => {
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
@@ -35,7 +46,10 @@ const Home: React.FC = () => {
   const { completedTests, inProgressTests, allTests } = useSelector(
     (state: RootState) => state.user
   );
-  const [mobileMenuAnchor, setMobileMenuAnchor] = useState<null | HTMLElement>(null);
+  const [mobileMenuAnchor, setMobileMenuAnchor] = useState<null | HTMLElement>(
+    null
+  );
+  const [testType, setTestType] = useState<TestTypes>(TestTypes.TEST_SERIES);
 
   const { handleFreeCouncellingCall, handleMentorshipAppointment } =
     useCouncelling();
@@ -117,6 +131,16 @@ const Home: React.FC = () => {
     handleCloseMobileMenu();
   };
 
+  const tabs=[
+    {
+      title:"Test Series",
+      key:TestTypes.TEST_SERIES
+    },
+    {title:"PYQs",
+      key:TestTypes.PYQS
+    }
+  ]
+
   return (
     <>
       <Stack
@@ -138,17 +162,21 @@ const Home: React.FC = () => {
             className="logo cursor-pointer"
           />
         </Box>
-        
+
         {/* Desktop buttons - visible only on larger screens */}
-        <Stack 
-          direction="row" 
+        <Stack
+          direction="row"
           gap="16px"
           sx={{
-            display: { xs: 'none', sm: 'flex' }
+            display: { xs: "none", sm: "flex" },
           }}
         >
-          <Button onClick={handleFreeCouncellingCall}>Free Counselling Call</Button>
-          <Button onClick={handleMentorshipAppointment}>Mentoring Appointment</Button>
+          <Button onClick={handleFreeCouncellingCall}>
+            Free Counselling Call
+          </Button>
+          <Button onClick={handleMentorshipAppointment}>
+            Mentoring Appointment
+          </Button>
           <Button
             endIcon={<MdLogout />}
             onClick={() => setLogoutDialogOpen(true)}
@@ -161,9 +189,9 @@ const Home: React.FC = () => {
             Log Out
           </Button>
         </Stack>
-        
+
         {/* Mobile hamburger menu - visible only on mobile screens */}
-        <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+        <Box sx={{ display: { xs: "block", sm: "none" } }}>
           <IconButton
             onClick={handleOpenMobileMenu}
             size="large"
@@ -190,10 +218,7 @@ const Home: React.FC = () => {
             <MenuItem onClick={handleMobileMentorship}>
               Mentoring Appointment
             </MenuItem>
-            <MenuItem 
-              onClick={handleMobileLogout}
-              sx={{ color: "#FF3D3D" }}
-            >
+            <MenuItem onClick={handleMobileLogout} sx={{ color: "#FF3D3D" }}>
               <MdLogout style={{ marginRight: 8 }} />
               Log Out
             </MenuItem>
@@ -206,15 +231,19 @@ const Home: React.FC = () => {
         className="dashboard"
         sx={{ [theme.breakpoints.down("sm")]: { padding: 0 } }}
       >
-        <Typography
-          sx={{ fontSize: "1.25rem", fontWeight: "600" }}
-          variant="h5"
-          className="text-center md:text-left"
-        >
-          All Tests
-        </Typography>
+        <Tabs value={testType} onChange={(_,newValue) => setTestType(newValue)}>
+          {tabs.map((item, index) => (
+            <Tab
+              key={index}
+              value={item.key}
+              label={item.title} // Add this line to show the actual test type as label
+              sx={{textTransform:"none" }}
+            />
+          ))}
+        </Tabs>
+
         {/* In Progress Tests Section */}
-        {inProgressTests.length > 0 && (
+        {inProgressTests?.filter((item)=>item.testType===testType).length > 0 && (
           <section className="test-section mb-8">
             <Typography
               sx={{ fontSize: "1.25rem", fontWeight: "600" }}
@@ -232,7 +261,7 @@ const Home: React.FC = () => {
                 justifyContent: { xs: "center", sm: "start" },
               }}
             >
-              {inProgressTests?.map((test: any, index) => (
+              {inProgressTests?.filter((item)=>item.testType===testType)?.map((test: any, index) => (
                 <Card key={index} sx={cardStyles}>
                   <Stack>
                     <Stack direction="row" justifyContent={"space-between"}>
@@ -323,7 +352,7 @@ const Home: React.FC = () => {
         )}
 
         {/* Start New Test Section */}
-        {allTests.length > 0 && (
+        {allTests?.filter((item)=>item.testType===testType).length > 0 && (
           <section className="test-section mb-8">
             <Typography
               sx={{ fontSize: "1.25rem", fontWeight: "600" }}
@@ -341,7 +370,7 @@ const Home: React.FC = () => {
                 justifyContent: { xs: "center", sm: "start" },
               }}
             >
-              {allTests?.map((test: any, index) => (
+              {allTests?.filter((item)=>item.testType===testType)?.map((test: any, index) => (
                 <Card
                   key={index}
                   sx={{
@@ -389,7 +418,7 @@ const Home: React.FC = () => {
               ))}
 
               {/* Static temporary data */}
-              {tests.map((test, index) => (
+              {(testType===TestTypes.TEST_SERIES?tests:pyqs).map((test, index) => (
                 <Card
                   key={index}
                   sx={{
@@ -449,7 +478,7 @@ const Home: React.FC = () => {
           >
             Previous Attempts
           </Typography>
-          {completedTests.length ? (
+          {completedTests?.filter((item)=>item.testType===testType).length ? (
             <Stack
               direction={"row"}
               gap={"1rem"}
@@ -458,7 +487,7 @@ const Home: React.FC = () => {
                 justifyContent: { xs: "center", sm: "start" },
               }}
             >
-              {completedTests.map((test, index) => (
+              {completedTests?.filter((item)=>item.testType===testType)?.map((test, index) => (
                 <Card
                   key={index}
                   sx={{

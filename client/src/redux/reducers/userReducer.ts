@@ -8,9 +8,15 @@ export enum AuthStates {
   ERROR = "ERROR",
 }
 
+export enum TestTypes{
+  TEST_SERIES = "TEST_SERIES",
+  PYQS = "PYQS"
+}
+
 interface Test {
   testId: string;
   testTemplateId: string;
+  testType:TestTypes;
   testName: string;
   startDate?: string;
   completeDate?: string;
