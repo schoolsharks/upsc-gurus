@@ -77,6 +77,7 @@ const handlePaymentWebhook = async (
     next: NextFunction
 ) => {
     try {
+        console.log("Webhook triggered")
         const webhookSecret: string | null = process.env.RAZORPAY_WEBHOOK_SECRET ?? null;
         const razorpaySignature = req.headers['x-razorpay-signature'];
         const body = JSON.stringify(req.body);

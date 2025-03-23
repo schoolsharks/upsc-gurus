@@ -135,7 +135,7 @@ interface TestType extends Document {
     testTimeSpent: number;
     testCompletionPercent: number;
     totalScore: number | null;
-    testMode: string;
+    // testMode: string;
     answers: AnswerType[];
 }
 
@@ -200,11 +200,11 @@ const testSchema = new Schema<TestType>({
             message: 'Selected test template is not available in the purchased package.'
         }
     },
-    testMode: {
-        type: String,
-        enum: ['PRELIMS', 'PYQ'],
-        default: 'COMBINED'
-    },
+    // testMode: {
+    //     type: String,
+    //     enum: ['PRELIMS', 'PYQ'],
+    //     default: 'COMBINED'
+    // },
     testStatus: {
         type: String,
         enum: Object.values(TestStatusEnum),

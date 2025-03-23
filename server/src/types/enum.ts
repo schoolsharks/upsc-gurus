@@ -66,3 +66,9 @@ export enum PackageEnum {
     PYQ = 'Previous Year Questions (PYQs)',
     COMBINED = 'Comprehensive Prelims Preparation (Prelims + PYQs)'
 }
+
+
+export enum TestTypes{
+  TEST_SERIES="TEST_SERIES",
+  PYQS="PYQS",
+}

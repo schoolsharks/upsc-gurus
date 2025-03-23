@@ -1,7 +1,11 @@
 import mongoose, { Document, Schema, model } from 'mongoose';
+import { TestTypes } from '../types/enum';
+
+
 
 interface TestTemplateType extends Document {
   testName: string;
+  type:TestTypes;
   active: boolean;
   isDeleted: boolean;
   deletedAt: Date | null;
@@ -14,6 +18,11 @@ const testTemplateSchema = new Schema<TestTemplateType>(
       type: String,
       required: true,
       unique: true,
+    },
+    type:{
+      type:String,
+      enum:Object.values(TestTypes),
+      required:true
     },
     active: {
       type: Boolean,

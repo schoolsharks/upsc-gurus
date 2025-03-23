@@ -112,6 +112,26 @@ const userTestInfo = async (
     {
       $match: { _id: new mongoose.Types.ObjectId(userId) },
     },
+    
+    {
+      $lookup: {
+        from: "packages",
+        localField: "purchasedPackages",
+        foreignField: "_id",
+        as: "userPackages"
+      }
+    },
+    {
+      $addFields: {
+        purchasedTestTemplateIds: {
+          $reduce: {
+            input: "$userPackages",
+            initialValue: [],
+            in: { $concatArrays: ["$$value", "$$this.testTemplateIds"] }
+          }
+        }
+      }
+    },
     {
       $unwind: {
         path: "$testIds",
@@ -140,24 +160,35 @@ const userTestInfo = async (
         preserveNullAndEmptyArrays: true,
       },
     },
+    
     {
       $lookup: {
         from: "testtemplates",
+        let: { purchasedIds: "$purchasedTestTemplateIds" },
         pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $in: ["$_id", "$$purchasedIds"] },
+                  { $eq: ["$active", true] },
+                  { $eq: ["$isDeleted", false] }
+                ]
+              }
+            }
+          },
           {
             $project: {
               _id: 1,
               testTemplateId: "$_id",
               testName: 1,
+              testType: "$type",
               active: 1,
               isDeleted: 1,
             },
-          },
-          {
-            $match: { active: true, isDeleted: false },
-          },
+          }
         ],
-        as: "allTestTemplates",
+        as: "purchasedTestTemplates",
       },
     },
     {
@@ -165,6 +196,7 @@ const userTestInfo = async (
         _id: "$_id",
         userName: { $first: { $concat: ["$firstName", " ", "$lastName"] } },
         email: { $first: "$email" },
+        purchasedTestTemplateIds: { $first: "$purchasedTestTemplateIds" },
         inProgressTest: {
           $push: {
             $cond: {
@@ -174,6 +206,7 @@ const userTestInfo = async (
               then: {
                 testId: "$tests._id",
                 testTemplateId: "$testIds.testTemplateId",
+                testType: { $arrayElemAt: ["$testTemplates.type", 0] },
                 testName: { $arrayElemAt: ["$testTemplates.testName", 0] },
                 testMode: "$tests.testMode",
                 startDate: "$tests.createdAt",
@@ -191,6 +224,7 @@ const userTestInfo = async (
               then: {
                 testId: "$tests._id",
                 testTemplateId: "$testIds.testTemplateId",
+                testType: { $arrayElemAt: ["$testTemplates.type", 0] },
                 testName: { $arrayElemAt: ["$testTemplates.testName", 0] },
                 completeDate: "$tests.updatedAt",
                 totalScore: "$tests.totalScore",
@@ -200,7 +234,7 @@ const userTestInfo = async (
             },
           },
         },
-        allTestTemplates: { $addToSet: "$allTestTemplates" },
+        purchasedTestTemplates: { $first: "$purchasedTestTemplates" },
       },
     },
     {
@@ -222,42 +256,18 @@ const userTestInfo = async (
             cond: { $ne: ["$$test", null] },
           },
         },
+        
         allTests: {
           $let: {
             vars: {
-              allTestTemplateIdsFlattened: {
-                $reduce: {
-                  input: "$allTestTemplates",
-                  initialValue: [],
-                  in: { $concatArrays: ["$$value", "$$this"] },
-                },
-              },
               inProgressTestIds: "$inProgressTest.testTemplateId",
             },
             in: {
-              $let: {
-                vars: {
-                  remainingTestTemplateIds: {
-                    $setDifference: [
-                      {
-                        $map: {
-                          input: "$$allTestTemplateIdsFlattened",
-                          as: "testTemplate",
-                          in: "$$testTemplate._id",
-                        },
-                      },
-                      "$$inProgressTestIds",
-                    ],
-                  },
-                },
-                in: {
-                  $filter: {
-                    input: "$$allTestTemplateIdsFlattened",
-                    as: "testTemplate",
-                    cond: {
-                      $in: ["$$testTemplate._id", "$$remainingTestTemplateIds"],
-                    },
-                  },
+              $filter: {
+                input: "$purchasedTestTemplates",
+                as: "testTemplate",
+                cond: {
+                  $not: { $in: ["$$testTemplate._id", "$$inProgressTestIds"] }
                 },
               },
             },
@@ -267,20 +277,19 @@ const userTestInfo = async (
     },
   ]);
 
-  // Check if user data is retrieved
+  
   if (user.length === 0) {
     return next(new AppError("User not found", 404));
   }
 
-  // Ensure tests arrays exist even if empty
+  
   const result = {
     _id: user[0]._id,
     userName: user[0].userName,
     email: user[0].email,
-    allTests: user[0].allTests || [], // Add the new allTests field
+    allTests: user[0].allTests || [], 
     completedTest: user[0].completedTest || [],
     inProgressTest: user[0].inProgressTest || [],
-    unAttemptedTest: user[0].unAttemptedTest || [],
   };
 
   return res.status(200).json({
