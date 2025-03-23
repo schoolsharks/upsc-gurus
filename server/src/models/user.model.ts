@@ -1,5 +1,4 @@
-import mongoose, { Schema, model, Document } from 'mongoose';
-import TestTemplate from './testTemplate.model';
+import { Schema, model, Document } from 'mongoose';
 
 interface UserType extends Document {
     email: string;
@@ -12,7 +11,7 @@ interface UserType extends Document {
     accessToken: string;
     resetPasswordToken: string | null;
     resetPasswordExpires: Date;
-    purchasedPackages: Schema.Types.ObjectId[];
+    purchasedPackages: Schema.Types.ObjectId[]; // it is only condering array values 
 }
 
 const userSchema = new Schema<UserType>({
@@ -61,7 +60,7 @@ const userSchema = new Schema<UserType>({
         type: Date
     },
     purchasedPackages: [{
-        type: Schema.Types.ObjectId,
+        type:Schema.Types.ObjectId,
         ref: 'Package'
     }]
 },

@@ -1,257 +1,196 @@
 import { Request, Response, NextFunction } from "express";
 import AppError from "../utils/appError";
 import Payment from "../models/payment.model";
-// const shortid = require("shortid");
-// const Razorpay = require("razorpay");
 import crypto from "crypto";
-import mongoose from "mongoose";
 import { AccountStatusEnum, PaymentEnum } from "../types/enum";
 import User from "../models/user.model";
 import bcrypt from "bcrypt";
+import Package from "../models/package.model";
+import mongoose, { Schema } from "mongoose";
 
 const createAccountOnSuccessfullPayment = async ({
     email,
     firstName,
     lastName,
     contactNumber,
+    packageId
 }: {
     email: string;
     firstName: string;
-    lastName: [string]; 
+    lastName: string[];
     contactNumber: string;
+    packageId: Schema.Types.ObjectId;
 }) => {
-    const existedUser = await User.findOne({ email: email });
-    
-    if (existedUser) {
-        console.log("User already exists...");
+    try {
+        const existedUser = await User.findOne({ email });
+
+        if (existedUser) {
+
+            existedUser.paymentStatus = true;
+            if (!existedUser.purchasedPackages.includes(packageId)) {
+                existedUser.purchasedPackages.push(packageId); 
+            }
+
+            await existedUser.save();
+
+            return { statusCode: 200, message: "Payment verified and account updated successfully" };
+        }
+
+
+        const password = crypto.randomBytes(4).toString("hex");
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const user = await User.create({
+            email,
+            firstName: firstName.trim(),
+            lastName: lastName.join(" "),
+            contactNumber: contactNumber.replace(/\s+/g, ""), 
+            password: hashedPassword,
+            accountStatus: AccountStatusEnum.ACTIVE,
+            subscriptionStartDate: new Date(),
+            paymentStatus: true,
+            purchasedPackages: [packageId]
+        });
+
+
+        return { statusCode: 201, message: "Payment verified and account created successfully." };
         
-        // existedUser.accountStatus = AccountStatusEnum.ACTIVE;
-        // existedUser.subscriptionStartDate = new Date();
-        existedUser.paymentStatus = true;
-        await existedUser.save();
-
-       
-        // await sendEmail({
-        //     to: email,
-        //     subject: "Payment Verified | Access Granted",
-        //     html: paymentVerifiedTemplate(email, `${firstName} ${lastName}`)
-        // });
-
-        console.log("Activated account:", existedUser);
-        return { statusCode: 200, message: "Payment verified and account updated to active mode" };
+    } catch (error) {
+        console.error("Error in createAccountOnSuccessfullPayment:", error);
+        return { statusCode: 500, message: "Internal Server Error" };
     }
-
-     // password generated
-     const password = crypto.randomBytes(4).toString("hex");
-     const hashedPassword = await bcrypt.hash(password, 10);
- 
-     console.log("creating new account.....", lastName);
- 
-     console.log("on spliting", lastName ? (lastName.join(" ") ?? "") : "")
- 
-     const user = await User.create({
-         email,
-         firstName: firstName.split(" ")[0] ?? "",
-         lastName: lastName ? (lastName.join(" ") ?? "") : "",
-         contactNumber: contactNumber.split(" ")[0],
-         password: hashedPassword,
-         accountStatus: AccountStatusEnum.ACTIVE,
-         subscriptionStartDate: new Date(),
-         paymentStatus: true
-     });
- 
-     const createdUser = await User.findById(user._id).select(
-         "-password -refreshToken -accessToken"
-     );
- 
-     if (!createdUser) {
-         return { statusCode: 500, message: "Payement Verfied but failed to create account" }
-     }
- 
-    //  await sendEmail({
-    //      to: createdUser.email,
-    //      subject: "CareerGreek Login Credentials",
-    //      html: registrationTemplate(email, password, firstName)
-    //  });
- 
-     return { StatusCodes: 201, message: "Payment verified and account created successfully" }
 };
 
-// const handleCreateOrder = async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-// ) => {
-//     const { userId } = req.body;
-
-//     const razorpay = new Razorpay({
-//         key_id: process.env.RAZORPAY_KEY_ID,
-//         key_secret: process.env.RAZORPAY_SECRET,
-//     });
-
-//     const amount: number = 5000;
-
-//     const options = {
-//         amount: amount,
-//         currency: "INR",
-//         receipt: `CG_${new Date().getTime()}`,
-//         payment_capture: 1,
-//     }
-
-//     // creating order
-//     const orderedData = await razorpay.orders.create(options);
-
-//     console.log("razorpay response", orderedData);
-
-//     if (orderedData.status !== "created")
-//         throw new AppError("Order Creation Error", 410);
-
-//     // creating order in db
-//     const payment = await Payment.create({
-//         userId: new mongoose.Types.ObjectId(userId),
-//         amount,
-//         paymentId: "",
-//         orderId: orderedData.id,           // replace with order_id
-//         razorpaySignature: "",
-//         status: PaymentEnum.PENDING
-//     });
-
-//     console.log("payment", payment);
-
-//     if (!payment)
-//         throw new AppError("Order not created, try agin later", 504);
-
-//     return res.status(200).json({
-//         success: true,
-//         message: "Payement status successfully",
-//         orderedData,
-//         // payment
-//     })
-
-
-// }
-
-
-
-// const handleVerifyingPayment = async (
-//     req: Request,
-//     res: Response,
-//     next: NextFunction
-// ) => {
-//     const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
-
-//     if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature)
-//         throw new AppError("All Fields are required", 404);
-
-//     const payment = await Payment.findOne({ orderId: razorpay_order_id });
-
-//     if (!payment)
-//         throw new AppError("Order Not found", 404);
-
-//     const RAZORPAY_SECRET = process.env.RAZORPAY_SECRET ?? "";
-
-//     const generated_signature = crypto
-//         .createHmac("sha256", RAZORPAY_SECRET)
-//         .update(razorpay_order_id + "|" + razorpay_payment_id)
-//         .digest("hex");
-
-
-//     if (generated_signature === razorpay_signature) {
-//         payment.paymentId = razorpay_payment_id,
-//             payment.razorpaySignature = razorpay_signature,
-//             payment.status = PaymentEnum.COMPLETED
-
-//         const updatedPayemntDoc = await payment.save();
-
-//         return res.status(200).json({
-//             success: true,
-//             message: "Payment verfied successfully",
-//             updatedPayemntDoc
-//         })
-//     }
-//     else {
-//         payment.status = PaymentEnum.FAILED;
-//         await payment.save();
-//         throw new AppError("Payment verrification Failed", 400);
-//     }
-// }
-
+async function getIdFromName(name: string): Promise<Schema.Types.ObjectId> {
+    const coursePackage = await Package.findOne({ name: name });
+    if (coursePackage) {
+        return coursePackage._id;
+    }
+    else {
+        throw new AppError("Package not found", 404);
+    }
+}
 
 const handlePaymentWebhook = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    const webhookSecret: string | null = process.env.RAZORPAY_WEBHOOK_SECRET ?? null;
-    const razorpaySignature = req.headers['x-razorpay-signature'];
-    const body = JSON.stringify(req.body);
-    // console.log("paymentDetails", body);
+    try {
+        const webhookSecret: string | null = process.env.RAZORPAY_WEBHOOK_SECRET ?? null;
+        const razorpaySignature = req.headers['x-razorpay-signature'];
+        const body = JSON.stringify(req.body);
+        
 
-    if (webhookSecret) {
-        const generatedSignature = crypto
-            .createHmac('sha256', webhookSecret)
-            .update(body)
-            .digest('hex');
-
-        if (generatedSignature !== razorpaySignature) {
-            throw new AppError("Invalid Signature", 404);
+        if (!razorpaySignature) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing Razorpay signature",
+            });
         }
-    }
 
-    // Extract payment details from the Razorpay webhook payload
+        if (webhookSecret) {
+            const generatedSignature = crypto
+                .createHmac('sha256', webhookSecret)
+                .update(body)
+                .digest('hex');
 
-    const paymentDetails = req.body;
-    console.log("___payment details___")
-    console.dir(paymentDetails, { depth: null });
-    console.log("___payment details___")
+            if (generatedSignature !== razorpaySignature) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Invalid signature",
+                });
+            }
+        }
+
+        const paymentDetails = req.body;
+        console.dir(paymentDetails, { depth: null });
+
+        if (!paymentDetails.payload?.payment?.entity) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid payment data structure",
+            });
+        }
+
+        const entity = paymentDetails.payload.payment.entity;
+        
+        const razorpay_payment_id = entity.id;
+        const razorpay_order_id = entity.order_id;
+        const amount = entity.amount;
+        const contactNumber = entity.contact;
+        const email = entity.notes?.email || entity.email || "";
+        const method = entity.method;
+        const packageName = entity.notes?.package;
+        
+        if (!packageName) {
+            return res.status(400).json({
+                success: false,
+                message: "Package name is required",
+            });
+        }
+        
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is required",
+            });
+        }
+
+        const userEmail = entity.email || email;
+        
+        let packageId;
+        try {
+            packageId = await getIdFromName(packageName);
+        } catch (error) {
+            return res.status(404).json({
+                success: false,
+                message: "Package not found",
+            });
+        }
 
 
-    const razorpay_payment_id = paymentDetails.payload.payment.entity.id;
-    const razorpay_order_id = paymentDetails.payload.payment.entity.order_id;
-    const razorpay_signature = paymentDetails.payload.payment.entity.signature;
-    const amount = paymentDetails.payload.payment.entity.amount;
-    const contactNumber = paymentDetails.payload.payment.entity.contact;
-    const email = paymentDetails.payload.payment.entity.email ?? "";
-    const method = paymentDetails.payload.payment.entity.method;
+        if (entity.status === 'captured') {
+            const paymentRecord = await Payment.create({
+                contactNumber,
+                amount,
+                method,
+                paymentId: razorpay_payment_id,
+                orderId: razorpay_order_id,
+                status: PaymentEnum.COMPLETED,
+                purchasedPackage: packageId,
+                userEmail: userEmail
+            });
 
 
-    if (paymentDetails.payload.payment.entity.status === 'captured') {
+            const name = entity.notes?.name ?? "Jinesh Prajapat";
+            const [firstName, ...lastName] = name.split(" ");
 
-        const paymenDetails = await Payment.create({
-            contactNumber,
-            amount,
-            method,
-            paymentId: razorpay_payment_id,
-            orderId: razorpay_order_id,
-            razorpaySignature: razorpay_signature,
-            status: PaymentEnum.COMPLETED
+            const { statusCode, message } = await createAccountOnSuccessfullPayment({ 
+                email, 
+                firstName, 
+                lastName, 
+                contactNumber, 
+                packageId 
+            });
+            
+            return res.status(Number(statusCode)).json({
+                success: (statusCode === 200 || statusCode === 201) ? true : false,
+                message: message,
+            });
+        } else {
+            return res.status(402).json({
+                success: false,
+                message: "Payment not verified",
+            });
+        }
+    } catch (error) {
+        console.error("Error in handlePaymentWebhook:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
         });
-
-        console.log("payment creation details", paymenDetails)
-
-        console.log("entity object", paymentDetails.payload.payment.entity)
-        const name = paymentDetails.payload.payment.entity.notes.name ?? "Jinesh Prajapat";
-        const [firstName, ...lastName] = name.split(" ");
-
-        console.log("lastName", lastName)
-
-        const { statusCode, message } = await createAccountOnSuccessfullPayment({ email, firstName, lastName, contactNumber })
-
-        return res.status(Number(statusCode)).json({
-            success: (statusCode === 200 || statusCode === 201) ? true : false,
-            message: message,
-        });
     }
-    else {
-
-        return res.status(402).json({
-            success: true,
-            message: "Payment not verfied",
-        })
-    }
-
-
-
-}
+};
 
 export { handlePaymentWebhook };

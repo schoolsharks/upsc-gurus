@@ -62,7 +62,7 @@ export enum AccountStatusEnum {
 }
 
 export enum PackageEnum {
-    PRELIMS = 'PRELIMS',
-    PYQ = 'PYQ',
-    COMBINED = 'COMBINED'
+    PRELIMS = 'Prelims Test Series',
+    PYQ = 'Previous Year Questions (PYQs)',
+    COMBINED = 'Comprehensive Prelims Preparation (Prelims + PYQs)'
 }

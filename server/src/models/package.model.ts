@@ -2,6 +2,7 @@ import { Schema, model, Document } from 'mongoose';
 import { PackageEnum } from '../types/enum';
 
 interface PackageType extends Document {
+    _id: Schema.Types.ObjectId;
     name: PackageEnum;
     testTemplateIds: Schema.Types.ObjectId[]; 
 }

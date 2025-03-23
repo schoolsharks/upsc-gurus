@@ -1,9 +1,9 @@
 import { Schema, model, Document } from "mongoose";
-import { PaymentEnum } from "../types/enum";
+import { PackageEnum, PaymentEnum } from "../types/enum";
 
 interface PaymentType extends Document {
-    userId: Schema.Types.ObjectId;
-    packageId: Schema.Types.ObjectId;
+    userEmail: string;
+    purchasedPackage: string;
     contactNumber: string;
     amount: number;
     paymentId: string;
@@ -15,15 +15,12 @@ interface PaymentType extends Document {
 
 const paymentSchema = new Schema<PaymentType>(
     {
-        userId: {
-            type: Schema.Types.ObjectId,
-            ref: "User",
+        userEmail: {
+            type: String,
             required: true,
         },
-        packageId: {
-            type: Schema.Types.ObjectId,
-            ref: "Package",
-            required: true,
+        purchasedPackage: {
+            type: String,
         },
         contactNumber: {
             type: String,
@@ -45,9 +42,7 @@ const paymentSchema = new Schema<PaymentType>(
             type: String,
         },
         status: {
-            type: String,
-            enum: Object.values(PaymentEnum),
-            required: true,
+            type: String
         },
     },
     { timestamps: true }
