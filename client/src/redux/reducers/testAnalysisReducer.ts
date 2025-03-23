@@ -16,6 +16,7 @@ export interface Question {
   section: string;
   userAnswer?: string[][];
   correctAnswer?:string[];
+  explanation?:string;
   isCorrect?: boolean;
 }
 

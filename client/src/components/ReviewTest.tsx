@@ -16,6 +16,7 @@ import { RootState } from "../redux/store";
 import { Cancel, Check } from "@mui/icons-material";
 import AnalysisHeader from "./analysis/AnalysisHeader";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
+
 interface TestAnalyticsResponse {
   attemptedCount: number;
   correctAnswerScore: number;
@@ -27,6 +28,7 @@ interface TestAnalyticsResponse {
   topicWiseAnalysis: any[];
   totalQuestions: number;
 }
+
 const ReviewTest: React.FC = () => {
   const location = useLocation();
   const dispatch = useDispatch();
@@ -40,7 +42,6 @@ const ReviewTest: React.FC = () => {
   const [showSidebar, setShowSidebar] = useState(window.innerWidth >= 1024);
   const navigate = useNavigate();
   const totalQuestions = questions.length;
-  
 
   useEffect(() => {
     const handleResize = () => {
@@ -83,8 +84,6 @@ const ReviewTest: React.FC = () => {
       navigate(`${location.pathname}?question=${newIndex}`);
     }
   };
-
-
 
   return (
     <div className=" min-w-screen ">
@@ -134,50 +133,61 @@ const ReviewTest: React.FC = () => {
                 </div>
               </>
             ) : null}
-            <div className="flex gap-4 px-16 mt-4 items-center">
-              {currentQuestion?.userAnswer?.length ? (
-                <div
-                  className={`font-semibold ${
-                    currentQuestion?.isCorrect
-                      ? "text-green-500"
-                      : "text-red-500"
-                  }`}
-                >
-                  {currentQuestion?.isCorrect ? (
-                    <div>
-                      <Check /> Correct
-                    </div>
-                  ) : (
-                    <div>
-                      <Cancel /> Incorrect
-                    </div>
-                  )}
-                </div>
-              ) : null}
 
-              {(!currentQuestion?.isCorrect ||
-                !currentQuestion?.userAnswer?.length) && (
-                <div className="text-[1rem]">
-                  Correct option is{" "}
-                  {currentQuestion?.options.findIndex(
-                    (option) =>
-                      JSON.stringify(option) ===
-                      JSON.stringify(currentQuestion?.correctAnswer?.[0])
-                  ) !== -1
-                    ? String.fromCharCode(
-                        65 +
-                          currentQuestion?.options.findIndex(
-                            (option) =>
-                              JSON.stringify(option) ===
-                              JSON.stringify(
-                                currentQuestion?.correctAnswer?.[0]
-                              )
-                          )
-                      )
-                    : null}{" "}
-                  : {currentQuestion?.correctAnswer?.[0]}
-                </div>
-              )}
+            <div className="px-16 flex flex-col gap-5">
+              <div className="flex gap-4 mt-4 items-center">
+                {currentQuestion?.userAnswer?.length ? (
+                  <div
+                    className={`font-semibold ${
+                      currentQuestion?.isCorrect
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {currentQuestion?.isCorrect ? (
+                      <div>
+                        <Check /> Correct
+                      </div>
+                    ) : (
+                      <div>
+                        <Cancel /> Incorrect
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+
+                {(!currentQuestion?.isCorrect ||
+                  !currentQuestion?.userAnswer?.length) && (
+                  <div className="text-[1rem]">
+                    Correct option is{" "}
+                    {currentQuestion?.options.findIndex(
+                      (option) =>
+                        JSON.stringify(option) ===
+                        JSON.stringify(currentQuestion?.correctAnswer?.[0])
+                    ) !== -1
+                      ? String.fromCharCode(
+                          65 +
+                            currentQuestion?.options.findIndex(
+                              (option) =>
+                                JSON.stringify(option) ===
+                                JSON.stringify(
+                                  currentQuestion?.correctAnswer?.[0]
+                                )
+                            )
+                        )
+                      : null}{" "}
+                    : {currentQuestion?.correctAnswer?.[0]}
+                  </div>
+                )}
+              </div>
+              {
+                <div className="w-[70%]">{currentQuestion?.explanation}</div>
+                // <div
+                //   // dangerouslySetInnerHTML={{
+                //   //   __html: DOMPurify.sanitize(currentQuestion.explanation ??""),
+                //   // }}
+                // />
+              }
             </div>
           </div>
         </div>
@@ -190,8 +200,22 @@ const ReviewTest: React.FC = () => {
         totalQuestions={questions.length}
         questionId={currentQuestion?.questionId}
       />
-      <div className="flex justify-between max-w-[75%] text-lg px-16 mt-16"><div className="flex gap-2 items-center cursor-pointer" onClick={()=>handleNavigation("prev")}><BsArrowLeft size={24}/><span >Previous Question</span></div>
-      <div className="flex gap-2 items-center flex-row-reverse cursor-pointer" onClick={()=>handleNavigation("next")}><BsArrowRight size={24}/><span >Next Question</span></div></div>
+      <div className="flex justify-between max-w-[75%] text-lg px-16 mt-16">
+        <div
+          className="flex gap-2 items-center cursor-pointer"
+          onClick={() => handleNavigation("prev")}
+        >
+          <BsArrowLeft size={24} />
+          <span>Previous Question</span>
+        </div>
+        <div
+          className="flex gap-2 items-center flex-row-reverse cursor-pointer"
+          onClick={() => handleNavigation("next")}
+        >
+          <BsArrowRight size={24} />
+          <span>Next Question</span>
+        </div>
+      </div>
     </div>
   );
 };

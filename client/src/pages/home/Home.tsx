@@ -7,26 +7,38 @@ import {
   Stack,
   Dialog,
   useTheme,
+  Menu,
+  MenuItem,
+  IconButton,
 } from "@mui/material";
 import "./home.css";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import { logout, setUserInfo } from "../../redux/reducers/userReducer";
-import { MdLogout } from "react-icons/md";
+import { MdLogout, MdMenu } from "react-icons/md";
 import { convertSecondsToTime } from "../../utils/formatTime";
 import userApi from "../../api/userApi";
 import { LockOutlined } from "@mui/icons-material";
+import useCouncelling from "../../hooks/useCouncelling";
 
-
-const tests=["Polity","Geography","Art and Culture","Environment","Economics","Science and IR","GS Full Syllabus Test","Full GS","Full CSAT test"]
+const tests = [
+  "Science and IR",
+  "GS Full Syllabus Test",
+  "Full GS",
+  "Full CSAT test",
+];
 
 const Home: React.FC = () => {
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [inProgressDialogOpen, setInProgressDialogOpen] = useState(false);
-  const { completedTests, inProgressTests,allTests } = useSelector(
+  const { completedTests, inProgressTests, allTests } = useSelector(
     (state: RootState) => state.user
   );
+  const [mobileMenuAnchor, setMobileMenuAnchor] = useState<null | HTMLElement>(null);
+
+  const { handleFreeCouncellingCall, handleMentorshipAppointment } =
+    useCouncelling();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
@@ -48,8 +60,8 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await userApi.get(`/test/userTestInfo`);
-        console.log(response.data)
+        const response = await userApi.get("/test/userTestInfo");
+        console.log(response.data);
         dispatch(setUserInfo(response.data.user));
       } catch (err: any) {
         dispatch(setUserInfo(err));
@@ -71,17 +83,40 @@ const Home: React.FC = () => {
   const handleLogout = () => {
     dispatch(logout());
     localStorage.removeItem("accessToken");
+    setMobileMenuAnchor(null);
   };
 
   const handleResumeTest = (testMode: string, testId: string) => {
     if (testMode === "TEST") {
       navigate(`/test/question/${testId}`);
-    }
-    else {
+    } else {
       navigate(`/learn/test/question/${testId}`);
     }
   };
-  
+
+  const handleOpenMobileMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setMobileMenuAnchor(event.currentTarget);
+  };
+
+  const handleCloseMobileMenu = () => {
+    setMobileMenuAnchor(null);
+  };
+
+  const handleMobileFreeCounselling = () => {
+    handleFreeCouncellingCall();
+    handleCloseMobileMenu();
+  };
+
+  const handleMobileMentorship = () => {
+    handleMentorshipAppointment();
+    handleCloseMobileMenu();
+  };
+
+  const handleMobileLogout = () => {
+    setLogoutDialogOpen(true);
+    handleCloseMobileMenu();
+  };
+
   return (
     <>
       <Stack
@@ -89,37 +124,81 @@ const Home: React.FC = () => {
         justifyContent={"space-between"}
         alignItems={"center"}
         padding={"16px 44px"}
+        gap={"20px"}
+        sx={{
+          [theme.breakpoints.down("sm")]: {
+            padding: "16px 24px",
+          },
+        }}
       >
-        <button onClick={() => navigate("/")} className="focus:outline-none">
+        <Box onClick={() => navigate("/")} className="focus:outline-none">
           <img
             src="/images/logo.png"
             alt="UPSC Gurus Logo"
             className="logo cursor-pointer"
           />
-        </button>
-      <Stack direction={"row"} gap={"16px"}>
-      <Button
-          endIcon={<MdLogout />}
-          onClick={() => setLogoutDialogOpen(true)}
+        </Box>
+        
+        {/* Desktop buttons - visible only on larger screens */}
+        <Stack 
+          direction="row" 
+          gap="16px"
           sx={{
-            color: "#FF3D3D",
-            height: "max-content",
-            textTransform: "none",
+            display: { xs: 'none', sm: 'flex' }
           }}
         >
-          Log Out
-        </Button>
-        {/* <Button
-          variant="outlined"
-        >
-          +91 0123456789
-        </Button>
-        <Button
-          variant="outlined"
-        >
-          +91 0123456789
-        </Button> */}
-      </Stack>
+          <Button onClick={handleFreeCouncellingCall}>Free Counselling Call</Button>
+          <Button onClick={handleMentorshipAppointment}>Mentoring Appointment</Button>
+          <Button
+            endIcon={<MdLogout />}
+            onClick={() => setLogoutDialogOpen(true)}
+            sx={{
+              color: "#FF3D3D",
+              height: "max-content",
+              textTransform: "none",
+            }}
+          >
+            Log Out
+          </Button>
+        </Stack>
+        
+        {/* Mobile hamburger menu - visible only on mobile screens */}
+        <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+          <IconButton
+            onClick={handleOpenMobileMenu}
+            size="large"
+            edge="end"
+            color="inherit"
+            aria-label="menu"
+          >
+            <MdMenu size={24} />
+          </IconButton>
+          <Menu
+            anchorEl={mobileMenuAnchor}
+            open={Boolean(mobileMenuAnchor)}
+            onClose={handleCloseMobileMenu}
+            PaperProps={{
+              sx: {
+                mt: 1.5,
+                width: 200,
+              },
+            }}
+          >
+            <MenuItem onClick={handleMobileFreeCounselling}>
+              Free Counselling Call
+            </MenuItem>
+            <MenuItem onClick={handleMobileMentorship}>
+              Mentoring Appointment
+            </MenuItem>
+            <MenuItem 
+              onClick={handleMobileLogout}
+              sx={{ color: "#FF3D3D" }}
+            >
+              <MdLogout style={{ marginRight: 8 }} />
+              Log Out
+            </MenuItem>
+          </Menu>
+        </Box>
       </Stack>
       <div className="gradient-line"></div>
 
@@ -128,12 +207,12 @@ const Home: React.FC = () => {
         sx={{ [theme.breakpoints.down("sm")]: { padding: 0 } }}
       >
         <Typography
-              sx={{ fontSize: "1.25rem", fontWeight: "600" }}
-              variant="h5"
-              className="text-center md:text-left"
-            >
-              All Tests
-            </Typography>
+          sx={{ fontSize: "1.25rem", fontWeight: "600" }}
+          variant="h5"
+          className="text-center md:text-left"
+        >
+          All Tests
+        </Typography>
         {/* In Progress Tests Section */}
         {inProgressTests.length > 0 && (
           <section className="test-section mb-8">
@@ -198,14 +277,16 @@ const Home: React.FC = () => {
                           color: "#FFBD00",
                         }}
                       >
-                        {test.testMode === "TEST" ? "Test Mode" : "Learning Mode"}
+                        {test.testMode === "TEST"
+                          ? "Test Mode"
+                          : "Learning Mode"}
                       </Box>
                     </Stack>
-                    
+
                     <Stack direction={"row"} justifyContent={"space-between"}>
                       <Typography fontSize={"0.9rem"}>Time Spent:</Typography>
                       <Typography fontSize={"0.9rem"}>
-                        {`${convertSecondsToTime(test.testTimeSpent)} minutes`}
+                        {convertSecondsToTime(test.testTimeSpent)} minutes
                       </Typography>
                     </Stack>
                     <Stack direction={"row"} justifyContent={"space-between"}>
@@ -307,10 +388,9 @@ const Home: React.FC = () => {
                 </Card>
               ))}
 
-
               {/* Static temporary data */}
-              {
-                tests.map((test,index)=>(<Card
+              {tests.map((test, index) => (
+                <Card
                   key={index}
                   sx={{
                     ...cardStyles,
@@ -332,15 +412,15 @@ const Home: React.FC = () => {
                       variant="body2"
                       style={{ color: "#656565", marginBottom: "12px" }}
                     >
-                      <span style={{ color: "#D5D5D5" }}>●</span> Total Time{" "}
-                      2 hours
+                      <span style={{ color: "#D5D5D5" }}>●</span> Total Time 2
+                      hours
                     </Typography>
                   </Stack>
                   <Box textAlign="center">
                     <Button
                       disabled={true}
                       variant="contained"
-                      startIcon={<LockOutlined/>}
+                      startIcon={<LockOutlined />}
                       sx={{
                         color: "white",
                         padding: "8px 16px",
@@ -351,12 +431,11 @@ const Home: React.FC = () => {
                       Unlock on 27/03/2025
                     </Button>
                   </Box>
-                </Card>))
-              }
+                </Card>
+              ))}
             </Stack>
           </section>
         )}
-
 
         {/* Completed Tests Section */}
         <section className="mb-8">
@@ -446,12 +525,7 @@ const Home: React.FC = () => {
             Are you sure you want to log out? You will not be able to login
             again without credentials
           </Typography>
-          <Stack
-            direction={"row"}
-            gap={"1rem"}
-            flex="1"
-            marginTop={"1rem"}
-          >
+          <Stack direction={"row"} gap={"1rem"} flex="1" marginTop={"1rem"}>
             <Button
               variant="outlined"
               onClick={() => setLogoutDialogOpen(false)}

@@ -13,7 +13,7 @@ import {
   updateTestAnalytics,
 } from "../../redux/reducers/testAnalysisReducer";
 import { RootState } from "../../redux/store";
-import { downloadAnalyticsPdf } from "../../utils/downloadAnalytics";
+import { downloadAnalyticsPdf } from "../../utils/downloadAnalytics.ts";
 
 export interface TopicAnalysis {
   topic: string;

@@ -104,6 +104,7 @@ export const getTestAnalytics = async (
         options: question?.options || [],
         userAnswer: answer.userAnswer,
         correctAnswer: answer.correctAnswer,
+        explanation:question.explanation,
         isCorrect: answer.isCorrect,
         timeTaken: answer.timeTaken || 0,
         markedForReview: answer.questionStatus===QuestionStatusEnum.MARKED || false,

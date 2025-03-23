@@ -609,12 +609,13 @@ const updateQuestionResponse = async (
 
     // Get the question details
     const question = await Question.findById(questionId).select(
-      "correctAnswer optionType"
+      "correctAnswer optionType explanation"
     );
     if (!question) {
       return next(new AppError("Question not found", 404));
     }
     const correctAnswer = question.correctAnswer;
+    const explanation = question.explanation;
     const isCorrect =
       JSON.stringify(userAnswer) === JSON.stringify(correctAnswer);
 
@@ -652,10 +653,15 @@ const updateQuestionResponse = async (
         },
       },
       { new: true }
-    );
-    const updatedAnswer = updatedTest?.answers.find(
-      (item) => item.questionId.toString() === questionId
-    );
+    ).lean();
+
+
+    const updatedAnswer = {
+      ...updatedTest?.answers.find(
+        (item) => item.questionId.toString() === questionId
+      ),
+      explanation:explanation,
+    };
     // const updatedAnswer = updatedTest?.answers[0];
 
     return res.status(200).json({
