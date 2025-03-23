@@ -289,6 +289,209 @@ const userTestInfo = async (
   });
 };
 
+
+// const userTestInfo = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   let userId: string | null = req.user?.id;
+
+//   if (!userId) {
+//     return next(new AppError("User ID is required", 400));
+//   }
+
+//   const user = await User.aggregate([
+//     {
+//       $match: { _id: new mongoose.Types.ObjectId(userId) },
+//     },
+//     {
+//       $lookup: {
+//         from: "packages", // Assuming "packages" is the collection for purchased packages
+//         localField: "purchasedPackage",
+//         foreignField: "name",
+//         as: "userPackage",
+//       },
+//     },
+//     {
+//       $unwind: {
+//         path: "$userPackage",
+//         preserveNullAndEmptyArrays: true,
+//       },
+//     },
+//     {
+//       $unwind: {
+//         path: "$testIds",
+//         preserveNullAndEmptyArrays: true,
+//       },
+//     },
+//     {
+//       $lookup: {
+//         from: "tests",
+//         localField: "testIds.testId",
+//         foreignField: "_id",
+//         as: "tests",
+//       },
+//     },
+//     {
+//       $lookup: {
+//         from: "testtemplates",
+//         localField: "testIds.testTemplateId",
+//         foreignField: "_id",
+//         as: "testTemplates",
+//       },
+//     },
+//     {
+//       $unwind: {
+//         path: "$tests",
+//         preserveNullAndEmptyArrays: true,
+//       },
+//     },
+//     {
+//       $lookup: {
+//         from: "testtemplates",
+//         pipeline: [
+//           {
+//             $match: {
+//               active: true,
+//               isDeleted: false,
+//               packageType: { $eq: "$userPackage.name" }, // Only fetch tests that match the purchased package
+//             },
+//           },
+//           {
+//             $project: {
+//               _id: 1,
+//               testTemplateId: "$_id",
+//               testName: 1,
+//               active: 1,
+//               isDeleted: 1,
+//             },
+//           },
+//         ],
+//         as: "allTestTemplates",
+//       },
+//     },
+//     {
+//       $group: {
+//         _id: "$_id",
+//         userName: { $first: { $concat: ["$firstName", " ", "$lastName"] } },
+//         email: { $first: "$email" },
+//         inProgressTest: {
+//           $push: {
+//             $cond: {
+//               if: {
+//                 $and: [
+//                   { $in: ["$tests.testStatus", ["IN_PROGRESS", "NOT_STARTED"]] },
+//                   { $eq: ["$testTemplates.packageType", "$userPackage.name"] }, // Filter by package
+//                 ],
+//               },
+//               then: {
+//                 testId: "$tests._id",
+//                 testTemplateId: "$testIds.testTemplateId",
+//                 testName: { $arrayElemAt: ["$testTemplates.testName", 0] },
+//                 testMode: "$tests.testMode",
+//                 startDate: "$tests.createdAt",
+//                 testTimeSpent: "$tests.testTimeSpent",
+//                 testCompletionPercent: "$tests.testCompletionPercent",
+//               },
+//               else: null,
+//             },
+//           },
+//         },
+//         completedTest: {
+//           $push: {
+//             $cond: {
+//               if: {
+//                 $and: [
+//                   { $eq: ["$tests.testStatus", "LOCKED"] },
+//                   { $eq: ["$testTemplates.packageType", "$userPackage.name"] }, // Filter by package
+//                 ],
+//               },
+//               then: {
+//                 testId: "$tests._id",
+//                 testTemplateId: "$testIds.testTemplateId",
+//                 testName: { $arrayElemAt: ["$testTemplates.testName", 0] },
+//                 completeDate: "$tests.updatedAt",
+//                 totalScore: "$tests.totalScore",
+//                 testTimeSpent: "$tests.testTimeSpent",
+//               },
+//               else: null,
+//             },
+//           },
+//         },
+//         allTestTemplates: { $addToSet: "$allTestTemplates" },
+//       },
+//     },
+//     {
+//       $project: {
+//         _id: 1,
+//         userName: 1,
+//         email: 1,
+//         inProgressTest: {
+//           $filter: {
+//             input: "$inProgressTest",
+//             as: "test",
+//             cond: { $ne: ["$$test", null] },
+//           },
+//         },
+//         completedTest: {
+//           $filter: {
+//             input: "$completedTest",
+//             as: "test",
+//             cond: { $ne: ["$$test", null] },
+//           },
+//         },
+//         allTests: {
+//           $let: {
+//             vars: {
+//               allTestTemplateIdsFlattened: {
+//                 $reduce: {
+//                   input: "$allTestTemplates",
+//                   initialValue: [],
+//                   in: { $concatArrays: ["$$value", "$$this"] },
+//                 },
+//               },
+//               inProgressTestIds: "$inProgressTest.testTemplateId",
+//             },
+//             in: {
+//               $let: {
+//                 vars: {
+//                   remainingTestTemplateIds: {
+//                     $setDifference: [
+//                       {
+//                         $map: {
+//                           input: "$$allTestTemplateIdsFlattened",
+//                           as: "testTemplate",
+//                           in: "$$testTemplate._id",
+//                         },
+//                       },
+//                       "$$inProgressTestIds",
+//                     ],
+//                   },
+//                 },
+//                 in: {
+//                   $filter: {
+//                     input: "$$allTestTemplateIdsFlattened",
+//                     as: "testTemplate",
+//                     cond: {
+//                       $in: ["$$testTemplate._id", "$$remainingTestTemplateIds"],
+//                     },
+//                   },
+//                 },
+//               },
+//             },
+//           },
+//         },
+//       },
+//     },
+//   ]);
+
+//   res.status(200).json({
+//     status: "success",
+//     data: user,
+//   });
+// };
+
 const handleCreateTest = async (
   req: Request,
   res: Response,

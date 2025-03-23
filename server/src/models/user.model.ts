@@ -1,5 +1,6 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
 import TestTemplate from './testTemplate.model';
+import { PackageEnum } from '../types/enum';
 
 interface UserType extends Document {
     email: string;
@@ -12,7 +13,7 @@ interface UserType extends Document {
     accessToken: string;
     resetPasswordToken: string | null;
     resetPasswordExpires: Date;
-    purchasedPackages: Schema.Types.ObjectId[];
+    purchasedPackages: string[]; // it is only condering array values 
 }
 
 const userSchema = new Schema<UserType>({
@@ -60,10 +61,7 @@ const userSchema = new Schema<UserType>({
     resetPasswordExpires: {
         type: Date
     },
-    purchasedPackages: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Package'
-    }]
+    purchasedPackages: { type: [String] }
 },
     {
         timestamps: true
