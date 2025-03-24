@@ -10,6 +10,7 @@ import mongoose, { Schema } from "mongoose";
 import { sendEmail } from "../utils/awsMailSender";
 import { registrationTemplate } from "../mails/registrationTemplate";
 
+
 const createAccountOnSuccessfullPayment = async ({
   email,
   firstName,
@@ -57,7 +58,7 @@ const createAccountOnSuccessfullPayment = async ({
 
     const response = await sendEmail({
       to: user.email,
-      subject: "CareerGreek Login Credentials",
+      subject: "UPSC Gurus Login Credentials",
       html: registrationTemplate(email, password, firstName),
     });
     console.log("Mail response", response);
