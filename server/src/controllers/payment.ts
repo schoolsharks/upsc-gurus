@@ -6,10 +6,15 @@ import { AccountStatusEnum, PaymentEnum } from "../types/enum";
 import User from "../models/user.model";
 import bcrypt from "bcrypt";
 import Package from "../models/package.model";
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
 import { sendEmail } from "../utils/awsMailSender";
 import { registrationTemplate } from "../mails/registrationTemplate";
 
+// sendEmail({
+//     to: "manish.piclet@gmail.com",
+//     subject: "UPSC Gurus Login Credentials",
+//     html: registrationTemplate("manishbulchandani4@gmail.com", "password", "Manish"),
+//   });
 
 const createAccountOnSuccessfullPayment = async ({
   email,
@@ -17,12 +22,18 @@ const createAccountOnSuccessfullPayment = async ({
   lastName,
   contactNumber,
   packageId,
+  noOfAttempts,
+  optionalSubject,
+  city,
 }: {
   email: string;
   firstName: string;
   lastName: string[];
   contactNumber: string;
   packageId: Schema.Types.ObjectId;
+  noOfAttempts?: number;
+  optionalSubject?: string;
+  city?: string;
 }) => {
   try {
     const existedUser = await User.findOne({ email });
@@ -54,6 +65,9 @@ const createAccountOnSuccessfullPayment = async ({
       subscriptionStartDate: new Date(),
       paymentStatus: true,
       purchasedPackages: [packageId],
+      noOfAttempts: noOfAttempts || 0,
+      optionalSubject: optionalSubject || "",
+      city: city || "",
     });
 
     const response = await sendEmail({
@@ -136,6 +150,10 @@ const handlePaymentWebhook = async (
     const email = entity.notes?.email || entity.email || "";
     const method = entity.method;
     const packageName = entity.notes?.package;
+    const noOfAttempts=entity.notes?.no_of_attempts_taken_at_upsc;
+    const optionalSubject=entity.notes?.optional_subject;
+    const city=entity.notes?.city;
+
 
     if (!packageName) {
       return res.status(400).json({
@@ -184,6 +202,9 @@ const handlePaymentWebhook = async (
         lastName,
         contactNumber,
         packageId,
+        noOfAttempts,
+        optionalSubject,
+        city,
       });
 
       return res.status(Number(statusCode)).json({

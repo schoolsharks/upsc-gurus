@@ -1,7 +1,7 @@
 export const registrationTemplate = (email: string, password: string, firstName: string) => {
   return `
-  <!DOCTYPE html>
-  <html lang="en">
+   <!DOCTYPE html>
+   <html lang="en">
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -93,29 +93,12 @@ export const registrationTemplate = (email: string, password: string, firstName:
         .ii a[href] {
         color: #ffffff;
       }
-
-        @media only screen and (max-width: 600px) {
-          .container {
-            width: 100%;
-            padding: 10px;
-          }
-
-          .header {
-            padding: 15px;
-          }
-
-          .body {
-            padding: 15px;
-          }
         }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <a href="https://app.upscgurus.in">
-            <h2>UPSC Gurus</h2>
-          </a>
           <div class="message">Welcome to UPSC Gurus!</div>
         </div>
         
@@ -131,7 +114,7 @@ export const registrationTemplate = (email: string, password: string, firstName:
           <p>To access your account, click the link below:</p>
           <a href="https://app.upscgurus.in/" class="cta-button">Go to UPSC Gurus</a>
           <p class="instruction">
-            For any support, feel free to reach out to us at <a href="mailto:support@upscgurus.com">support@upscgurus.com</a>.
+            For any support, feel free to reach out to us at <a href="mailto:enquiry@upscgurus.in">enquiry@upscgurus.in</a>.
           </p>
         </div>
 
@@ -142,5 +125,5 @@ export const registrationTemplate = (email: string, password: string, firstName:
       </div>
     </body>
   </html>
-  `;
+    `;
 };

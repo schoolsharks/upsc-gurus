@@ -12,7 +12,10 @@ interface UserType extends Document {
     resetPasswordToken: string | null;
     resetPasswordExpires: Date;
     purchasedPackages: Schema.Types.ObjectId[]; // it is only condering array values 
-}
+    noOfAttempts:number;
+    optionalSubject:string;
+    city:string;
+}   
 
 const userSchema = new Schema<UserType>({
     email: {
@@ -62,7 +65,19 @@ const userSchema = new Schema<UserType>({
     purchasedPackages: [{
         type:Schema.Types.ObjectId,
         ref: 'Package'
-    }]
+    }],
+    noOfAttempts:{
+        type:Number,
+        default:0
+    },
+    optionalSubject:{
+        type:String,
+        default:null
+    },
+    city:{
+        type:String,
+        default:null
+    }
 },
     {
         timestamps: true
