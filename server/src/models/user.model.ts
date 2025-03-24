@@ -12,7 +12,7 @@ interface UserType extends Document {
     resetPasswordToken: string | null;
     resetPasswordExpires: Date;
     purchasedPackages: Schema.Types.ObjectId[]; // it is only condering array values 
-    noOfAttempts:number;
+    noOfAttempts:string;
     optionalSubject:string;
     city:string;
 }   
@@ -67,8 +67,8 @@ const userSchema = new Schema<UserType>({
         ref: 'Package'
     }],
     noOfAttempts:{
-        type:Number,
-        default:0
+        type:String,
+        default:"_",
     },
     optionalSubject:{
         type:String,
