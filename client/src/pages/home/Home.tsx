@@ -34,11 +34,7 @@ const tests = [
   "Full GS",
   "Full CSAT test",
 ];
-const pyqs=[
-  "PYQs 2023",
-  "PYQs 2021",
-  "PYQs 2022",
-]
+
 
 const Home: React.FC = () => {
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
@@ -331,6 +327,7 @@ const Home: React.FC = () => {
                         onClick={() =>
                           handleResumeTest(test.testMode, test.testId)
                         }
+                        disabled={test.unlockUrl!=null}
                         variant="contained"
                         style={{
                           marginTop: "16px",
@@ -370,7 +367,7 @@ const Home: React.FC = () => {
                 justifyContent: { xs: "center", sm: "start" },
               }}
             >
-              {allTests?.filter((item)=>item.testType===testType)?.map((test: any, index) => (
+              {allTests?.filter((item)=>item.testType===testType)?.sort((a,b)=>b.testName.localeCompare(a.testName))?.map((test: any, index) => (
                 <Card
                   key={index}
                   sx={{
@@ -400,9 +397,10 @@ const Home: React.FC = () => {
                   <Box textAlign="center">
                     <Button
                       onClick={() =>
-                        navigate(`/launch-test/${test?.testTemplateId}`)
+                        test.unlockUrl?window.open(test.unlockUrl): navigate(`/launch-test/${test?.testTemplateId}`)
                       }
                       variant="contained"
+                      startIcon={test.unlockUrl?<LockOutlined />:null}
                       style={{
                         backgroundColor: "black",
                         color: "white",
@@ -411,14 +409,14 @@ const Home: React.FC = () => {
                         width: "100%",
                       }}
                     >
-                      Begin Test
+                      {test.unlockUrl? "Get Access" : "Begin Test"}
                     </Button>
                   </Box>
                 </Card>
               ))}
 
               {/* Static temporary data */}
-              {(testType===TestTypes.TEST_SERIES?tests:pyqs).map((test, index) => (
+              {(testType===TestTypes.TEST_SERIES?tests:null)?.map((test, index) => (
                 <Card
                   key={index}
                   sx={{

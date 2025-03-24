@@ -14,6 +14,7 @@ import {
 } from "../../redux/reducers/testAnalysisReducer";
 import { RootState } from "../../redux/store";
 import { downloadAnalyticsPdf } from "../../utils/downloadAnalytics.ts";
+import theme from "../../theme.ts";
 
 export interface TopicAnalysis {
   topic: string;
@@ -87,18 +88,21 @@ const Analysis = () => {
     (state: RootState) => state.testAnalytics.topicWiseAnalysis
   );
   console.log(topicReport);
-  const formatTime = (seconds: number) => {
-    if (!seconds && seconds !== 0) return "00:00";
 
-    // Calculate hours and minutes
+  const formatTime = (seconds: number) => {
+    if (!seconds && seconds !== 0) return "00:00:00";
+  
+    // Calculate hours, minutes, and seconds
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-
+    const remainingSeconds = seconds % 60;
+  
     // Format with leading zeros if needed
     const formattedHours = hours.toString().padStart(2, "0");
     const formattedMinutes = minutes.toString().padStart(2, "0");
-
-    return `${formattedHours}:${formattedMinutes}`;
+    const formattedSeconds = remainingSeconds.toString().padStart(2, "0");
+  
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
   };
 
   const processedTopicData =
@@ -123,7 +127,7 @@ const Analysis = () => {
             notAttempted: item.notAttempted || 0,
             difficulty: difficulty,
             accuracy: item.accuracy || 0,
-            timeTaken: `${formatTime(item.totalTimeSpent || 0)} hrs`,
+            timeTaken: `${formatTime(item.totalTimeSpent || 0)}`,
           };
         })
       : [];
@@ -152,7 +156,7 @@ const Analysis = () => {
   return (
     <>
       <div className="px-24"><AnalysisHeader onDownloadAnalysis={handleDownloadAnalysis}/></div>
-      <Box ref={pageRef} sx={{ px: 15 }}>
+      <Box ref={pageRef} sx={{ px: 15,[theme.breakpoints.down("md")]:{px:2} }}>
         <UserInfo user={user} />
         <Typography
           align="center"

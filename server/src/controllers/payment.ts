@@ -75,6 +75,7 @@ const createAccountOnSuccessfullPayment = async ({
       subject: "UPSC Gurus Login Credentials",
       html: registrationTemplate(email, password, firstName),
     });
+    
     console.log("Mail response", response);
 
     return {

@@ -18,6 +18,7 @@ interface Test {
   testTemplateId: string;
   testType:TestTypes;
   testName: string;
+  unlockUrl:string;
   startDate?: string;
   completeDate?: string;
   testTimeSpent?: number;

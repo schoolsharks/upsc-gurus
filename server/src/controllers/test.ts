@@ -3,10 +3,11 @@ import { Request, Response, NextFunction, response } from "express";
 import mongoose, { Schema } from "mongoose";
 import User from "../models/user.model";
 import Test from "../models/test.model";
-import { QuestionStatusEnum, TestStatusEnum } from "../types/enum";
+import { QuestionStatusEnum, TestStatusEnum, TestTypes } from "../types/enum";
 import Question from "../models/questions.model";
 import TestTemplate from "../models/testTemplate.model";
 import { lockAndUpdateTestScore } from "../dbFunctions/Test";
+import { PYQS, TEST_SERIES } from "../utils/paymentPages";
 
 export function calulateAccuracyOfUserAnswer(
   userAnswer: string[][],
@@ -112,7 +113,6 @@ const userTestInfo = async (
     {
       $match: { _id: new mongoose.Types.ObjectId(userId) },
     },
-    
     {
       $lookup: {
         from: "packages",
@@ -160,7 +160,6 @@ const userTestInfo = async (
         preserveNullAndEmptyArrays: true,
       },
     },
-    
     {
       $lookup: {
         from: "testtemplates",
@@ -170,7 +169,6 @@ const userTestInfo = async (
             $match: {
               $expr: {
                 $and: [
-                  { $in: ["$_id", "$$purchasedIds"] },
                   { $eq: ["$active", true] },
                   { $eq: ["$isDeleted", false] }
                 ]
@@ -188,7 +186,7 @@ const userTestInfo = async (
             },
           }
         ],
-        as: "purchasedTestTemplates",
+        as: "allTestTemplates",
       },
     },
     {
@@ -234,7 +232,7 @@ const userTestInfo = async (
             },
           },
         },
-        purchasedTestTemplates: { $first: "$purchasedTestTemplates" },
+        allTestTemplates: { $first: "$allTestTemplates" },
       },
     },
     {
@@ -256,27 +254,42 @@ const userTestInfo = async (
             cond: { $ne: ["$$test", null] },
           },
         },
-        
         allTests: {
-          $let: {
-            vars: {
-              inProgressTestIds: "$inProgressTest.testTemplateId",
-            },
+          $map: {
+            input: "$allTestTemplates",
+            as: "testTemplate",
             in: {
-              $filter: {
-                input: "$purchasedTestTemplates",
-                as: "testTemplate",
-                cond: {
-                  $not: { $in: ["$$testTemplate._id", "$$inProgressTestIds"] }
+              testName: "$$testTemplate.testName",
+              testType: "$$testTemplate.testType",
+              testTemplateId: {
+                $cond: {
+                  if: { $in: ["$$testTemplate._id", "$purchasedTestTemplateIds"] },
+                  then: "$$testTemplate._id",
+                  else: null,
                 },
               },
-            },
-          },
-        },
-      },
-    },
+              unlockUrl: {
+                $cond: {
+                  if: { $in: ["$$testTemplate._id", "$purchasedTestTemplateIds"] },
+                  then: null,
+                  else: {
+                    $switch: {
+                      branches: [
+                        { case: { $eq: ["$$testTemplate.testTyoe", TestTypes.TEST_SERIES] }, then: TEST_SERIES },
+                        { case: { $eq: ["$$testTemplate.testType", TestTypes.PYQS] }, then: PYQS }
+                      ],
+                      default: "url12345"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   ]);
-
+  
   
   if (user.length === 0) {
     return next(new AppError("User not found", 404));

@@ -24,7 +24,7 @@ const UserInfo = ({ user }: { user: UserTypes }) => {
         </Box>
         <Box>
           <Typography>
-            <strong>Total Time Taken:</strong> {user.timeTaken} hrs
+            <strong>Total Time Taken:</strong> {user.timeTaken}
           </Typography>
         </Box>
       </Box>

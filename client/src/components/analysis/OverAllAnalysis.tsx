@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography, useMediaQuery, useTheme } from "@mui/material";
 import {
   PieChart,
   Pie,
@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { UserTypes } from "../../pages/analysis/Analysis";
 
-//  colors for index-0 Attempted & index-1 Not Attempted
+// Colors for index-0 Attempted & index-1 Not Attempted
 const COLORS = ["#029105", "#111111"];
 
 const renderActiveShape = (props: any) => {
@@ -28,7 +28,6 @@ const renderActiveShape = (props: any) => {
     percent,
     value,
   } = props;
-  // console.log(payload)
 
   const sin = Math.sin(-RADIAN * midAngle);
   const cos = Math.cos(-RADIAN * midAngle);
@@ -40,6 +39,11 @@ const renderActiveShape = (props: any) => {
   const ey = my;
   const textAnchor = cos >= 0 ? "start" : "end";
 
+  // Adjust font sizes based on screen size
+  const isMobile = window.innerWidth < 600;
+  const centerFontSize = isMobile ? 22 : 28;
+  const subFontSize = isMobile ? 16 : 20;
+
   return (
     <g>
       <text
@@ -47,19 +51,19 @@ const renderActiveShape = (props: any) => {
         y={cy}
         dy={-5}
         textAnchor="middle"
-        fontSize={28}
+        fontSize={centerFontSize}
         fontWeight="bold"
       >
         {payload.value}
-        <tspan fontSize={20} fontWeight="lighter" >/100</tspan>
+        <tspan fontSize={subFontSize} fontWeight="lighter">/100</tspan>
       </text>
       <text
         x={cx}
         y={cy}
-        dy={25}
+        dy={20}
         textAnchor="middle"
         fill={fill}
-        fontSize={20}
+        fontSize={subFontSize}
         fontWeight="bold"
       >
         {payload.name}
@@ -94,6 +98,7 @@ const renderActiveShape = (props: any) => {
         y={ey}
         textAnchor={textAnchor}
         fill="#333"
+        fontSize={isMobile ? 12 : 14}
       >{`${value}`}</text>
       <text
         x={ex + (cos >= 0 ? 1 : -1) * 12}
@@ -101,6 +106,7 @@ const renderActiveShape = (props: any) => {
         dy={18}
         textAnchor={textAnchor}
         fill="#999"
+        fontSize={isMobile ? 12 : 14}
       >
         {`(${(percent * 100).toFixed(2)}%)`}
       </text>
@@ -110,26 +116,39 @@ const renderActiveShape = (props: any) => {
 
 const OverAllAnalysis = ({ user }: { user: UserTypes }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const data = [
     { name: "Attempted", value: user.attempted },
     { name: "Not Attempted", value: user.totalQuestions - user.attempted },
   ];
 
+  // Adjust chart dimensions based on screen size
+  const chartHeight = isMobile ? 250 : 300;
+  const innerRadius = isMobile ? 70 : 90;
+  const outerRadius = isMobile ? 85 : 110;
+
   return (
     <Paper
       sx={{
-        width: 800,
+        width: "100%",
+        maxWidth: 800,
         mx: "auto",
-        p: 3,
+        p: isMobile ? 2 : 3,
         mt: 3,
       }}
+      elevation={2}
     >
-      <Typography variant="h6" align="center" fontWeight="bold">
+      <Typography 
+        variant={isMobile ? "subtitle1" : "h6"} 
+        align="center" 
+        fontWeight="bold"
+      >
         Overall Analysis
       </Typography>
-      <Box display="flex" justifyContent="center" my={2}>
-        <ResponsiveContainer width="100%" height={300}>
+      <Box display="flex" justifyContent="center" my={isMobile ? 1 : 2}>
+        <ResponsiveContainer width="100%" height={chartHeight}>
           <PieChart>
             <Pie
               activeIndex={activeIndex}
@@ -137,8 +156,8 @@ const OverAllAnalysis = ({ user }: { user: UserTypes }) => {
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={90}
-              outerRadius={110}
+              innerRadius={innerRadius}
+              outerRadius={outerRadius}
               dataKey="value"
               onMouseEnter={(_, index) => setActiveIndex(index)}
             >
@@ -153,38 +172,85 @@ const OverAllAnalysis = ({ user }: { user: UserTypes }) => {
           </PieChart>
         </ResponsiveContainer>
       </Box>
-      <Box sx={{ mt: 2 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography fontWeight="bold">Total Questions:</Typography>
-          <Typography>{user.totalQuestions} questions</Typography>
-        </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography fontWeight="bold">Attempted:</Typography>
-          <Typography>{user.attempted} questions</Typography>
-        </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography fontWeight="bold">Correct:</Typography>
-          <Typography>{user.correct} questions</Typography>
-        </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography fontWeight="bold">Correct Answers Score:</Typography>
-          <Typography>{user.correctScore}</Typography>
-        </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography fontWeight="bold">Incorrect:</Typography>
-          <Typography>{user.incorrect} questions</Typography>
-        </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography fontWeight="bold">Negative Marks:</Typography>
-          <Typography>{user.negativeMarks}</Typography>
-        </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography fontWeight="bold">Time Taken:</Typography>
-          <Typography>{user.timeTaken} hrs</Typography>
+      <Box sx={{ mt: 2, px: isMobile ? 1 : 2 }}>
+        {/* Stats section with responsive layout */}
+        <Box 
+          sx={{ 
+            display: "grid", 
+            gridTemplateColumns: isMobile ? "1fr" : "repeat(2, 1fr)",
+            gap: isMobile ? 1 : 2
+          }}
+        >
+          <StatItem 
+            label="Total Questions:" 
+            value={`${user.totalQuestions} questions`}
+            isMobile={isMobile} 
+          />
+          <StatItem 
+            label="Attempted:" 
+            value={`${user.attempted} questions`}
+            isMobile={isMobile} 
+          />
+          <StatItem 
+            label="Correct:" 
+            value={`${user.correct} questions`}
+            isMobile={isMobile} 
+          />
+          <StatItem 
+            label="Correct Answers Score:" 
+            value={user.correctScore}
+            isMobile={isMobile} 
+          />
+          <StatItem 
+            label="Incorrect:" 
+            value={`${user.incorrect} questions`}
+            isMobile={isMobile} 
+          />
+          <StatItem 
+            label="Negative Marks:" 
+            value={user.negativeMarks}
+            isMobile={isMobile} 
+          />
+          <StatItem 
+            label="Time Taken:" 
+            value={`${user.timeTaken} hrs`}
+            isMobile={isMobile} 
+          />
         </Box>
       </Box>
     </Paper>
   );
 };
+
+// Helper component for stat items
+const StatItem = ({ 
+  label, 
+  value, 
+  isMobile 
+}: { 
+  label: string; 
+  value: string | number; 
+  isMobile: boolean;
+}) => (
+  <Box 
+    sx={{ 
+      display: "flex", 
+      justifyContent: "space-between",
+      borderBottom: "1px solid #eee",
+      py: 1,
+      flexDirection: isMobile ? "column" : "row"
+    }}
+  >
+    <Typography 
+      fontWeight="bold" 
+      variant={isMobile ? "body2" : "body1"}
+    >
+      {label}
+    </Typography>
+    <Typography variant={isMobile ? "body2" : "body1"}>
+      {value}
+    </Typography>
+  </Box>
+);
 
 export default OverAllAnalysis;
