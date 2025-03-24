@@ -508,7 +508,7 @@ const handleCreateTest = async (
 ) => {
   const { testTemplateId, mode } = req.body;
   let userId: string = req.user?.id;
-
+  
   if (!testTemplateId) throw new AppError("Field not found", 400);
 
   interface IQuestion {
@@ -547,6 +547,7 @@ const handleCreateTest = async (
   }));
 
   const newTest = new Test({
+    userId,
     testTemplateId: new mongoose.Types.ObjectId(String(testTemplateId)),
     testMode: mode,
     answers, // Attach pre-filled answers

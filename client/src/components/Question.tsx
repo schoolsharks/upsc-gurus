@@ -293,7 +293,7 @@ const QuestionComponent: React.FC = () => {
                     }}
                   />
                 </div>
-                <div className="options-container w-full md:w-[70%] px-2 sm:px-4 md:mx-auto -mt-10">
+                <div className="options-container w-full md:w-[70%] px-2 sm:px-4 md:mx-auto mt-10">
                   <div className="options-section flex flex-col gap-2 justify-center text-[0.9rem] sm:text-[1rem]">
                     {currentQuestion.optionType === "singleCorrectMCQ" &&
                       currentQuestion.options.map((option, idx) => {

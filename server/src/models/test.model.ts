@@ -189,16 +189,16 @@ const testSchema = new Schema<TestType>({
         type: Schema.Types.ObjectId,
         ref: 'TestTemplate',
         required: true,
-        validate: {
-            validator: async function (value: Schema.Types.ObjectId) {
-                const user = await model('User').findById(this.userId).populate('purchasedPackages');
-                if (!user) return false;
+        // validate: {
+        //     validator: async function (value: Schema.Types.ObjectId) {
+        //         const user = await model('User').findById(this.userId).populate('purchasedPackages');
+        //         if (!user) return false;
 
-                const packageData = await model('Package').findOne({ name: user.purchasedPackages });
-                return packageData?.testTemplateIds.includes(value);
-            },
-            message: 'Selected test template is not available in the purchased package.'
-        }
+        //         const packageData = await model('Package').findOne({ name: user.purchasedPackages });
+        //         return packageData?.testTemplateIds.includes(value);
+        //     },
+        //     message: 'Selected test template is not available in the purchased package.'
+        // }
     },
     // testMode: {
     //     type: String,
