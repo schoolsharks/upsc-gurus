@@ -155,12 +155,12 @@ const Analysis = () => {
 
   return (
     <>
-      <div className="px-24"><AnalysisHeader onDownloadAnalysis={handleDownloadAnalysis}/></div>
+      <div className="px-2 md:px-24"><AnalysisHeader onDownloadAnalysis={handleDownloadAnalysis}/></div>
       <Box ref={pageRef} sx={{ px: 15,[theme.breakpoints.down("md")]:{px:2} }}>
         <UserInfo user={user} />
         <Typography
           align="center"
-          sx={{ fontSize: "40px", fontWeight: "bold", mt: 10 }}
+          sx={{ fontSize: "40px", fontWeight: "bold", mt: 10 ,[theme.breakpoints.down("sm")]:{fontSize:"30px"}}}
         >
           Total Score:{user.totalScore}
           <span style={{ fontSize: "25px", fontWeight: "lighter" }}>

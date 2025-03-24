@@ -2,6 +2,7 @@ import { Box, Paper, Typography } from "@mui/material";
 import { UserTypes } from "../../pages/analysis/Analysis";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
+import theme from "../../theme";
 
 const UserInfo = ({ user }: { user: UserTypes }) => {
   const { email } = useSelector((state: RootState) => state.user);
@@ -16,7 +17,7 @@ const UserInfo = ({ user }: { user: UserTypes }) => {
         borderRadius: "13px",
       }}
     >
-      <Box display="flex" justifyContent="space-between">
+      <Box display="flex" sx={{[theme.breakpoints.down("sm")]:{flexDirection:"column",gap:"12px"}}} justifyContent="space-between">
         <Box>
           <Typography>
             <strong>Email Id:</strong> {email}
