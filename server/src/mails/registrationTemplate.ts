@@ -1,11 +1,11 @@
-export const paymentVerifiedTemplate = (email: string, name: string) => {
+export const registrationTemplate = (email: string, password: string, firstName: string) => {
     return `
     <!DOCTYPE html>
     <html lang="en">
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Payment Verified | Access Granted</title>
+        <title>Welcome to CareerGeek | Registration Complete</title>
         <style>
           body {
             background-color: #f4f4f9;
@@ -89,10 +89,10 @@ export const paymentVerifiedTemplate = (email: string, name: string) => {
             color: #0066cc;
             text-decoration: none;
           }
-  
+
           .ii a[href] {
-            color: #ffffff;
-          }
+          color: #ffffff;
+        }
   
           @media only screen and (max-width: 600px) {
             .container {
@@ -113,32 +113,34 @@ export const paymentVerifiedTemplate = (email: string, name: string) => {
       <body>
         <div class="container">
           <div class="header">
-            <a href="https://app.upscgurus.in">
-              <h1>UPSC GURUS</h1>
+            <a href="https://learn.careergeek.in">
+              <img class="logo" src="https://gre-test-images.s3.ap-south-1.amazonaws.com/Primary+Logo+1.png" alt="CareerGeek Logo" />
             </a>
-            <div class="message">Payment Verified! Access Granted</div>
+            <div class="message">Welcome to CareerGeek!</div>
           </div>
           
           <div class="body">
-            <p class="greeting">Dear ${name},</p>
+            <p class="greeting">Hello, ${firstName}!</p>
             <p class="instruction">
-              We are pleased to inform you that your payment has been successfully verified. You now have full access to all the features and services on the platform.
+              We are excited to have you join CareerGeek. Your registration was successful, and your account is now active.
             </p>
-            <p class="info">Your account is now upgraded, and you can start exploring the premium features available to you.</p>
+            <p class="info">Your account has been created with the following details:</p>
+            <p class="info">Email: ${email}</p>
+            <p class="info">Password: ${password}</p>
+            <p>If you did not register for CareerGeek, please disregard this email.</p>
             <p>To access your account, click the link below:</p>
-            <a href="https://app.upscgurus.in/" class="cta-button">Go to UPSC Gurus</a>
+            <a href="https://learn.careergeek.in/" class="cta-button">Go to CareerGeek</a>
             <p class="instruction">
-              If you encounter any issues or need assistance, feel free to contact us at <a href="mailto:support@careergeek.com">support@careergeek.com</a>.
+              For any support, feel free to reach out to us at <a href="mailto:support@careergeek.com">support@careergeek.com</a>.
             </p>
           </div>
   
           <div class="footer">
-            <p>&copy; 2024 Upsc Gurus, All Rights Reserved.</p>
-            <p>Visit us at <a href="https://app.upscgurus.in">UPSC Gurus</a></p>
+            <p>&copy; 2024 CareerGeek, All Rights Reserved.</p>
+            <p>Visit us at <a href="https://learn.careergeek.in">CareerGeek</a></p>
           </div>
         </div>
       </body>
     </html>
     `;
-  };
-  
+};
