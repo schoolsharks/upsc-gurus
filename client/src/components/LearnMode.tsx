@@ -327,7 +327,7 @@ const LearnMode: React.FC = () => {
                         return (
                           <button
                             key={idx}
-                            className={`inline-flex items-center gap-4 py-2 px-3 border rounded-md cursor-pointer whitespace-nowrap transition-colors duration-200
+                            className={`inline-flex items-center text-left gap-4 py-2 px-3 border rounded-md cursor-pointer transition-colors duration-200
                               ${
                                 isSubmitting &&
                                 selectedAnswers.length > 0 &&

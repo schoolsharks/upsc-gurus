@@ -10,6 +10,8 @@ import { updateTimeRemaining } from "../redux/reducers/questionReducer";
 import { useDispatch, useSelector } from "react-redux";
 import { AddCircleOutlineOutlined, EqualizerOutlined, RemoveCircleOutline } from "@mui/icons-material";
 import { AppDispatch, RootState } from "../redux/store";
+import logo from "../assets/logo.webp"
+
 
 interface HeaderProps {
   onContinue?: () => void;
@@ -80,7 +82,7 @@ const Header: React.FC<HeaderProps> = ({
         {/* Logo */}
         <div className="logo-container">
           <img
-            src="/public/images/logo.png"
+            src={logo}
             alt="UPSC Gurus Logo"
             className="logo mr-3"
           />

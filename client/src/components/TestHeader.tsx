@@ -4,8 +4,8 @@ import { markQuestion } from "../redux/reducers/questionReducer";
 import { useDispatch } from "react-redux";
 import { Button, Dialog, Stack, Typography, useTheme } from "@mui/material";
 import { useState } from "react";
-import { MdMenu } from "react-icons/md";
 import { RxCross1 } from "react-icons/rx";
+import logo from "../assets/logo.webp";
 
 interface TestHeaderProps {
   currentIndex: number;
@@ -80,7 +80,7 @@ const TestHeader: React.FC<TestHeaderProps> = ({
       <div className="flex items-center -mr-10">
         <button onClick={() => navigate("/")} className="focus:outline-none">
           <img
-            src="/images/logo.png"
+            src={logo}
             alt="UPSC Gurus Logo"
             className="logo mr-3 cursor-pointer"
           />
@@ -132,12 +132,7 @@ const TestHeader: React.FC<TestHeaderProps> = ({
             <Typography fontSize="1rem" color={theme.palette.text.secondary}>
               Are you sure you want to submit the test?
             </Typography>
-            <Stack
-              direction={"row"}
-              gap={"1rem"}
-              flex="1"
-              marginTop={"1rem"}
-            >
+            <Stack direction={"row"} gap={"1rem"} flex="1" marginTop={"1rem"}>
               <Button
                 variant="outlined"
                 onClick={() => setSubmitDialogOpen(false)}
@@ -166,10 +161,13 @@ const TestHeader: React.FC<TestHeaderProps> = ({
             onClick={() => setShowSidebar(false)}
           />
         ) : (
-          <MdMenu
-            className="text-3xl lg:hidden cursor-pointer"
+          <Button
+          variant="outlined"
             onClick={() => setShowSidebar(true)}
-          />
+            sx={{textTransform: "none",fontSize:"12px",padding:"4px"}}
+          >
+            All Questions
+          </Button>
         )}
       </div>
     </div>

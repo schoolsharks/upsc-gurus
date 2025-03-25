@@ -76,6 +76,7 @@ const userSlice = createSlice({
     },
     setUserInfo(state, action) {
       // console.log("action.payload", action.payload);
+      state.name= action.payload.userName ?? state.name;
       state.inProgressTests =
         action.payload.inProgressTest ?? state.inProgressTests;
       state.unAttemptedTests =

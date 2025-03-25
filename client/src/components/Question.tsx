@@ -301,7 +301,7 @@ const QuestionComponent: React.FC = () => {
                         return (
                           <button
                             key={idx}
-                            className={`inline-flex items-center gap-4 py-2 px-3 border rounded-md min-w-max cursor-pointer whitespace-nowrap ${
+                            className={`inline-flex text-left items-center gap-4 py-2 px-3 border rounded-md cursor-pointer ${
                               selectedAnswers.length > 0 &&
                               JSON.stringify(selectedAnswers[0]) ===
                                 JSON.stringify(option)
@@ -310,7 +310,7 @@ const QuestionComponent: React.FC = () => {
                             }`}
                             onClick={() => handleSelectAnswer(option)}
                           >
-                            <span className="w-8 h-8 flex items-center justify-center rounded-full border">
+                            <span style={{aspectRatio:"1"}} className="w-8 h-8 flex items-center justify-center rounded-full border">
                               {optionLetter}
                             </span>
                             {option}

@@ -6,6 +6,7 @@ import { Button, Dialog, Stack, Typography, useTheme } from "@mui/material";
 import { useState } from "react";
 import { MdMenu } from "react-icons/md";
 import { RxCross1 } from "react-icons/rx";
+import logo from "../assets/logo.webp";
 
 interface ReviewTestHeaderProps {
   currentIndex: number;
@@ -69,7 +70,7 @@ const ReviewTestHeader: React.FC<ReviewTestHeaderProps> = ({
       <div className="flex items-center -mr-10">
         <button onClick={() => navigate("/")} className="focus:outline-none">
           <img
-            src="/images/logo.png"
+            src={logo}
             alt="UPSC Gurus Logo"
             className="logo mr-3 cursor-pointer"
           />

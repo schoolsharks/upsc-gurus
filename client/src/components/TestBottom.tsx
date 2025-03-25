@@ -68,7 +68,7 @@ const TestBottom: React.FC<TestBottomProps> = ({
   };
 
   return (
-    <div className="flex justify-between items-center md:hidden mb-5 -mt-20">
+    <div className="flex justify-between items-center md:hidden mb-5">
     <div className="flex items-center gap-3 w-full z-10">
       <div className="flex md:hidden items-center gap-4 font-medium flex-col w-full">
         <div className="flex gap-2"><button

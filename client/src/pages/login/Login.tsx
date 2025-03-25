@@ -14,6 +14,7 @@ import { AppDispatch, RootState } from "../../redux/store";
 import { setUser} from "../../redux/reducers/userReducer";
 import { login } from "../../redux/actions/userActions";
 import { NavLink, useNavigate } from "react-router-dom";
+import logo from "../../assets/logo.webp";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -99,7 +100,7 @@ const Login = () => {
 
   return (
     <div className="mt-12">
-    <div><img src="/public/images/logo.png" alt="" className="mx-auto  w-[150px] sm:w-[200px]"/></div>
+    <div><img src={logo} alt="" className="mx-auto  w-[150px] sm:w-[200px]"/></div>
     <Container>
       <Box
         component="form"
