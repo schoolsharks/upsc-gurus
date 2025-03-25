@@ -115,15 +115,11 @@ const handlePaymentWebhook = async (
     console.log('Secret exists:', !!webhookSecret);
     console.log('Secret length:', webhookSecret?.length || 0);
 
-    // Get the raw body if possible
-    const rawBody = (req as any).rawBody;
-    const parsedBody = JSON.stringify(req.body);
-    const bodyToUse = rawBody || parsedBody;
+    // Get the EXACT raw body that was sent by Razorpay
+    const rawBody = (req as any).rawBody ? (req as any).rawBody.toString('utf8') : req.body.toString('utf8');
     
-    console.log('\n=== REQUEST BODY ===');
-    console.log('Using body type:', rawBody ? 'rawBody' : 'parsedBody');
-    console.log('Body content:');
-    console.dir(bodyToUse, { depth: null, colors: true });
+    console.log('\n=== RAW REQUEST BODY ===');
+    console.log(rawBody);
 
     // Case-insensitive header access
     const razorpaySignature = 
@@ -153,7 +149,7 @@ const handlePaymentWebhook = async (
     console.log('\nGenerating signature comparison...');
     const generatedSignature = crypto
       .createHmac('sha256', webhookSecret)
-      .update(bodyToUse)
+      .update(rawBody)
       .digest('hex');
 
     console.log('Generated signature:', generatedSignature);
@@ -182,7 +178,6 @@ const handlePaymentWebhook = async (
         message: 'Invalid signature',
       });
     }
-
     console.log('\n✅ SIGNATURE VALIDATION SUCCESSFUL ✅');
     
     // Process payment details

@@ -10,34 +10,18 @@ import errorHandlerMiddleware from "./middlewares/errorHandler";
 import notFoundMiddleware from "./middlewares/notFound";
 import cookieParser from "cookie-parser";
 
+
 dotenv.config();
 
 connectDB();
 
 const app = express();
 
-// Add raw body saving middleware first
-app.use((req, res, next) => {
-  if (req.originalUrl.includes('/verifypaymentWebHook')) {
-    express.raw({ type: 'application/json' })(req, res, next);
-  } else {
-    next();
-  }
-});
-
-// Store raw body for all requests
-app.use((req, res, next) => {
-  if (req.body && typeof req.body === 'object' && !Buffer.isBuffer(req.body)) {
-    (req as any).rawBody = JSON.stringify(req.body);
-  }
-  next();
-});
-
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-app.use(helmet());
+app.use(helmet())
 
 const corsOptions = {
   origin: process.env.FRONTEND_URL || "http://localhost:5173",
@@ -47,12 +31,15 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
 app.use(cookieParser());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 app.use("/api/v1", v1Routes);
+
 
 if (process.env.NODE_ENV === "production") {
   const buildPath = path.join(__dirname, "..", "..", "client", "dist");

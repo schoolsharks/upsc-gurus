@@ -6,6 +6,11 @@ const router= express.Router();
 
 // router.route("/createOrder").post(asyncHandler(handleCreateOrder));
 // router.route("/verifyPayment").put(asyncHandler(handleVerifyingPayment))
-router.route("/verifypaymentWebHook").post(asyncHandler(handlePaymentWebhook));
+
+router.route("/verifypaymentWebHook")
+  .post(
+    express.raw({ type: 'application/json' }), 
+    asyncHandler(handlePaymentWebhook)
+  );
 
 export default router;
