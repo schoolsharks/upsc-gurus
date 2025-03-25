@@ -103,26 +103,26 @@ const handlePaymentWebhook = async (
   next: NextFunction
 ) => {
   try {
-    console.log("\n====== NEW WEBHOOK REQUEST RECEIVED ======");
-    console.log("Timestamp:", new Date().toISOString());
+    console.log('\n====== NEW WEBHOOK REQUEST RECEIVED ======');
+    console.log('Timestamp:', new Date().toISOString());
     
     // Log all headers for debugging
-    console.log("\n=== REQUEST HEADERS ===");
+    console.log('\n=== REQUEST HEADERS ===');
     console.dir(req.headers, { depth: null, colors: true });
 
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
-    console.log("\n=== WEBHOOK SECRET ===");
-    console.log("Secret exists:", !!webhookSecret);
-    console.log("Secret length:", webhookSecret?.length || 0);
+    console.log('\n=== WEBHOOK SECRET ===');
+    console.log('Secret exists:', !!webhookSecret);
+    console.log('Secret length:', webhookSecret?.length || 0);
 
     // Get the raw body if possible
     const rawBody = (req as any).rawBody;
     const parsedBody = JSON.stringify(req.body);
     const bodyToUse = rawBody || parsedBody;
     
-    console.log("\n=== REQUEST BODY ===");
-    console.log("Using body type:", rawBody ? "rawBody" : "parsedBody");
-    console.log("Body content:");
+    console.log('\n=== REQUEST BODY ===');
+    console.log('Using body type:', rawBody ? 'rawBody' : 'parsedBody');
+    console.log('Body content:');
     console.dir(bodyToUse, { depth: null, colors: true });
 
     // Case-insensitive header access
@@ -130,35 +130,35 @@ const handlePaymentWebhook = async (
       req.headers['x-razorpay-signature'] || 
       req.headers['X-Razorpay-Signature'];
     
-    console.log("\n=== SIGNATURE VERIFICATION ===");
-    console.log("Received signature:", razorpaySignature);
-    console.log("Signature type:", typeof razorpaySignature);
+    console.log('\n=== SIGNATURE VERIFICATION ===');
+    console.log('Received signature:', razorpaySignature);
+    console.log('Signature type:', typeof razorpaySignature);
 
     if (!razorpaySignature || typeof razorpaySignature !== 'string') {
-      console.error("❌ ERROR: Missing or invalid signature header");
+      console.error('❌ ERROR: Missing or invalid signature header');
       return res.status(400).json({
         success: false,
-        message: "Missing or invalid Razorpay signature header",
+        message: 'Missing or invalid Razorpay signature header',
       });
     }
 
     if (!webhookSecret) {
-      console.error("❌ ERROR: Webhook secret not configured");
+      console.error('❌ ERROR: Webhook secret not configured');
       return res.status(500).json({
         success: false,
-        message: "Server configuration error - missing webhook secret",
+        message: 'Server configuration error - missing webhook secret',
       });
     }
 
-    console.log("\nGenerating signature comparison...");
+    console.log('\nGenerating signature comparison...');
     const generatedSignature = crypto
-      .createHmac("sha256", webhookSecret)
+      .createHmac('sha256', webhookSecret)
       .update(bodyToUse)
-      .digest("hex");
+      .digest('hex');
 
-    console.log("Generated signature:", generatedSignature);
-    console.log("Signature length:", generatedSignature.length);
-    console.log("Received length:", razorpaySignature.length);
+    console.log('Generated signature:', generatedSignature);
+    console.log('Signature length:', generatedSignature.length);
+    console.log('Received length:', razorpaySignature.length);
 
     // Secure comparison
     const signatureValid = crypto.timingSafeEqual(
@@ -167,63 +167,151 @@ const handlePaymentWebhook = async (
     );
 
     if (!signatureValid) {
-      console.error("\n❌ SIGNATURE VALIDATION FAILED ❌");
-      console.error("Possible causes:");
-      console.error("- Webhook secret mismatch");
-      console.error("- Request body was modified");
-      console.error("- Incorrect signature generation");
+      console.error('\n❌ SIGNATURE VALIDATION FAILED ❌');
+      console.error('Possible causes:');
+      console.error('- Webhook secret mismatch');
+      console.error('- Request body was modified');
+      console.error('- Incorrect signature generation');
       
-      console.log("\n=== DIFF ANALYSIS ===");
-      console.log("First 10 chars of received:", razorpaySignature.substring(0, 10));
-      console.log("First 10 chars of generated:", generatedSignature.substring(0, 10));
+      console.log('\n=== DIFF ANALYSIS ===');
+      console.log('First 10 chars of received:', razorpaySignature.substring(0, 10));
+      console.log('First 10 chars of generated:', generatedSignature.substring(0, 10));
       
       return res.status(401).json({
         success: false,
-        message: "Invalid signature",
+        message: 'Invalid signature',
       });
     }
 
-    console.log("\n✅ SIGNATURE VALIDATION SUCCESSFUL ✅");
+    console.log('\n✅ SIGNATURE VALIDATION SUCCESSFUL ✅');
     
     // Process payment details
     const paymentDetails = req.body;
-    console.log("\n=== PAYMENT DETAILS ===");
+    console.log('\n=== PAYMENT DETAILS ===');
     console.dir(paymentDetails, { depth: null, colors: true });
 
     if (!paymentDetails.payload?.payment?.entity) {
-      console.error("❌ Invalid payment data structure");
+      console.error('❌ Invalid payment data structure');
       return res.status(400).json({
         success: false,
-        message: "Invalid payment data structure",
+        message: 'Invalid payment data structure',
       });
     }
 
     const entity = paymentDetails.payload.payment.entity;
-    console.log("\n=== ENTITY DETAILS ===");
-    console.log("Payment ID:", entity.id);
-    console.log("Status:", entity.status);
-    console.log("Amount:", entity.amount);
-    console.log("Email:", entity.email);
-    console.log("Notes:", entity.notes);
+    console.log('\n=== ENTITY DETAILS ===');
+    console.log('Payment ID:', entity.id);
+    console.log('Status:', entity.status);
+    console.log('Amount:', entity.amount);
+    console.log('Email:', entity.email);
+    console.log('Notes:', entity.notes);
 
-    // Rest of your payment processing logic...
-    if (entity.status === "captured") {
-      console.log("\n💰 PAYMENT CAPTURED - PROCESSING...");
-      // Your existing processing code
-    } else {
-      console.log("\n⚠️ PAYMENT NOT CAPTURED - STATUS:", entity.status);
-      return res.status(402).json({
+    const razorpay_payment_id = entity.id;
+    const razorpay_order_id = entity.order_id;
+    const amount = entity.amount;
+    const contactNumber = entity.contact;
+    const email = entity.notes?.email || entity.email || '';
+    const method = entity.method;
+    const packageName = entity.notes?.package;
+    const noOfAttempts = entity.notes?.no_of_attempts_taken_at_upsc;
+    const optionalSubject = entity.notes?.optional_subject;
+    const city = entity.notes?.city;
+
+    console.log('\n=== EXTRACTED PAYMENT DATA ===');
+    console.log('Package Name:', packageName);
+    console.log('Email:', email);
+    console.log('Contact:', contactNumber);
+    console.log('No. of Attempts:', noOfAttempts);
+    console.log('Optional Subject:', optionalSubject);
+    console.log('City:', city);
+
+    if (!packageName) {
+      console.error('❌ Package name is required');
+      return res.status(400).json({
         success: false,
-        message: "Payment not verified",
+        message: 'Package name is required',
       });
     }
 
+    if (!email) {
+      console.error('❌ Email is required');
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required',
+      });
+    }
+
+    const userEmail = entity.email || email;
+
+    let packageId;
+    try {
+      console.log('\n=== LOOKING UP PACKAGE ID ===');
+      packageId = await getIdFromName(packageName);
+      console.log('Found package ID:', packageId);
+    } catch (error) {
+      console.error('❌ Package lookup failed:', error);
+      return res.status(404).json({
+        success: false,
+        message: 'Package not found',
+      });
+    }
+
+    if (entity.status === 'captured') {
+      console.log('\n💰 PAYMENT CAPTURED - PROCESSING...');
+      
+      // Create payment record
+      console.log('Creating payment record...');
+      await Payment.create({
+        contactNumber,
+        amount,
+        method,
+        paymentId: razorpay_payment_id,
+        orderId: razorpay_order_id,
+        status: PaymentEnum.COMPLETED,
+        purchasedPackage: packageId,
+        userEmail: userEmail,
+      });
+
+      const name = entity.notes?.name ?? 'Jinesh Prajapat';
+      const [firstName, ...lastName] = name.split(' ');
+
+      console.log('\n=== CREATING USER ACCOUNT ===');
+      console.log('Name:', name);
+      console.log('First Name:', firstName);
+      console.log('Last Name:', lastName.join(' '));
+
+      const { statusCode, message } = await createAccountOnSuccessfullPayment({
+        email,
+        firstName,
+        lastName,
+        contactNumber,
+        packageId,
+        noOfAttempts,
+        optionalSubject,
+        city,
+      });
+
+      console.log('\n=== ACCOUNT CREATION RESULT ===');
+      console.log('Status Code:', statusCode);
+      console.log('Message:', message);
+
+      return res.status(Number(statusCode)).json({
+        success: statusCode === 200 || statusCode === 201 ? true : false,
+        message: message,
+      });
+    } else {
+      console.log('\n⚠️ PAYMENT NOT CAPTURED - STATUS:', entity.status);
+      return res.status(402).json({
+        success: false,
+        message: 'Payment not verified',
+      });
+    }
   } catch (error) {
-    console.error("\n❌❌❌ UNHANDLED ERROR IN WEBHOOK ❌❌❌");
-    console.error("Error:", error);
+    console.error('\n❌❌❌ UNHANDLED ERROR IN WEBHOOK ❌❌❌');
+    console.error('Error:', error);
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: 'Internal server error',
     });
   }
 };
