@@ -221,7 +221,6 @@ const handlePaymentWebhook = async (
   } catch (error) {
     console.error("\n❌❌❌ UNHANDLED ERROR IN WEBHOOK ❌❌❌");
     console.error("Error:", error);
-    console.error("Stack:", error.stack);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
