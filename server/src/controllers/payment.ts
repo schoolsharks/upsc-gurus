@@ -97,6 +97,25 @@ async function getIdFromName(name: string): Promise<Schema.Types.ObjectId> {
   }
 }
 
+
+function getRawBody(req: Request): string {
+  // Try different ways to get raw body based on middleware
+  if ((req as any).rawBody) {
+    return (req as any).rawBody.toString('utf8');
+  }
+  if (Buffer.isBuffer(req.body)) {
+    return req.body.toString('utf8');
+  }
+  if (typeof req.body === 'string') {
+    return req.body;
+  }
+  if (typeof req.body === 'object') {
+    return JSON.stringify(req.body);
+  }
+  return '';
+}
+
+
 const handlePaymentWebhook = async (
   req: Request,
   res: Response,
@@ -116,7 +135,7 @@ const handlePaymentWebhook = async (
     console.log('Secret length:', webhookSecret?.length || 0);
 
     // Get the EXACT raw body that was sent by Razorpay
-    const rawBody = (req as any).rawBody ? (req as any).rawBody.toString('utf8') : req.body.toString('utf8');
+    const rawBody = getRawBody(req);
     
     console.log('\n=== RAW REQUEST BODY ===');
     console.log(rawBody);
