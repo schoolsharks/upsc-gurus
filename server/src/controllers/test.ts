@@ -118,8 +118,8 @@ const userTestInfo = async (
         from: "packages",
         localField: "purchasedPackages",
         foreignField: "_id",
-        as: "userPackages"
-      }
+        as: "userPackages",
+      },
     },
     {
       $addFields: {
@@ -127,10 +127,10 @@ const userTestInfo = async (
           $reduce: {
             input: "$userPackages",
             initialValue: [],
-            in: { $concatArrays: ["$$value", "$$this.testTemplateIds"] }
-          }
-        }
-      }
+            in: { $concatArrays: ["$$value", "$$this.testTemplateIds"] },
+          },
+        },
+      },
     },
     {
       $unwind: {
@@ -170,10 +170,11 @@ const userTestInfo = async (
               $expr: {
                 $and: [
                   { $eq: ["$active", true] },
-                  { $eq: ["$isDeleted", false] }
-                ]
-              }
-            }
+                  { $eq: ["$isDeleted", false] },
+                  { $ne: ["$hidden", true] }, // Exclude hidden templates
+                ],
+              },
+            },
           },
           {
             $project: {
@@ -183,8 +184,9 @@ const userTestInfo = async (
               testType: "$type",
               active: 1,
               isDeleted: 1,
+              hidden: 1, // Keep this for debugging, can be removed later
             },
-          }
+          },
         ],
         as: "allTestTemplates",
       },
@@ -192,7 +194,7 @@ const userTestInfo = async (
     {
       $group: {
         _id: "$_id",
-        userName: { $first: { $concat: ["$firstName", " ", "$lastName"] } },
+        userName: { $first: "$name" },
         email: { $first: "$email" },
         purchasedTestTemplateIds: { $first: "$purchasedTestTemplateIds" },
         inProgressTest: {
@@ -275,20 +277,27 @@ const userTestInfo = async (
                   else: {
                     $switch: {
                       branches: [
-                        { case: { $eq: ["$$testTemplate.testTyoe", TestTypes.TEST_SERIES] }, then: TEST_SERIES },
-                        { case: { $eq: ["$$testTemplate.testType", TestTypes.PYQS] }, then: PYQS }
+                        {
+                          case: { $eq: ["$$testTemplate.testType", TestTypes.TEST_SERIES] },
+                          then: TEST_SERIES,
+                        },
+                        {
+                          case: { $eq: ["$$testTemplate.testType", TestTypes.PYQS] },
+                          then: PYQS,
+                        },
                       ],
-                      default: "url12345"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+                      default: "url12345",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   ]);
+  
   
   
   if (user.length === 0) {

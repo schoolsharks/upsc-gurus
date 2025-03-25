@@ -1,6 +1,7 @@
 import { Schema, model, Document } from 'mongoose';
 
 interface UserType extends Document {
+    name:string;
     email: string;
     password: string;
     paymentStatus: boolean;
@@ -22,6 +23,10 @@ const userSchema = new Schema<UserType>({
         type: String,
         required: true,
         unique: true
+    },
+    name: {
+        type: String,
+        default: null
     },
     password: {
         type: String,

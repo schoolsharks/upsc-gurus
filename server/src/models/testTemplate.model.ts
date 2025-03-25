@@ -6,6 +6,7 @@ import { TestTypes } from '../types/enum';
 interface TestTemplateType extends Document {
   testName: string;
   type:TestTypes;
+  hidden:boolean;
   active: boolean;
   isDeleted: boolean;
   deletedAt: Date | null;
@@ -22,6 +23,11 @@ const testTemplateSchema = new Schema<TestTemplateType>(
     type:{
       type:String,
       enum:Object.values(TestTypes),
+      required:true
+    },
+    hidden:{
+      type:Boolean,
+      default:false,
       required:true
     },
     active: {
