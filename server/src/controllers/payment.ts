@@ -136,6 +136,7 @@ const handlePaymentWebhook = async (
 
     // Get the EXACT raw body that was sent by Razorpay
     const rawBody = getRawBody(req);
+    const normalizedBody = rawBody.replace(/\u00A0/g, ' ');
     
     console.log('\n=== RAW REQUEST BODY ===');
     console.log(rawBody);
@@ -168,7 +169,7 @@ const handlePaymentWebhook = async (
     console.log('\nGenerating signature comparison...');
     const generatedSignature = crypto
       .createHmac('sha256', webhookSecret)
-      .update(rawBody)
+      .update(normalizedBody)
       .digest('hex');
 
     console.log('Generated signature:', generatedSignature);
