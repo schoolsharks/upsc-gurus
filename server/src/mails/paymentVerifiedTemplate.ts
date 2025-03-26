@@ -11,7 +11,7 @@ To access your account, click the link below:
 https://app.upscgurus.in/  
 
 If you encounter any issues or need assistance, feel free to contact us at:  
-support@careergeek.com  
+enquiry@upscgurus.in  
 
 Best regards,  
 UPSC Gurus Team  

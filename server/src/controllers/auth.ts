@@ -161,7 +161,7 @@ const handleResetPasswordToken = async (req: Request,
 
     await sendEmail({
         to: email,
-        subject: "CareerGreek Reset Password Link",
+        subject: "UPSC Gurus Reset Password Link",
         html: resetPasswordTemplate(email, user.name, url)
     });
 
