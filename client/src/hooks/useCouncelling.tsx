@@ -1,6 +1,6 @@
 
 const FREE_COUNCELLING_CALL_URL = "tel:918122002172";
-const MENTORSHIP_APPOINTMETN_LINK = "https://rzp.io/rzp/combo-upscgurus";
+const MENTORSHIP_APPOINTMETN_LINK = "https://rzp.io/rzp/mentoring-appointment";
 
 
 

@@ -1,6 +1,6 @@
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import "./App.css";
-import Login from "./pages/login/Login";
+import Login from "./pages/auth/Login";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "./redux/store";
 import { AuthStates, setUser } from "./redux/reducers/userReducer";
@@ -14,6 +14,8 @@ import QuestionComponent from "./components/Question";
 import LearnMode from "./components/LearnMode";
 import ReviewTest from "./components/ReviewTest";
 import Analysis from "./pages/analysis/Analysis";
+import ForgetPasswordForm from "./pages/auth/ForgetPasswordForm";
+import ResetPasswordForm from "./pages/auth/ResetPassword";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -28,7 +30,7 @@ function App() {
         dispatch(setUser({ authState: AuthStates.AUTHENTICATED }));
       } else {
         dispatch(setUser({ authState: AuthStates.IDLE }));
-        navigate("/login", { replace: true });
+        // navigate("/login", { replace: true });
       }
 
       setLoading(false);
@@ -42,6 +44,11 @@ function App() {
   return (
     <Routes>
       {/* Public Routes */}
+
+      <Route path="/*" element={<Navigate to="/" replace />} />
+      <Route path="/forget-password" element={<ForgetPasswordForm />} />
+      <Route path="/reset-password/:token" element={<ResetPasswordForm />} />
+
       <Route path="/login" element={<Login />} />
 
       {/* Protected Routes */}

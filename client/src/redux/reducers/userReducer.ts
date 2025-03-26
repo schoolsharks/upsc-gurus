@@ -1,5 +1,6 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { fetchUserInfo, login } from "../actions/userActions";
+import userApi from "../../api/userApi";
 
 export enum AuthStates {
   AUTHENTICATED = "AUTHENTICATED",
@@ -53,6 +54,68 @@ const initialState: UserState = {
   loading: false,
   error: null,
 };
+
+
+
+export const forgetPassword = createAsyncThunk(
+  "user/forgetPassword",
+  async ({ email }: { email: string }, { rejectWithValue }) => {
+    try {
+      const response = await userApi.put("/auth/forgetPassword", {
+        email,
+      });
+
+      console.log("forgetPassword res", response);
+      if (response.data.sucess === true) {
+        console.log("reset link share on registered mailID");
+        return 1;
+      } else {
+        return rejectWithValue(
+          "Registration failed: No access token received."
+        );
+      }
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Registration failed: Server error."
+      );
+    }
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  "user/resetPassword",
+  async (
+    {
+      password,
+      confirmPassword,
+      token,
+    }: { password: string; confirmPassword: string; token: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await userApi.put("/auth/resetPassword", {
+        password,
+        confirmPassword,
+        token,
+      });
+
+      console.log("reset Password res", response);
+      if (response.data.sucess === true) {
+        console.log("reset link share on registered mailID");
+        return 1;
+      } else {
+        return rejectWithValue("Password not updated.");
+      }
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+        "Password updation failed: Server error."
+      );
+    }
+  }
+);
+
+
 
 const userSlice = createSlice({
   name: "user",
